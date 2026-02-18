@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git-ia-assistant"
+version = "0.1.0"
+authors = [
+  { name="Hussard", email="hussard@example.com" },
+]
+description = "Assistant Git propulsé par l'IA pour les commits, revues et changelogs."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Version Control :: Git",
+]
+dependencies = [
+    "google-genai",
+    "GitPython",
+    "requests",
+    "pydantic",
+    "InquirerPy",
+    "python-gitlab",
+    "PyGithub",
+]
+
+[project.scripts]
+git-ia-commit = "git_ia_assistant.cli.commit_cli:main"
+git-ia-review = "git_ia_assistant.cli.review_cli:main"
+git-ia-mr = "git_ia_assistant.cli.mr_cli:main"
+git-ia-squash = "git_ia_assistant.cli.squash_cli:main"
+git-ia-changelog = "git_ia_assistant.cli.changelog_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"git_ia_assistant" = ["prompts/*.md"]
