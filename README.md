@@ -5,7 +5,10 @@ Un ensemble d'outils intelligents pour améliorer votre workflow Git en utilisan
 ## 🚀 Fonctionnalités principales
 
 ### Workflow Git standard
-*   **Génération de Commits** (`git-ia-commit`) : Analyse vos changements indexés et génère un message de commit conforme à la spécification *Conventional Commits*. Supporte un **mode interactif** pour affiner le message.
+*   **Génération de Commits** (`git-ia-commit`) : Analyse vos changements et génère un message conforme à *Conventional Commits*. 
+    *   **Mode interactif** : Affinez le message avec des instructions supplémentaires.
+    *   **Optimisation** (`--optimise`) : Regroupe intelligemment les fichiers en commits logiques.
+    *   **Commits partiels** (`--partiel`) : Découpe un fichier en plusieurs commits via `git add -p`.
 *   **Revue de Code** (`git-ia-review`) : Analyse vos fichiers locaux modifiés et propose des suggestions d'amélioration (lisibilité, bugs potentiels, bonnes pratiques). Supporte l'extraction de contexte pour les imports Python.
 *   **Revue de MR/PR** (`git-ia-mr`) : Automatise la relecture des *Merge Requests* (GitLab) et *Pull Requests* (GitHub) en téléchargeant le diff et en générant un rapport complet incluant une **analyse de sécurité** et une **évaluation du risque**.
 *   **Stratégie de Squash** (`git-ia-squash`) : Analyse votre historique récent pour suggérer quels commits fusionner lors d'un `git rebase -i`.
@@ -76,6 +79,8 @@ Analyse les fichiers modifiés et propose un message de commit.
 git-ia-commit                   # Utilise l'IA par défaut
 git-ia-commit --ia gemini       # Force l'utilisation de Gemini
 git-ia-commit --dry-run         # Affiche uniquement le diff qui serait envoyé
+git-ia-commit --optimise        # Propose des regroupements de commits
+git-ia-commit --optimise --partiel # Permet de découper un fichier en plusieurs commits
 git-ia-commit -f file1.py       # Analyse uniquement des fichiers spécifiques
 ```
 

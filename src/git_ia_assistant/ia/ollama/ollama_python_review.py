@@ -26,7 +26,7 @@ DATA
         Nom du modèle Ollama par défaut utilisé pour la revue Python.
 """
 
-import subprocess
+from python_commun.system.system import executer_capture
 import sys
 
 from python_commun.logging.logger import logger
@@ -44,17 +44,12 @@ def executer_black(chemin_fichier: str) -> bool:
     :return: True si le formatage a réussi, False sinon.
     """
     logger.log_info(f"Formatage de {chemin_fichier} avec Black...")
-    cmd = [sys.executable, "-m", "black", chemin_fichier]
     try:
-        resultat = subprocess.run(cmd, capture_output=True, text=True)
+        resultat = executer_capture([sys.executable, "-m", "black", chemin_fichier], check=False)
         if resultat.returncode != 0:
-            resultat = subprocess.run(
-                ["black", chemin_fichier], capture_output=True, text=True
-            )
+            resultat = executer_capture(["black", chemin_fichier], check=False)
     except FileNotFoundError:
-        resultat = subprocess.run(
-            ["black", chemin_fichier], capture_output=True, text=True
-        )
+        resultat = executer_capture(["black", chemin_fichier], check=False)
 
     if resultat.returncode != 0:
         logger.log_error(f"Erreur lors du formatage avec Black : {resultat.stderr}")

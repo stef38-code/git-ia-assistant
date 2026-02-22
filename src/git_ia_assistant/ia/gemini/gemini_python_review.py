@@ -30,7 +30,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-import subprocess
+from python_commun.system.system import executer_capture
 
 from python_commun.logging.logger import logger
 from python_commun import gemini_utils
@@ -48,19 +48,14 @@ def executer_black(chemin_fichier: str) -> bool:
     """
     logger.log_info(f"Formatage de {chemin_fichier} avec Black...")
     # Tentative d'appel de black via l'interpréteur actuel ou via l'exécutable black
-    cmd = [sys.executable, "-m", "black", chemin_fichier]
     try:
-        resultat = subprocess.run(cmd, capture_output=True, text=True)
+        resultat = executer_capture([sys.executable, "-m", "black", chemin_fichier], check=False)
         if resultat.returncode != 0:
             # Si -m black échoue, on tente l'exécutable direct
-            resultat = subprocess.run(
-                ["black", chemin_fichier], capture_output=True, text=True
-            )
+            resultat = executer_capture(["black", chemin_fichier], check=False)
     except FileNotFoundError:
         # Fallback sur l'exécutable black si python -m black échoue par FileNotFoundError
-        resultat = subprocess.run(
-            ["black", chemin_fichier], capture_output=True, text=True
-        )
+        resultat = executer_capture(["black", chemin_fichier], check=False)
 
     if resultat.returncode != 0:
         logger.log_error(f"Erreur lors du formatage avec Black : {resultat.stderr}")

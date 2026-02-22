@@ -5,6 +5,17 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-02-22
+
+### Ajouté
+- Option `--optimise` dans `git-ia-commit` pour regrouper les changements en commits logiques et atomiques.
+- Option `--partiel` dans `git-ia-commit` (nécessite `--optimise`) permettant d'utiliser `git add -p` pour répartir un fichier sur plusieurs commits.
+
+### Changé
+- Refactorisation de `git_core.py` : Centralisation des appels `GitPython` (reset, push, commit, index status).
+- Amélioration de `system.py` : La fonction `executer_capture` supporte désormais l'envoi de données via `stdin`.
+- `git-ia-commit` utilise désormais exclusivement les fonctions de `git_core.py` pour manipuler le dépôt Git.
+
 ## [0.2.0] - 2026-02-22
 
 ### Ajouté

@@ -136,6 +136,52 @@ class IaAssistantCommit(IaAssistant):
         """
         raise NotImplementedError
 
+    def optimiser_commits(self, partiel: bool = False) -> List[dict]:
+        """
+        Analyse les changements et propose un regroupement en commits logiques.
+        
+        :param partiel: Si True, permet à un fichier d'être présent dans plusieurs commits.
+        :return: Une liste de dictionnaires décrivant les commits suggérés.
+        """
+        import json
+        from python_commun.git.git_core import obtenir_branche_actuelle
+        diff = self.get_diff()
+        
+        try:
+            branch_name = obtenir_branche_actuelle(self.repo)
+        except Exception:
+            branch_name = "unknown"
+
+        try:
+            repo_root = self.repo.working_dir or os.getcwd()
+            langage = detect_lang_repo(repo_root)
+        except Exception:
+            langage = "python"
+
+        from python_commun.ai.prompt import charger_prompt
+        prompt_template = charger_prompt("optimise_commit_prompt.md", self.dossier_prompts)
+        
+        prompt = prompt_template.format(
+            diff=diff,
+            branch_name=branch_name,
+            langage=langage,
+            partiel=str(partiel)
+        )
+
+        raw_response = self._envoyer_prompt_ia(prompt)
+        
+        # Nettoyage de la réponse pour extraire le JSON
+        json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+        if json_match:
+            try:
+                data = json.loads(json_match.group(0))
+                return data.get("commits", [])
+            except json.JSONDecodeError:
+                logger.log_error("Erreur lors du décodage du JSON de regroupement de commits.")
+        
+        logger.log_warn("Impossible d'extraire des suggestions de commits structurées.")
+        return []
+
     def generer_message_commit(self, instruction_supplementaire: str = "") -> str:
         """
         Génère un message de commit en utilisant une IA.
@@ -144,19 +190,14 @@ class IaAssistantCommit(IaAssistant):
         :param instruction_supplementaire: Optionnelle, pour affiner le message (ex: "plus court").
         :return: Le message de commit formaté.
         """
+        from python_commun.git.git_core import obtenir_branche_actuelle
         diff = self.get_diff()
         
         # Récupération du nom de la branche courante (robuste même en detached HEAD)
         try:
-            branch_name = self.repo.active_branch.name  # type: ignore[attr-defined]
+            branch_name = obtenir_branche_actuelle(self.repo)
         except Exception:
-            try:
-                # Fallback via commande git
-                branch_name = self.repo.git.rev_parse("--abbrev-ref", "HEAD")
-                if branch_name == "HEAD":
-                    branch_name = "detached-HEAD"
-            except Exception:
-                branch_name = "unknown"
+            branch_name = "unknown"
 
         # Détection du langage principal du dépôt
         try:
@@ -201,8 +242,11 @@ class IaAssistantCommit(IaAssistant):
             return cleaned_response.strip()
 
     def valider_commit(self, message: str):
-        import tempfile
-        import subprocess
+        from python_commun.git.git_core import (
+            editer_texte_avec_editeur,
+            effectuer_commit_avec_message,
+            pousser_vers_distant,
+        )
 
         while True:
             choix = (
@@ -214,12 +258,7 @@ class IaAssistantCommit(IaAssistant):
                 valider = True
                 break
             elif choix == "e":
-                with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".txt") as tf:
-                    tf.write(message)
-                    tf.flush()
-                    subprocess.call([os.environ.get("EDITOR", "vi"), tf.name])
-                    tf.seek(0)
-                    message = tf.read()
+                message = editer_texte_avec_editeur(message)
                 valider = True
                 break
             elif choix == "a":
@@ -235,15 +274,15 @@ class IaAssistantCommit(IaAssistant):
                 break
         
         if valider:
-            self.repo.index.commit(message)
+            effectuer_commit_avec_message(self.repo, message)
             logger.log_success("Commit effectué avec succès !")
-            
+
             # Demande de push avec défaut à 'n' et acceptation de 'o' (oui) ou 'y'
             push = input(
                 "Pousser le commit sur le dépôt distant ? [y: oui, n: non] [défaut: n] : "
             ).strip().lower()
             if push in ("y", "o"):
-                self.repo.git.push()
+                pousser_vers_distant(self.repo)
                 logger.log_success("git push effectué !")
             else:
                 logger.log_info("Push non effectué. N'oubliez pas de pousser vos changements manuellement.")

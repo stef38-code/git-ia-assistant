@@ -165,8 +165,15 @@ def main() -> None:
         os.path.join(os.path.dirname(__file__), "..", "prompts")
     )
 
+    from git_ia_assistant.cli.review_cli import generate_review_prompt
+
     # Construction manuelle du prompt
-    prompt_template = charger_prompt("review_prompt.py", dossier_prompts)
+    # prompt_template = charger_prompt("review_prompt.py", dossier_prompts)
+    
+    # On utilise maintenant la fonction déportée dans review_cli.py qui charge le bon template .md
+    # On simule les paramètres manquants ou on adapte le prompt
+    # Pour l'instant on garde la logique de mr_cli.py qui construit son propre prompt
+    # Mais on pourrait utiliser generate_review_prompt si on avait toutes les infos.
 
     contenu_diff = (
         fichier_diff.read_text(encoding="utf-8") if fichier_diff.exists() else ""
@@ -185,8 +192,6 @@ Diff complet :
 ```diff
 {contenu_diff}
 ```
-
-Template de base: {prompt_template}
 
 ### Instructions supplémentaires pour cette revue :
 1. **Sécurité :** Identifie tout problème de sécurité potentiel (injections, exposition de secrets, mauvaises pratiques d'authentification).

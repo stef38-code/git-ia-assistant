@@ -22,6 +22,7 @@ EXEMPLES
 
 FUNCTIONS
     main() : Point d'entrée du script, gère les options et le flux principal.
+    generate_review_prompt(title, description, files, diff, author, language, version) : Génère le prompt formaté pour l'IA à partir du template markdown.
 """
 
 import argparse
@@ -76,6 +77,51 @@ def _parser_options() -> argparse.Namespace:
     )
     parser.add_argument("-h", "--help", action="help", help="Affiche l'aide du script")
     return parser.parse_args()
+
+
+def generate_review_prompt(
+    title: str,
+    description: str,
+    files: list,
+    diff: str,
+    author: str,
+    language: str,
+    version: str,
+) -> str:
+    """
+    Génère le prompt formaté pour l'IA à partir du template markdown et des données MR/PR.
+
+    :param title: Titre de la MR/PR
+    :param description: Description de la MR/PR
+    :param files: Liste des fichiers modifiés
+    :param diff: Diff de la MR/PR
+    :param author: Auteur de la MR/PR
+    :param language: Langage du projet
+    :param version: Version du langage
+    :raises FileNotFoundError: Si le template markdown du langage n'existe pas
+    :return: Prompt formaté prêt à être envoyé à l'IA
+    """
+    prompt_filename = f"{language.lower()}_review_prompt.md"
+    dossier_prompts = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "prompts")
+    )
+    prompt_path = os.path.join(dossier_prompts, prompt_filename)
+    if not os.path.exists(prompt_path):
+        raise FileNotFoundError(
+            f"Le template de prompt pour le langage '{language}' est introuvable: {prompt_filename}"
+        )
+    with open(prompt_path, "r", encoding="utf-8") as f:
+        template = f.read()
+    prompt = template.format(
+        titre=title,
+        description=description,
+        fichiers="\n".join(files),
+        diff=diff,
+        auteur=author,
+        langage=language,
+        version=version,
+    )
+    return prompt
 
 
 def main() -> None:

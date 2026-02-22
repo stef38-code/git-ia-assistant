@@ -4,7 +4,7 @@
 Classe commit pour l'IA Ollama.
 """
 
-import subprocess
+from python_commun.system.system import executer_capture
 from git_ia_assistant.core.definition.ia_assistant_commit import IaAssistantCommit
 
 
@@ -21,12 +21,10 @@ class IaAssistantOllamaCommit(IaAssistantCommit):
         """
         try:
             # Note: Assurez-vous que le modèle 'commit-message' est bien configuré dans Ollama.
-            result = subprocess.run(
+            result = executer_capture(
                 ["ollama", "run", "commit-message"],
-                input=prompt.encode(),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
                 check=False,
+                entree=prompt
             )
             if result.returncode != 0:
                 return f"Erreur Ollama (stderr): {result.stderr.decode()}"
