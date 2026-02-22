@@ -12,7 +12,7 @@ ALIAS_FILE="${HOME}/.aliases"
 TMP_DIR=$(mktemp -d)
 
 # Commandes disponibles
-COMMANDS=("git-ia-commit" "git-ia-review" "git-ia-mr" "git-ia-squash" "git-ia-changelog")
+COMMANDS=("git-ia-commit" "git-ia-review" "git-ia-mr" "git-ia-squash" "git-ia-changelog" "git-ia-explain" "git-ia-test" "git-ia-doc" "git-ia-refacto")
 
 function cleanup {
     if [ -d "$TMP_DIR" ]; then

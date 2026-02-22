@@ -28,8 +28,8 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 import sys
 from python_commun.logging.logger import logger
-from python_commun.copilot import envoyer_prompt_copilot
-from git_ia_assistant.copilot.copilot_utils import charger_prompt, formatter_prompt
+from python_commun.ai.copilot import envoyer_prompt_copilot
+from git_ia_assistant.ia.copilot.copilot_utils import charger_prompt, formatter_prompt
 
 
 def obtenir_revue_ia(

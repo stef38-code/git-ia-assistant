@@ -53,18 +53,14 @@ def appeler_ollama(prompt: str, modele: str = DEFAULT_MODEL) -> str:
         raise
 
 
-def charger_prompt(nom_prompt: str) -> str:
+def charger_prompt(nom_prompt: str, dossier_prompts: str = None) -> str:
     """
     Charge le contenu d'un fichier de prompt.
 
     :param nom_prompt: Le nom du fichier de prompt à charger.
+    :param dossier_prompts: Le chemin optionnel vers le dossier des prompts.
     :return: Le contenu du fichier de prompt.
     """
-    # Le chemin est relatif à ce fichier (ia_assistant/ollama/ollama_utils.py)
-    # On remonte d'un niveau pour arriver à ia_assistant, puis git_ia_assistant.prompts
-    chemin_prompt = os.path.join(os.path.dirname(__file__), "..", "prompts", nom_prompt)
-    try:
-        with open(chemin_prompt, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        logger.die(f"Le fichier de prompt '{chemin_prompt}' est introuvable.")
+    from python_commun.ai.prompt import charger_prompt as cp
+
+    return cp(nom_prompt, dossier_prompts)

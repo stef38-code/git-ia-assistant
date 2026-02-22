@@ -136,11 +136,12 @@ class IaAssistantCommit(IaAssistant):
         """
         raise NotImplementedError
 
-    def generer_message_commit(self) -> str:
+    def generer_message_commit(self, instruction_supplementaire: str = "") -> str:
         """
         Génère un message de commit en utilisant une IA.
         Orchestre la création du prompt, l'appel à l'IA et le nettoyage de la réponse.
 
+        :param instruction_supplementaire: Optionnelle, pour affiner le message (ex: "plus court").
         :return: Le message de commit formaté.
         """
         diff = self.get_diff()
@@ -164,19 +165,21 @@ class IaAssistantCommit(IaAssistant):
         except Exception:
             langage = "python"
         
-        prompt_path = os.path.join(os.path.dirname(__file__), '..', '..', 'prompts', 'commit_message_prompt.md')
-        try:
-            with open(prompt_path, 'r', encoding='utf-8') as f:
-                prompt_template = f.read()
+        from python_commun.ai.prompt import charger_prompt
+        prompt_template = charger_prompt("commit_message_prompt.md", self.dossier_prompts)
+        if "[Prompt" in prompt_template:
+             logger.log_error(f"Fichier de prompt non trouvé dans {self.dossier_prompts}")
+             prompt = f"Génère un message de commit au format Conventional Commits pour les changements suivants :\n{diff}"
+        else:
             # Injecte les variables attendues par le template (diff, branch_name, langage)
             prompt = prompt_template.format(
                 diff=diff,
                 branch_name=branch_name,
                 langage=langage,
             )
-        except FileNotFoundError:
-            logger.log_error(f"Fichier de prompt non trouvé : {prompt_path}")
-            prompt = f"Génère un message de commit au format Conventional Commits pour les changements suivants :\n{diff}"
+        
+        if instruction_supplementaire:
+            prompt += f"\n\nIMPORTANT: {instruction_supplementaire}"
 
         raw_response = self._envoyer_prompt_ia(prompt)
 
@@ -201,23 +204,35 @@ class IaAssistantCommit(IaAssistant):
         import tempfile
         import subprocess
 
-        choix = (
-            input("Valider le commit ? [y: oui, n: non, e: éditer] [défaut: y] : ")
-            .strip()
-            .lower()
-        )
-        if not choix or choix == "y" or choix == "o":
-            valider = True
-        elif choix == "e":
-            with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".txt") as tf:
-                tf.write(message)
-                tf.flush()
-                subprocess.call([os.environ.get("EDITOR", "vi"), tf.name])
-                tf.seek(0)
-                message = tf.read()
-            valider = True
-        else:
-            valider = False
+        while True:
+            choix = (
+                input("Valider le commit ? [y: oui, n: non, e: éditer, a: affiner] [défaut: y] : ")
+                .strip()
+                .lower()
+            )
+            if not choix or choix == "y" or choix == "o":
+                valider = True
+                break
+            elif choix == "e":
+                with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".txt") as tf:
+                    tf.write(message)
+                    tf.flush()
+                    subprocess.call([os.environ.get("EDITOR", "vi"), tf.name])
+                    tf.seek(0)
+                    message = tf.read()
+                valider = True
+                break
+            elif choix == "a":
+                instruction = input("Instruction pour affiner (ex: 'plus court', 'plus technique') : ").strip()
+                if instruction:
+                    message = self.generer_message_commit(instruction_supplementaire=instruction)
+                    logger.log_console("\nNouveau message généré :\n" + "="*20)
+                    logger.log_console(message)
+                    logger.log_console("="*20 + "\n")
+                continue
+            else:
+                valider = False
+                break
         
         if valider:
             self.repo.index.commit(message)

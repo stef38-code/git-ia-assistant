@@ -4,9 +4,9 @@
 Factory pour instancier la classe de changelog IA selon l'IA choisie.
 """
 
-from git_ia_assistant.copilot.ia_copilot_changelog import IaCopilotChangelog
-from git_ia_assistant.gemini.ia_gemini_changelog import IaGeminiChangelog
-from git_ia_assistant.ollama.ia_ollama_changelog import IaOllamaChangelog
+from git_ia_assistant.ia.copilot.ia_copilot_changelog import IaCopilotChangelog
+from git_ia_assistant.ia.gemini.ia_gemini_changelog import IaGeminiChangelog
+from git_ia_assistant.ia.ollama.ia_ollama_changelog import IaOllamaChangelog
 
 
 class IaAssistantChangelogFactory:

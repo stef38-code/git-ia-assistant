@@ -6,7 +6,7 @@ set -e
 
 echo "--- Mise à jour des sous-modules ---"
 if [ -d ".git" ]; then
-    git submodule update --remote libs/python_commun
+    git submodule update --init --recursive --remote --force libs/python_commun
 else
     echo "Attention : .git non trouvé, passage de la mise à jour des sous-modules."
 fi

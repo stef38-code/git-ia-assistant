@@ -15,6 +15,7 @@ DATA
     Aucune
 """
 
+from git_ia_assistant.core.definition.ia_assistant_squash import IaAssistantSquash
 from git_ia_assistant.ia.copilot.ia_copilot_squash import IaCopilotSquash
 from git_ia_assistant.ia.gemini.ia_gemini_squash import IaGeminiSquash
 from git_ia_assistant.ia.ollama.ia_ollama_squash import IaOllamaSquash

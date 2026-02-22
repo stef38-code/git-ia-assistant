@@ -22,15 +22,17 @@ DATA
 """
 
 import os
+from git_ia_assistant.core.definition.ia_assistant import IaAssistant
 from python_commun.logging.logger import logger
 
 
-class IaAssistantTypeReview:
+class IaAssistantTypeReview(IaAssistant):
     """
     Classe mère pour la revue de code par type de langage et IA.
     """
 
     def __init__(self, fichiers, version=None):
+        super().__init__()
         self.fichiers = fichiers
         self.version = version
         # Vérifie l'existence de chaque fichier
@@ -41,6 +43,45 @@ class IaAssistantTypeReview:
                 "Aucun fichier existant à reviewer. Aucun traitement effectué."
             )
         self.fichiers = fichiers_existants
+
+    def generer_prompt_review(self) -> str:
+        """
+        Génère le prompt pour la revue de code, incluant le contexte des imports.
+        """
+        if not self.fichiers:
+            return ""
+
+        chemin_fichier = self.fichiers[0]
+        with open(chemin_fichier, "r", encoding="utf-8") as f:
+            code = f.read()
+
+        contexte_imports = self._extraire_contexte_imports(chemin_fichier, code)
+        
+        # Le prompt template doit être chargé par les sous-classes pour avoir le bon nom de fichier
+        raise NotImplementedError
+
+    def _extraire_contexte_imports(self, chemin_fichier: str, code: str) -> str:
+        """
+        Tente d'extraire le contenu des fichiers importés (interfaces, types) pour donner du contexte.
+        """
+        import re
+        dossier_base = os.path.dirname(chemin_fichier)
+        contexte = ""
+        
+        # Exemple simple pour Python
+        if chemin_fichier.endswith(".py"):
+            imports = re.findall(r"from (\..+) import (.+)", code)
+            for module, _ in imports:
+                # Tentative de lecture du fichier local (simplifié)
+                target_path = os.path.join(dossier_base, module.replace(".", "/") + ".py")
+                if os.path.exists(target_path):
+                    try:
+                        with open(target_path, "r", encoding="utf-8") as f:
+                            contexte += f"\n--- Contexte Import ({module}) ---\n"
+                            contexte += f.read()[:2000] # Limite par fichier
+                    except:
+                        pass
+        return contexte
 
     def generer_review(self, repo_path=None):
         raise NotImplementedError

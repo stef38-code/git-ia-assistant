@@ -27,31 +27,31 @@ class IaAssistantTypeReviewFactory:
     def get_review_class(cls, ia, type_lang):
         # Logique pour retourner la bonne classe selon l'IA et le langage
         if ia == "copilot" and type_lang == "angular":
-            from git_ia_assistant.copilot.ia_assistant_copilot_angular_review import (
+            from git_ia_assistant.ia.copilot.ia_assistant_copilot_angular_review import (
                 IaAssistantCopilotAngularReview,
             )
 
             return IaAssistantCopilotAngularReview
         if ia == "gemini" and type_lang == "angular":
-            from git_ia_assistant.gemini.ia_assistant_gemini_angular_review import (
+            from git_ia_assistant.ia.gemini.ia_assistant_gemini_angular_review import (
                 IaAssistantGeminiAngularReview,
             )
 
             return IaAssistantGeminiAngularReview
         if ia == "copilot" and type_lang == "python":
-            from git_ia_assistant.copilot.ia_assistant_copilot_python_review import (
+            from git_ia_assistant.ia.copilot.ia_assistant_copilot_python_review import (
                 IaAssistantCopilotPythonReview,
             )
 
             return IaAssistantCopilotPythonReview
         if ia == "gemini" and type_lang == "python":
-            from git_ia_assistant.gemini.ia_assistant_gemini_python_review import (
+            from git_ia_assistant.ia.gemini.ia_assistant_gemini_python_review import (
                 IaAssistantGeminiPythonReview,
             )
 
             return IaAssistantGeminiPythonReview
         if ia == "ollama" and type_lang == "python":
-            from git_ia_assistant.ollama.ia_assistant_ollama_python_review import (
+            from git_ia_assistant.ia.ollama.ia_assistant_ollama_python_review import (
                 IaAssistantOllamaPythonReview,
             )
 

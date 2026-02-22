@@ -4,9 +4,9 @@
 Classe pour la génération de changelog IA avec Copilot.
 """
 
-from git_ia_assistant.definition.ia_assistant_changelog import IaAssistantChangelog
-from python_commun.prompt import charger_prompt, formatter_prompt
-from python_commun.copilot import envoyer_prompt_copilot
+from git_ia_assistant.core.definition.ia_assistant_changelog import IaAssistantChangelog
+from python_commun.ai.prompt import charger_prompt, formatter_prompt
+from python_commun.ai.copilot import envoyer_prompt_copilot
 from python_commun.logging.logger import logger
 
 
@@ -25,7 +25,7 @@ class IaCopilotChangelog(IaAssistantChangelog):
         return prompt
 
     def generer_changelog(self, messages):
-        modele_prompt = charger_prompt("changelog_prompt.md")
+        modele_prompt = charger_prompt("changelog_prompt.md", self.dossier_prompts)
         texte_commits = "\n".join(
             f"- {commit.hexsha[:7]}: {commit.summary}" for commit in messages
         )

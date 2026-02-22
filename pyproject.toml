@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-ia-assistant"
-version = "0.1.3"
+version = "0.2.0"
 authors = [
   { name="Hussard", email="hussard@example.com" },
 ]
@@ -33,6 +33,10 @@ git-ia-review = "git_ia_assistant.cli.review_cli:main"
 git-ia-mr = "git_ia_assistant.cli.mr_cli:main"
 git-ia-squash = "git_ia_assistant.cli.squash_cli:main"
 git-ia-changelog = "git_ia_assistant.cli.changelog_cli:main"
+git-ia-explain = "git_ia_assistant.cli.explain_cli:main"
+git-ia-test = "git_ia_assistant.cli.test_cli:main"
+git-ia-doc = "git_ia_assistant.cli.doc_cli:main"
+git-ia-refacto = "git_ia_assistant.cli.refacto_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

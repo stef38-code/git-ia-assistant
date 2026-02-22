@@ -18,6 +18,7 @@ DATA
         L'objet GitPython représentant le dépôt Git du projet.
 """
 
+import os
 import git
 from python_commun.logging import logger
 
@@ -30,6 +31,11 @@ class IaAssistant:
     def __init__(self):
         try:
             self.repo = git.Repo(search_parent_directories=True)
+            # Détermine le dossier des prompts (src/git_ia_assistant/prompts/)
+            # par rapport à la racine du projet git-ia-assistant
+            self.dossier_prompts = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "..", "..", "prompts")
+            )
         except (git.InvalidGitRepositoryError, git.NoSuchPathError):
             logger.die("Le répertoire actuel n'est pas un dépôt Git.")
             raise

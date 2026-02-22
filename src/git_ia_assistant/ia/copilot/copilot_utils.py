@@ -18,6 +18,11 @@ FUNCTIONS
     formatter_prompt(template: str, **kwargs) -> str
         Remplace les variables dans le template par les valeurs fournies.
 
-DATA
-    __all__ = ['charger_prompt', 'formatter_prompt']
+from python_commun.ai.prompt import charger_prompt, formatter_prompt
+
+__all__ = ["charger_prompt", "formatter_prompt"]
 """
+
+from python_commun.ai.prompt import charger_prompt, formatter_prompt
+
+__all__ = ["charger_prompt", "formatter_prompt"]

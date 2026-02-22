@@ -5,6 +5,23 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-02-22
+
+### Ajouté
+- Nouveaux outils d'assistance IA :
+    - `ia-explain` : Explique le code source de manière pédagogique.
+    - `ia-test` : Génère des suites de tests (PyTest, JUnit, Jest, Vitest, Playwright).
+    - `ia-doc` : Génère de la documentation technique (Markdown, Javadoc, KDoc, Docstrings).
+    - `ia-refacto` : Propose des refactorisations intelligentes du code.
+- Mode interactif dans `ia-commit` pour affiner le message généré via une instruction utilisateur.
+- Analyse de sécurité et évaluation du risque (1-10) dans `ia-mr`.
+- Extraction de contexte automatique pour les fichiers importés localement dans `ia-review` (support initial pour Python).
+- Support complet de Gemini, Copilot et Ollama pour tous les nouveaux outils.
+
+### Changé
+- Refactorisation majeure de la structure interne pour une meilleure modularité des assistants.
+- Amélioration de la robustesse du chargement des prompts grâce à un chemin centralisé.
+
 ## [0.1.3] - 2026-02-22
 
 ### Changé

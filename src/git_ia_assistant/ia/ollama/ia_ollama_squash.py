@@ -21,7 +21,7 @@ DATA
 
 from git_ia_assistant.core.definition.ia_assistant_squash import IaAssistantSquash
 from python_commun.ai.prompt import charger_prompt, formatter_prompt
-from python_commun.ai.ollama_utils import envoyer_prompt_ollama
+from python_commun.ai.ollama_utils import appeler_ollama as envoyer_prompt_ollama
 from python_commun.logging.logger import logger
 
 
@@ -51,7 +51,7 @@ class IaOllamaSquash(IaAssistantSquash):
         :param liste_commits: Liste des commits à traiter
         :return: Suggestion textuelle générée par Ollama
         """
-        modele_prompt = charger_prompt("squash_prompt.md")
+        modele_prompt = charger_prompt("squash_prompt.md", self.dossier_prompts)
         texte_commits = self.formatter_liste_commits(liste_commits)
         prompt_final = formatter_prompt(modele_prompt, commits=texte_commits)
         logger.log_info("Ollama réfléchit à la stratégie de squash...")

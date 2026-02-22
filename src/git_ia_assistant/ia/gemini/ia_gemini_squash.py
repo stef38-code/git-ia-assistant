@@ -51,7 +51,7 @@ class IaGeminiSquash(IaAssistantSquash):
         :param liste_commits: Liste des commits à traiter
         :return: Suggestion textuelle générée par Gemini
         """
-        modele_prompt = charger_prompt("squash_prompt.md")
+        modele_prompt = charger_prompt("squash_prompt.md", self.dossier_prompts)
         texte_commits = self.formatter_liste_commits(liste_commits)
         prompt_final = formatter_prompt(modele_prompt, commits=texte_commits)
         logger.log_info("Gemini réfléchit à la stratégie de squash...")

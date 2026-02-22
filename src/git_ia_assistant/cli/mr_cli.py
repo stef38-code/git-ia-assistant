@@ -157,10 +157,13 @@ def main() -> None:
     fichier_checklist = OUT_DIR / f"checklist_{numero_merge}.md"
     ecrire_checklist_mr(fichier_checklist, args.url)
 
+    # Dossier des prompts
+    dossier_prompts = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "prompts")
+    )
+
     # Construction manuelle du prompt
-    prompt_template = charger_prompt(
-        "review_prompt.py"
-    )  # Ceci est un nom de fichier incorrect, mais conservé pour la rétrocompatibilité
+    prompt_template = charger_prompt("review_prompt.py", dossier_prompts)
 
     contenu_diff = (
         fichier_diff.read_text(encoding="utf-8") if fichier_diff.exists() else ""
@@ -170,8 +173,7 @@ def main() -> None:
     )
 
     prompt = f"""
-Voici une revue de code à analyser.
-Template de base: {prompt_template}
+Voici une revue de code à analyser pour une Merge Request / Pull Request.
 
 Résumé de la MR/PR :
 {contenu_resume}
@@ -180,6 +182,12 @@ Diff complet :
 ```diff
 {contenu_diff}
 ```
+
+Template de base: {prompt_template}
+
+### Instructions supplémentaires pour cette revue :
+1. **Sécurité :** Identifie tout problème de sécurité potentiel (injections, exposition de secrets, mauvaises pratiques d'authentification).
+2. **Risque :** Évalue le risque de fusionner ce changement sur une échelle de 1 (faible) à 10 (critique). Justifie ta note.
 """
 
     if args.dry_run:

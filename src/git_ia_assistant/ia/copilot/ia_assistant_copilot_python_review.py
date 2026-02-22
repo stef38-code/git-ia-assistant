@@ -7,9 +7,9 @@ Exemple :
     review.generer_review()
 """
 
-from git_ia_assistant.definition.ia_assistant_type_review import IaAssistantTypeReview
-from python_commun.prompt import charger_prompt, formatter_prompt
-from python_commun.copilot import envoyer_prompt_copilot
+from git_ia_assistant.core.definition.ia_assistant_type_review import IaAssistantTypeReview
+from python_commun.ai.prompt import charger_prompt, formatter_prompt
+from python_commun.ai.copilot import envoyer_prompt_copilot
 from python_commun.logging.logger import logger
 
 
@@ -19,7 +19,7 @@ class IaAssistantCopilotPythonReview(IaAssistantTypeReview):
     """
 
     def generer_review(self):
-        prompt_template = charger_prompt("python_review_prompt.md")
+        prompt_template = charger_prompt("python_review_prompt.md", self.dossier_prompts)
         with open(self.fichiers[0], "r", encoding="utf-8") as f:
             code = f.read()
         prompt = formatter_prompt(
@@ -30,7 +30,7 @@ class IaAssistantCopilotPythonReview(IaAssistantTypeReview):
         logger.log_console(reponse)
 
     def generer_prompt_review(self):
-        prompt_template = charger_prompt("python_review_prompt.md")
+        prompt_template = charger_prompt("python_review_prompt.md", self.dossier_prompts)
         with open(self.fichiers[0], "r", encoding="utf-8") as f:
             code = f.read()
         prompt = formatter_prompt(
