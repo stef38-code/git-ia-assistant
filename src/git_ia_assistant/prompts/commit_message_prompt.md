@@ -44,7 +44,7 @@ Le message doit respecter la structure suivante :
 - **Titre :** doit être court (max 50 caractères).
 - **Description courte :** Commence par une minuscule, ne finit pas par un point. Utilise l'impératif ou le présent.
 - **Scope (optionnel) :** Un nom de composant ou de module entre parenthèses pour préciser le lieu du changement (ex: `feat(parser): ...`).
-- **Body (optionnel) :** Utilise le corps pour expliquer le "pourquoi" du changement plutôt que le "comment", pas de grands discours. Sépare-le du sujet par une ligne vide.
+- **Body (optionnel) :** Utilise le corps pour expliquer le "pourquoi" du changement de manière très **SYNTHÉTIQUE** et concise (maximum 3-4 lignes). Ne liste pas chaque fichier modifié si le titre est déjà clair. Sépare-le du sujet par une ligne vide.
 - **Footer (optionnel) :** Utilise-le pour référencer des issues (ex: `Fixes #123`) ou signaler des ruptures de compatibilité.
 - **BREAKING CHANGE :** Si le changement casse la compatibilité, ajoute un `!` après le type (ex: `feat!: ...`) ou commence un footer par `BREAKING CHANGE:`.
 
@@ -52,7 +52,8 @@ Le message doit respecter la structure suivante :
 - Ne fournis **QUE** le texte du message de commit.
 - Pas d'introduction, pas de conclusion, pas de guillemets autour du message.
 - Pas de bloc de code markdown entourant la réponse.
-- Mettez un retour à la ligne à environ 72 caractères.
+- **Mettez un retour à la ligne à environ 72 caractères.**
+- **Concision :** Évite les listes exhaustives de changements techniques triviaux. Vise la synthèse maximale.
 
 RÉPONSE ATTENDUE :
 Uniquement le message de commit( titre et contenu ). Pas d'introduction, pas de guillemets.

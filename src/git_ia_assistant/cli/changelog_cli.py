@@ -31,13 +31,14 @@ import os
 import sys
 from typing import List, Tuple
 
-# Ajout du chemin racine pour permettre l'import des modules du projet
+# Ajout du chemin racine et de la librairie commune pour permettre l'import des modules du projet
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../libs/python_commun/src")))
 
 from git_ia_assistant.core.definition.ia_assistant_changelog_factory import (
     IaAssistantChangelogFactory,
 )
-from python_commun.ai.git_ia_assistant.cli_utils import detecter_ia
+from python_commun.ai.ia_assistant_cli_utils import  detecter_ia
 from python_commun.logging import logger
 
 

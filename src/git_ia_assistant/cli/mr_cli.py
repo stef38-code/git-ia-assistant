@@ -27,7 +27,9 @@ import urllib.error
 from pathlib import Path
 from typing import Dict, Callable
 
+# Ajout du chemin racine et de la librairie commune pour permettre l'import des modules du projet
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../libs/python_commun/src")))
 
 from python_commun.vcs.mr_utils import cloner_ou_fetch_depot, generer_diff_mr
 from python_commun.vcs.diff_stats import (
@@ -38,7 +40,7 @@ from python_commun.vcs.diff_stats import (
 )
 from python_commun.ai.copilot import envoyer_prompt_copilot
 from python_commun.ai.gemini_utils import envoyer_prompt_gemini
-from python_commun.ai.git_ia_assistant.cli_utils import detecter_ia
+from python_commun.ai.ia_assistant_cli_utils import detecter_ia
 from python_commun.logging import logger
 from python_commun.ai.ollama_utils import appeler_ollama
 from python_commun.ai.prompt import charger_prompt

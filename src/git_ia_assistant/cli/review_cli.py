@@ -30,14 +30,16 @@ import argparse
 import os
 import sys
 
+# Ajout du chemin racine et de la librairie commune pour permettre l'import des modules du projet
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../libs/python_commun/src")))
 
 from python_commun.git.git_core import (
     liste_fichier_non_suivis_et_modifies,
     obtenir_chemin_racine_git,
     obtenir_depot_git,
 )
-from python_commun.ai.git_ia_assistant.cli_utils import detecter_ia
+from python_commun.ai.ia_assistant_cli_utils import detecter_ia
 from python_commun.logging import logger
 from python_commun.system.system import detect_lang_repo
 from git_ia_assistant.core.definition.ia_assistant_type_review_factory import (
