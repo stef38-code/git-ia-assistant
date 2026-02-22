@@ -2,7 +2,28 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_test - Script principal pour la génération de tests via IA.
+    ia_assistant_test - Génère des tests unitaires ou d'intégration avec l'IA choisie (Copilot, Gemini, Ollama).
+
+DESCRIPTION
+    Script Python pour générer des tests automatisés pour un fichier source à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Supporte différents frameworks (PyTest, JUnit, etc.) et types de tests (unit, integration, e2e).
+
+OPTIONS
+    fichier                     Fichier source pour lequel générer des tests (obligatoire)
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    -f, --framework FRAMEWORK   Framework de test (ex: PyTest, JUnit, Playwright, Vitest)
+    -v, --version VERSION       Version du framework (défaut: latest)
+    -t, --type TYPE             Type de test (unit, integration, e2e)
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
+
+EXEMPLES
+    python ia_assistant_test.py mon_code.py -ia gemini
+    python ia_assistant_test.py src/service.java --framework JUnit --type integration
+    python ia_assistant_test.py script.py --dry-run
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

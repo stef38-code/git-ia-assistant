@@ -2,7 +2,26 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_refacto - Script principal pour la refactorisation de code via IA.
+    ia_assistant_refacto - Refactorise le code source avec l'IA choisie (Copilot, Gemini, Ollama).
+
+DESCRIPTION
+    Script Python pour améliorer et moderniser un fichier source à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Applique des bonnes pratiques et peut cibler une version spécifique du langage.
+
+OPTIONS
+    fichier                     Fichier source à refactoriser (obligatoire)
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    -v, --version VERSION       Version cible du langage (ex: 3.12, 17)
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
+
+EXEMPLES
+    python ia_assistant_refacto.py mon_code.py -ia gemini
+    python ia_assistant_refacto.py ancienne_classe.java --version 17
+    python ia_assistant_refacto.py script.py --dry-run
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

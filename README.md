@@ -68,12 +68,64 @@ Les commandes (`git-ia-commit`, etc.) seront alors disponibles dans votre termin
 
 ## 🛠️ Utilisation
 
-Chaque outil est disponible sous forme de commande CLI après l'installation (ou via des alias comme `ia-commit`, `ia-test`, etc.) :
-*   `git-ia-commit --ia gemini`
-*   `git-ia-review --dry-run`
-*   `git-ia-mr --url https://github.com/user/repo/pull/1`
-*   `git-ia-explain mon_fichier.py`
-*   `git-ia-test mon_fichier.java`
+Chaque outil est disponible sous forme de commande CLI. Par défaut, les outils tentent de détecter l'IA disponible, mais vous pouvez forcer un choix avec l'option `--ia` ou `-ia`.
+
+### 📝 Génération de Commits
+Analyse les fichiers modifiés et propose un message de commit.
+```bash
+git-ia-commit                   # Utilise l'IA par défaut
+git-ia-commit --ia gemini       # Force l'utilisation de Gemini
+git-ia-commit --dry-run         # Affiche uniquement le diff qui serait envoyé
+git-ia-commit -f file1.py       # Analyse uniquement des fichiers spécifiques
+```
+
+### 🔍 Revue de Code locale
+Analyse vos modifications locales pour suggérer des améliorations.
+```bash
+git-ia-review                   # Analyse tous les fichiers modifiés
+git-ia-review -ia ollama        # Utilise Ollama pour la revue
+git-ia-review fichier.py        # Revue d'un fichier spécifique
+```
+
+### 🚀 Revue de MR/PR
+Réalise une revue complète d'une Merge Request GitLab ou Pull Request GitHub.
+```bash
+git-ia-mr --url https://github.com/user/repo/pull/123
+git-ia-mr -u https://gitlab.com/repo/-/merge_requests/45 -ia gemini
+```
+
+### 📚 Documentation
+Génère de la documentation pour un fichier source.
+```bash
+git-ia-doc mon_code.py          # Génère des docstrings Python
+git-ia-doc Service.java -f Javadoc -l English
+```
+
+### 💡 Explication de Code
+Obtenez une explication détaillée d'un fichier complexe.
+```bash
+git-ia-explain script_complexe.py
+```
+
+### 🧪 Génération de Tests
+Crée des tests unitaires pour vos fichiers.
+```bash
+git-ia-test composant.ts --framework Vitest
+git-ia-test service.py --type unit
+```
+
+### 🛠️ Refactorisation
+Propose une version modernisée de votre code.
+```bash
+git-ia-refacto vieux_script.py --version 3.12
+```
+
+### 📜 Changelog & Squash
+Gérez votre historique Git.
+```bash
+git-ia-changelog -c 20          # Génère un changelog sur les 20 derniers commits
+git-ia-squash --commits 10      # Suggère des regroupements sur les 10 derniers commits
+```
 
 ## 🧱 Structure du projet
 *   `src/git_ia_assistant/core` : Logique de base et orchestration.

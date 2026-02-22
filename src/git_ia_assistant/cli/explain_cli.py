@@ -2,14 +2,25 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_explain - Script principal pour l'explication de code via IA.
+    ia_assistant_explain - Analyse et explique le code source avec l'IA choisie (Copilot, Gemini, Ollama).
 
 DESCRIPTION
-    Analyse un fichier de code source et fournit une explication détaillée.
+    Script Python pour obtenir des explications détaillées sur un fichier source à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Analyse la structure et le fonctionnement du code pour faciliter sa compréhension.
 
 OPTIONS
-    -ia {copilot,gemini,ollama}   Sélectionne l'IA à utiliser (défaut: auto-détection)
-    --dry-run                     Simule et affiche le prompt généré
+    fichier                     Fichier source à expliquer (obligatoire)
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
+
+EXEMPLES
+    python ia_assistant_explain.py mon_script.py
+    python ia_assistant_explain.py src/utils.py -ia gemini
+    python ia_assistant_explain.py code.java --dry-run
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

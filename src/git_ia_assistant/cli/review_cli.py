@@ -2,28 +2,26 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_review - Script principal pour la revue de code IA (Copilot, Gemini, Ollama)
+    ia_assistant_review - Effectue la revue de code avec l'IA choisie (Copilot, Gemini, Ollama).
 
 DESCRIPTION
-    Analyse et génère une revue de code via une IA sélectionnable.
+    Script Python pour générer une revue de code sur des fichiers spécifiés ou modifiés à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Analyse les changements, identifie les bugs potentiels et suggère des améliorations.
 
 OPTIONS
-    -ia {copilot,gemini,ollama}   Sélectionne l'IA à utiliser (défaut: auto-détection)
-    -l, --langage LANG            Définit le langage du projet (détection auto si vide)
-    --dryrun                      Simule la review et affiche le prompt envoyé à l'IA
-    -h, --help                    Affiche l'aide du script
+    fichiers                    Liste des fichiers à reviewer (défaut: fichiers modifiés)
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    -l, --langage LANG          Définit le langage du projet (détection auto si absent)
+    --dryrun                    Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
 
 EXEMPLES
-    # Utilise Gemini pour une review Python sur un fichier spécifique
     python ia_assistant_review.py -ia gemini -l python fichier.py
-    # Simule la review et affiche le prompt pour les fichiers modifiés
     python ia_assistant_review.py --dryrun
-    # Détection automatique du langage et de l'IA pour les fichiers modifiés
     python ia_assistant_review.py
 
 FUNCTIONS
-    main()
-        Point d'entrée du script, gère les options et l'exécution principale.
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

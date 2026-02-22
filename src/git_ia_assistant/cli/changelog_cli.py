@@ -2,28 +2,25 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_changelog - Génération de changelog IA (Copilot, Gemini, Ollama)
+    ia_assistant_changelog - Génère un changelog avec l'IA choisie (Copilot, Gemini, Ollama).
 
 DESCRIPTION
-    Génère un changelog à partir des commits via une IA sélectionnable.
+    Script Python pour générer un changelog Git à partir des commits à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Permet de récupérer les commits récents et de générer un résumé des changements.
 
 OPTIONS
-    -ia {copilot,gemini,ollama}   Sélectionne l'IA à utiliser (défaut: auto-détecté)
-    -c, --commits N               Nombre de commits à traiter (défaut: 10)
-    --dryrun                      Simule la génération et affiche le prompt envoyé à l'IA
-    -h, --help                    Affiche l'aide du script
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    -c, --commits N             Nombre de commits à traiter (défaut: 10)
+    --dryrun                    Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
 
 EXEMPLES
-    # Utilise Gemini pour 5 commits
     python ia_assistant_changelog.py -ia gemini -c 5
-    # Simule la génération et affiche le prompt
     python ia_assistant_changelog.py --dryrun
-    # Utilise l'IA détectée automatiquement pour 20 commits
     python ia_assistant_changelog.py -c 20
 
 FUNCTIONS
-    main()
-        Point d'entrée du script, gère les options et l'exécution principale.
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

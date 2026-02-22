@@ -2,21 +2,24 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_squash - Script principal pour la suggestion de squash IA.
+    ia_assistant_squash - Suggère un squash de commits avec l'IA choisie (Copilot, Gemini, Ollama).
 
 DESCRIPTION
-    Génère une suggestion de squash de commits via une IA sélectionnable.
+    Script Python pour analyser les commits récents et suggérer des regroupements (squash) à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Aide à maintenir un historique de commits propre et cohérent.
 
 OPTIONS
-    -ia {copilot,gemini,ollama}   Sélectionne l'IA à utiliser (défaut: auto-détection)
-    -c, --commits N               Nombre de commits à traiter (défaut: 10)
-    --dry-run                     Simule sans modification et affiche le prompt généré
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    -c, --commits N             Nombre de commits à traiter (défaut: 10)
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
 
 EXEMPLES
-    # Utilise Gemini pour les 5 derniers commits
     python ia_assistant_squash.py -ia gemini -c 5
-    # Simule la génération du prompt pour les 10 derniers commits
     python ia_assistant_squash.py --dry-run
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

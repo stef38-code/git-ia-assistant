@@ -2,21 +2,24 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_mrOrpr - Script principal pour la relecture de MR/PR (GitHub/GitLab) via IA
+    ia_assistant_mrOrpr - Effectue la relecture d'une MR/PR avec l'IA choisie (Copilot, Gemini, Ollama).
 
 DESCRIPTION
-    Analyse une MR/PR GitHub ou GitLab, génère un prompt IA et sauvegarde le résultat en markdown.
+    Script Python pour relire une Merge Request (GitLab) ou Pull Request (GitHub) à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Analyse les changements, génère un résumé et une checklist de relecture sauvegardés en Markdown.
 
 OPTIONS
-    -u, --url URL                 URL obligatoire de la MR/PR
-    -ia {copilot,gemini,ollama}   IA à utiliser (défaut: copilot)
-    --dry-run                     Simulation, affiche le prompt généré sans appeler l'IA
+    -u, --url URL               URL obligatoire de la MR/PR (GitLab ou GitHub)
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
 
 EXEMPLES
-    # Simulation dry-run sur une MR GitLab
-    python ia_assistant_mrOrpr.py -u https://gitlab.example.com/group/project/-/merge_requests/123 --dry-run
-    # Relecture réelle sur une PR GitHub avec Gemini
+    python ia_assistant_mrOrpr.py -u https://gitlab.com/repo/-/merge_requests/1 --dry-run
     python ia_assistant_mrOrpr.py -u https://github.com/user/repo/pull/456 -ia gemini
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse

@@ -2,7 +2,27 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    ia_assistant_doc - Script principal pour la génération de documentation via IA.
+    ia_assistant_doc - Génère la documentation d'un fichier avec l'IA choisie (Copilot, Gemini, Ollama).
+
+DESCRIPTION
+    Script Python pour générer la documentation d'un fichier source à l'aide d'une IA (Copilot, Gemini, Ollama).
+    Permet de spécifier le format de sortie et la langue de la documentation.
+
+OPTIONS
+    fichier                     Fichier source à documenter (obligatoire)
+    -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
+    -f, --format FORMAT         Format de doc (ex: Markdown, Javadoc, Docstrings)
+    -l, --langue LANGUE         Langue de la doc (défaut: Français)
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
+    -h, --help                  Afficher l'aide du script
+
+EXEMPLES
+    python ia_assistant_doc.py mon_fichier.py -ia gemini
+    python ia_assistant_doc.py src/main.java --format Javadoc
+    python ia_assistant_doc.py script.py --dry-run
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère les options et le flux principal.
 """
 
 import argparse
