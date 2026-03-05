@@ -47,7 +47,10 @@ Identifie tout problème de sécurité potentiel :
 ### 4. **Risques et recommandations**
 - **Niveau de risque** : Évalue le risque de fusionner ce changement sur une échelle de 1 (faible) à 10 (critique). Justifie ta note.
 - **Points bloquants** : Liste les problèmes qui DOIVENT être corrigés avant merge
-- **Suggestions d'amélioration** : Propose des améliorations non-bloquantes mais recommandées
+- **Suggestions d'amélioration** : Pour chaque suggestion, indique précisément le ou les fichiers et lignes concernés, et inclus un extrait de code ou diff minimal. Structure chaque suggestion ainsi :
+    - **Problème détecté** (contexte précis : fichier, ligne, extrait)
+    - **Suggestion d’amélioration** (explication + exemple de code corrigé)
+    Fournis un exemple de correction ou de bonne pratique pour chaque point soulevé.
 - **Points positifs** : Mentionne ce qui est bien fait
 
 ### 5. **Checklist de validation**
