@@ -174,6 +174,15 @@ def main() -> None:
 
     stats = calculer_stats_mr(fichier_diff, fichier_liste_fichiers)
 
+    # Affichage du nombre de changements et de commits
+    nb_fichiers = stats.get('fichiers_modifies', 0)
+    nb_lignes_ajoutees = stats.get('additions', 0)
+    nb_lignes_supprimees = stats.get('suppressions', 0)
+    print(f"\nRésumé des changements :")
+    print(f"- Fichiers modifiés : {nb_fichiers}")
+    print(f"- Lignes ajoutées : {nb_lignes_ajoutees}")
+    print(f"- Lignes supprimées : {nb_lignes_supprimees}")
+
     fichier_resume = OUT_DIR / f"resume_{numero_merge}.md"
     ecrire_resume_mr(fichier_resume, numero_merge, stats, fichier_liste_fichiers)
 
