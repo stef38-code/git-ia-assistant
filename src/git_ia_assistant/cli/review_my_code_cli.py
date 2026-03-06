@@ -49,20 +49,24 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../libs/python_commun/src")))
 
+from python_commun.cli import usage
 from python_commun.git.git_core import (
-    liste_fichier_non_suivis_et_modifies,
-    obtenir_chemin_racine_git,
-    obtenir_depot_git,
+    obtenir_depot_git, 
+    obtenir_chemin_racine_git, 
     obtenir_branche_actuelle,
+    liste_fichier_non_suivis_et_modifies,
+    detecter_branche_base,
+    recuperer_commits_branche,
+    generer_diff_branche,
+    generer_diff_fichiers,
+    generer_resume_commits
 )
 from python_commun.ai.ia_assistant_cli_utils import detecter_ia
 from python_commun.ai.prompt import charger_prompt, formatter_prompt
 from python_commun.logging import logger
 from python_commun.system.system import detect_lang_repo
-from python_commun.ai.ia_assistant_cli_utils import detecter_ia
-from python_commun.ai.prompt import charger_prompt, formatter_prompt
-from python_commun.logging import logger
-from python_commun.system.system import detect_lang_repo
+
+import git
 
 
 def _parser_options() -> argparse.Namespace:
@@ -95,166 +99,6 @@ def _parser_options() -> argparse.Namespace:
     )
     parser.add_argument("-h", "--help", action="help", help="Affiche l'aide du script")
     return parser.parse_args()
-
-
-def detecter_branche_base(repo) -> str:
-    """
-    Détecte automatiquement la branche de base en analysant le reflog Git.
-    
-    Stratégies (dans l'ordre de priorité) :
-    1. Analyse du reflog HEAD pour trouver d'où la branche actuelle a été créée
-    2. Fallback sur les branches principales (origin/main, origin/master, main, master)
-    3. Fallback ultime sur la première branche remote trouvée
-    
-    :param repo: Objet GitPython du dépôt
-    :return: Nom de la branche de base trouvée
-    """
-    import re
-    
-    current_branch = repo.active_branch.name
-    
-    # Stratégie 1 : Analyser le reflog pour trouver la branche source
-    try:
-        # Parcourir le reflog HEAD pour trouver le checkout initial vers cette branche
-        for entry in repo.head.log():
-            msg = entry.message
-            
-            # Rechercher "checkout: moving from <source> to <current_branch>"
-            if 'checkout: moving from' in msg and f'to {current_branch}' in msg:
-                match = re.search(r'checkout: moving from ([^\s]+) to', msg)
-                if match:
-                    source_branch = match.group(1)
-                    
-                    # Vérifier que la branche source existe encore
-                    try:
-                        # Essayer de résoudre la référence
-                        repo.commit(source_branch)
-                        logger.log_debug(True, f"Branche de base détectée via reflog : {source_branch}")
-                        return source_branch
-                    except (git.exc.BadName, ValueError):
-                        # La branche source n'existe plus, continuer la recherche
-                        logger.log_debug(True, f"Branche {source_branch} trouvée dans reflog mais n'existe plus")
-                        pass
-    except Exception as e:
-        logger.log_debug(True, f"Erreur lors de l'analyse du reflog : {e}")
-    
-    # Stratégie 2 : Fallback sur les branches principales standards
-    branches_principales = ['origin/main', 'origin/master', 'main', 'master']
-    
-    for branch_name in branches_principales:
-        try:
-            for ref in repo.references:
-                if ref.name == branch_name:
-                    logger.log_debug(True, f"Branche de base fallback : {branch_name}")
-                    return branch_name
-        except Exception:
-            continue
-    
-    # Stratégie 3 : Fallback ultime sur la première branche remote
-    for ref in repo.references:
-        if ref.name.startswith('origin/') and ref.name != f'origin/{current_branch}':
-            logger.log_debug(True, f"Branche de base fallback (première remote) : {ref.name}")
-            return ref.name
-    
-    # Si rien trouvé, retourner master par défaut
-    logger.log_warn("Impossible de détecter la branche de base, utilisation de 'master' par défaut")
-    return "master"
-
-
-def recuperer_commits_branche(repo, base_branch: str, current_branch: str) -> list:
-    """
-    Récupère les commits de la branche actuelle qui ne sont pas dans la branche de base.
-    
-    :param repo: Objet GitPython du dépôt
-    :param base_branch: Nom de la branche de base
-    :param current_branch: Nom de la branche actuelle
-    :return: Liste des commits
-    """
-    try:
-        # Commits dans current_branch qui ne sont pas dans base_branch
-        commits = list(repo.iter_commits(f'{base_branch}..{current_branch}'))
-        return commits
-    except Exception as e:
-        logger.log_error(f"Erreur lors de la récupération des commits : {e}")
-        return []
-
-
-def generer_diff_branche(repo, base_branch: str, current_branch: str) -> str:
-    """
-    Génère le diff complet entre la branche de base et la branche actuelle.
-    
-    :param repo: Objet GitPython du dépôt
-    :param base_branch: Nom de la branche de base
-    :param current_branch: Nom de la branche actuelle
-    :return: Diff au format string
-    """
-    try:
-        # Diff entre base_branch et current_branch
-        diff = repo.git.diff(base_branch, current_branch)
-        return diff
-    except Exception as e:
-        logger.log_error(f"Erreur lors de la génération du diff : {e}")
-        return ""
-
-
-def generer_diff_fichiers(repo, fichiers: list) -> str:
-    """
-    Génère le diff pour les fichiers modifiés spécifiés.
-    
-    :param repo: Objet GitPython du dépôt
-    :param fichiers: Liste des fichiers à analyser
-    :return: Diff au format string
-    """
-    try:
-        # Diff des fichiers modifiés (staged + unstaged)
-        diff_parts = []
-        
-        # Fichiers staged
-        if repo.index.diff("HEAD"):
-            diff_parts.append(repo.git.diff("HEAD", "--", *fichiers))
-        
-        # Fichiers unstaged
-        if repo.index.diff(None):
-            diff_parts.append(repo.git.diff("--", *fichiers))
-        
-        # Fichiers untracked
-        untracked = [f for f in fichiers if f in repo.untracked_files]
-        if untracked:
-            for file in untracked:
-                try:
-                    with open(file, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                    diff_parts.append(f"diff --git a/{file} b/{file}\n"
-                                    f"new file mode 100644\n"
-                                    f"--- /dev/null\n"
-                                    f"+++ b/{file}\n"
-                                    f"@@ -0,0 +1,{len(content.splitlines())} @@\n"
-                                    f"+{content.replace(chr(10), chr(10) + '+')}")
-                except Exception:
-                    pass
-        
-        return "\n\n".join(diff_parts)
-    except Exception as e:
-        logger.log_error(f"Erreur lors de la génération du diff des fichiers : {e}")
-        return ""
-
-
-def generer_resume_commits(commits: list) -> str:
-    """
-    Génère un résumé textuel des commits.
-    
-    :param commits: Liste des commits GitPython
-    :return: Résumé formaté
-    """
-    if not commits:
-        return "Aucun commit dans cette branche."
-    
-    resume_lines = [f"**{len(commits)} commit(s)** dans cette branche :\n"]
-    for commit in commits:
-        message_first_line = commit.message.splitlines()[0]
-        resume_lines.append(f"- `{commit.hexsha[:7]}` : {message_first_line}")
-    
-    return "\n".join(resume_lines)
 
 
 def main() -> None:
