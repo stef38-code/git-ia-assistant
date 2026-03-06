@@ -43,3 +43,4 @@ Tu dois répondre **UNIQUEMENT** avec un objet JSON respectant la structure suiv
 - Si {partiel} est 'True', un fichier peut apparaître dans plusieurs commits si nécessaire.
 - Le JSON doit être valide et prêt à être parsé par `json.loads()`.
 - N'inclus aucun texte en dehors du JSON.
+- **Pas de signature** en fin de message proposé (pas de "Signed-off-by", "Co-authored-by", etc.).
