@@ -325,17 +325,18 @@ def extraire_version_package_json(fichier: Path) -> str:
 ```
 
 #### Git Tags (fallback)
+
 ```python
 def extraire_version_depuis_tags() -> str:
     """Extrait la dernière version depuis les tags Git."""
     import git
-    
-    repo = git.Repo('.')
+
+    repo = git.Repo('../..')
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    
+
     if not tags:
         return "0.0.0"  # Première version
-    
+
     derniere_tag = str(tags[-1])
     # Nettoyer le préfixe 'v' si présent
     return derniere_tag.lstrip('v')

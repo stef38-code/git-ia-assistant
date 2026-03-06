@@ -5,6 +5,35 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-03-06
+
+### Ajouté
+- **Documentation complète du laboratoire** : 13 scénarios de fonctionnalités documentés dans `laboratoire/`
+  - 🔴 **Priorité Haute (Quick Wins)** :
+    - `git-ia-lint` : Linting intelligent avec explications IA (40h) - Auto-détection pylint/eslint/spotless/shellcheck, corrections automatiques, pre-commit hook
+    - `git-ia-coverage` : Assistant de couverture de tests (30h) - Analyse JaCoCo/pytest-cov/Istanbul, génération auto de tests manquants
+  - 🟠 **Priorité Moyenne** :
+    - `git-ia-scaffold` : Génération de composants full-stack (80h) - Spring Boot/Angular/FastAPI avec tests et documentation
+    - `git-ia-deps` : Gestion intelligente des dépendances (50h) - Audit CVE, upgrade sécurisé SemVer, nettoyage, création MR/PR automatique
+    - `git-ia-api-doc` : Documentation API auto-sync (60h) - Génération OpenAPI 3.0, client SDK TypeScript/Java/Python, sync JIRA
+  - 🟣 **Long Terme** :
+    - `git-ia-migrate` : Migration inter-framework (60h) - Jest→Vitest, Swagger→OpenAPI, Angular 15→17
+    - `git-ia-perf` : Audit de performance (50h) - Détection goulots, suggestions optimisation IA
+    - `git-ia-security` : Politique de sécurité (40h) - Génération SECURITY.md, SBOM, scan secrets
+    - `git-ia-db` : Gestion schémas DB (50h) - Génération migrations, validation DB↔ORM
+    - `git-ia-cicd` : Génération pipelines CI/CD (70h) - GitHub Actions/GitLab CI/Jenkins avec optimisation
+- **Fichier PROPOSITIONS.md** : Analyse détaillée de 10 nouveaux scénarios avec ROI, synergies et roadmap d'implémentation
+- **Section README.md "Laboratoire"** : +200 lignes documentant tous les scénarios avec tableau récapitulatif (priorités, efforts, ROI)
+- **Documentation existante enrichie** :
+  - Scénario SonarQube : Intégration complète avec suggestions IA de corrections
+  - Scénario JIRA : Synchronisation Git↔JIRA, TODO→tickets, rapports de sprint
+  - Scénario Commit+Version : Workflow automatisé (déjà implémenté)
+
+### Amélioré
+- **Estimation d'effort** : ~580h total pour tous les scénarios (Quick Wins : 70h, High Value : 190h, Long Terme : 320h)
+- **ROI documenté** : Break-even à ~7 mois (1 dev) ou ~1 mois (équipe de 5 devs)
+- **Synergies identifiées** : Intégrations entre scénarios (lint↔commit, coverage↔test, deps↔changelog, etc.)
+
 ## [0.4.0] - 2026-03-06
 
 ### Ajouté

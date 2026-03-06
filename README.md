@@ -95,6 +95,7 @@ ia
   # Arch Linux
   sudo pacman -S fzf
   ```
+  Installation uniquement pour sans les droits admin :  https://github.com/stef38-code/dev-env-installers
 
 **Utilisation alternative** (si vous connaissez déjà la commande) :
 ```bash
@@ -229,6 +230,7 @@ git-ia-commit --dry-run         # Affiche uniquement le diff qui serait envoyé
 git-ia-commit --optimise        # Propose des regroupements de commits
 git-ia-commit --optimise --partiel # Permet de découper un fichier en plusieurs commits
 git-ia-commit -f file1.py       # Analyse uniquement des fichiers spécifiques
+git-ia-commit-version           # Commit + versioning automatique + CHANGELOG
 ```
 
 ### 🔍 Revue de Code locale
@@ -312,6 +314,395 @@ git-ia-squash --commits 10      # Suggère des regroupements sur les 10 derniers
 *   `src/git_ia_assistant/ia` : Implémentations spécifiques pour chaque moteur d'IA.
 *   `src/git_ia_assistant/prompts` : Templates de prompts Markdown.
 *   `libs/python_commun` : (Submodule) Librairie partagée pour les fonctions transverses.
+*   `laboratoire/` : Scénarios et idées à explorer (voir section ci-dessous).
+
+## 🧪 Laboratoire - Idées à explorer
+
+Le dossier `laboratoire/` contient des **scénarios de fonctionnalités** sous forme de documents Markdown. Certains scénarios sont déjà implémentés, d'autres sont en cours de développement ou à l'état d'idées.
+
+### 📂 Scénarios disponibles
+
+#### 1. **Commit avec versioning automatique** (`laboratoire/git/outil_commit_developpement.md`)
+
+**Objectif** : Automatiser complètement le workflow de versioning lors d'un commit.
+
+**Commande** :
+```bash
+git-ia-commit-version
+```
+
+**Workflow** :
+1. Génération du message de commit (comme `git-ia-commit` actuel)
+2. Analyse du projet pour déterminer la version actuelle
+3. Incrémentation automatique de la version selon le type de commit (feat → MINOR, fix → PATCH)
+4. Mise à jour du fichier de version (`pyproject.toml`, `pom.xml`, `package.json`, etc.)
+5. Mise à jour du `CHANGELOG.md` avec la nouvelle version
+6. Commit unique avec message + version + changelog
+7. Push automatique
+
+**Bénéfices** :
+- ✅ Versioning cohérent et automatisé
+- ✅ CHANGELOG toujours à jour
+- ✅ Workflow en une seule commande
+- ✅ Support multi-langages (Python, Java/Maven, JavaScript/NPM)
+
+**Statut** : ✅ **Implémenté** - Disponible via `git-ia-commit-version`
+
+---
+
+#### 2. **Intégration SonarQube avec suggestions IA** (`laboratoire/sonar/outil_sonar.md`)
+
+**Objectif** : Interroger SonarQube/SonarCloud pour récupérer les problèmes de qualité et générer des corrections automatiques via IA.
+
+**Commande proposée** :
+```bash
+git-ia-sonar --ai-suggestions
+```
+
+**Workflow** :
+1. Connexion à SonarQube/SonarCloud via API (token sécurisé)
+2. Récupération des métriques globales (bugs, vulnérabilités, code smells)
+3. Pour chaque problème détecté :
+   - Extraction du contexte du code (±10 lignes)
+   - Génération d'un prompt spécialisé (Bug, Vulnerability, Code Smell)
+   - Envoi à l'IA (Copilot, Gemini, Ollama)
+   - Réception de suggestions de correction avec explications
+4. Affichage du rapport avec code avant/après
+5. Mode interactif pour appliquer les corrections
+
+**Fonctionnalités** :
+- 🔍 **3 types de prompts spécialisés** : Bugs, Vulnérabilités (OWASP/CWE), Code Smells (Clean Code)
+- 🤖 **Analyse contextuelle** : Code environnant extrait automatiquement
+- 💡 **Suggestions détaillées** : Code corrigé + explication + tests recommandés
+- 🛡️ **Analyse de sécurité** : Évaluation des risques et vecteurs d'attaque
+- 🔄 **Mode interactif** : Appliquer, éditer ou ignorer chaque correction
+- 📊 **Export JSON** : Rapport complet exportable
+
+**Endpoints SonarQube utilisés** :
+- `/api/measures/component` : Métriques globales (coverage, ncloc, debt, ratings)
+- `/api/issues/search` : Issues détaillées avec filtrage (type, sévérité, pagination)
+- `/api/hotspots/search` : Hotspots de sécurité
+
+**Exemples d'usage** :
+```bash
+# Analyser les bugs critiques avec suggestions IA
+git-ia-sonar --type bugs --severity blocker,critical --ai-suggestions
+
+# Analyser toutes les vulnérabilités avec IA Gemini
+git-ia-sonar --type vulnerabilities --ai-suggestions --ia gemini
+
+# Limiter à 5 analyses IA (économie de coûts)
+git-ia-sonar --ai-suggestions --max-ai-analysis 5
+
+# Mode interactif pour appliquer les corrections
+git-ia-sonar --ai-suggestions --interactive
+
+# Export du rapport en JSON
+git-ia-sonar --ai-suggestions --export sonar-ai-report.json
+```
+
+**Variables d'environnement** (sécurité maximale) :
+```bash
+export SONAR_HOST_URL="https://sonarcloud.io"
+export SONAR_TOKEN="sqp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export SONAR_PROJECT_KEY="mon-organisation_mon-projet"
+```
+
+**Intégrations prévues** :
+- 🔗 Hook pre-push : Bloquer le push si bugs critiques détectés
+- 🔗 Enrichissement de `git-ia-review` : Contexte SonarQube dans les revues
+- 🔗 Dashboard temporel : Suivi de l'évolution de la qualité
+- 🔗 Auto-fix : Application automatique des corrections simples
+
+**Statut** : 📝 Scénario documenté avec API complète et exemples de code
+
+---
+
+### 🚀 Comment contribuer à ces scénarios
+
+Les scénarios du `laboratoire/` sont des **work-in-progress** documentés. Si vous souhaitez :
+
+1. **Implémenter un scénario** :
+   - Lire le fichier Markdown correspondant
+   - Créer le script CLI dans `src/git_ia_assistant/cli/`
+   - Implémenter les classes nécessaires
+   - Ajouter les prompts dans `src/git_ia_assistant/prompts/`
+   - Mettre à jour `pyproject.toml` avec la nouvelle commande
+   - Documenter dans le README principal
+
+2. **Proposer un nouveau scénario** :
+   - Créer un fichier Markdown dans `laboratoire/<categorie>/`
+   - Documenter : Objectif, Workflow, Exemples, API/Dépendances
+   - Respecter le format des scénarios existants
+   - Soumettre une Pull Request
+
+3. **Améliorer un scénario existant** :
+   - Ajouter des cas d'usage
+   - Proposer des optimisations
+   - Enrichir les exemples de code
+   - Documenter des edge cases
+
+### 📋 Template pour nouveaux scénarios
+
+```markdown
+# Nom du scénario
+
+## Vue d'ensemble
+[Description brève de l'objectif]
+
+## Objectif
+[Ce que le scénario doit accomplir]
+
+## Workflow
+1. Étape 1
+2. Étape 2
+...
+
+## Commande proposée
+```bash
+git-ia-nouvelle-commande [options]
+```
+
+## Implémentation
+[Architecture, classes, fonctions nécessaires]
+
+## Exemples d'usage
+[Cas d'usage concrets]
+
+## Dépendances
+[APIs, bibliothèques, services requis]
+
+## Sécurité
+[Considérations de sécurité, gestion des secrets]
+
+## Intégrations
+[Comment s'intègre avec les outils existants]
+```
+
+---
+
+#### 3. **Intégration JIRA** (`laboratoire/jira/`)
+
+**Objectif** : Synchroniser automatiquement Git avec JIRA pour améliorer le workflow de développement.
+
+**Scénarios documentés** :
+- **Synchronisation Commits ↔ JIRA** (`workflow_commit_sync.md`) : Auto-commenting, transitions, détection de tickets
+- **TODO → Tickets JIRA** : Scanner le code pour transformer les TODOs en tickets JIRA
+- **Rapports de sprint** : Génération de rapports avec analyse IA
+
+**Statut** : 📝 Scénario documenté, implémentation à venir
+
+---
+
+### 📝 Nouveaux scénarios documentés (Mars 2026)
+
+#### 🔴 Priorité Haute
+
+##### 4. **Lint & Format Intelligent** (`laboratoire/lint/`)
+**Commande** : `git-ia-lint`  
+Détecte et corrige automatiquement les violations de linting avec explications IA.
+
+**Fonctionnalités** :
+- 🎨 Auto-détection du framework (pylint, eslint, spotless, shellcheck)
+- 💡 Explications IA pour chaque règle de linting
+- 🔧 Correction automatique avec `--apply`
+- 🔗 Intégration pre-commit hook + CI/CD
+
+**Valeur** : 10-15 min/jour gagnées par développeur
+
+**Statut** : 📝 Documenté - Effort estimé : 40h
+
+---
+
+##### 5. **Coverage & Test Assistant** (`laboratoire/coverage/`)
+**Commande** : `git-ia-coverage`  
+Analyse la couverture de code et génère automatiquement les tests manquants.
+
+**Fonctionnalités** :
+- 📊 Analyse JaCoCo, pytest-cov, Istanbul
+- 🧪 Génération automatique de tests pour atteindre seuils (80%, 90%)
+- 🎯 Identifie précisément lignes/branches non couvertes
+- 🔗 Intégration JIRA (tickets si < seuil)
+
+**Valeur** : 1-2h par module, atteint critères qualité automatiquement
+
+**Statut** : 📝 Documenté - Effort estimé : 30h
+
+---
+
+#### 🟠 Priorité Moyenne
+
+##### 6. **Génération de Composants Full-Stack** (`laboratoire/scaffold/`)
+**Commande** : `git-ia-scaffold`  
+Génère code structurel complet avec tests et documentation.
+
+**Sous-scénarios** :
+- **Spring Boot** : Entity + Service + Controller + Tests JUnit
+- **Angular** : Component + Service + Model + Tests Jasmine
+- **FastAPI** : Route + Schema + Model + Tests pytest
+
+**Valeur** : 30-60 min par composant, patterns projet respectés
+
+**Statut** : 📝 Documenté - Effort estimé : 80h
+
+---
+
+##### 7. **Gestion des Dépendances Intelligente** (`laboratoire/dependencies/`)
+**Commande** : `git-ia-deps`  
+Audit de sécurité, upgrade sécurisé, nettoyage de dépendances.
+
+**Fonctionnalités** :
+- 🔒 Audit CVE + SBOM generation
+- ⬆️ Upgrade sécurisé (respect SemVer)
+- 🧹 Détection dépendances inutilisées/dupliquées
+- 🔗 Création automatique de MR/PR
+
+**Valeur** : 2-3h/mois de veille sécurité éliminée
+
+**Statut** : 📝 Documenté - Effort estimé : 50h
+
+---
+
+##### 8. **Documentation API Auto-Sync** (`laboratoire/api-doc/`)
+**Commande** : `git-ia-api-doc`  
+Génère spec OpenAPI, client SDK, documentation Markdown.
+
+**Fonctionnalités** :
+- 📚 Génération OpenAPI 3.0 depuis code (Spring Boot, FastAPI, Express)
+- 🤖 Enrichissement IA (exemples, descriptions)
+- 🔧 Génération client SDK TypeScript/Java/Python
+- 🔗 Synchronisation JIRA (stories par endpoint)
+
+**Valeur** : 4-6h par sprint, documentation toujours à jour
+
+**Statut** : 📝 Documenté - Effort estimé : 60h
+
+---
+
+#### 🟣 Opportunités Long Terme
+
+##### 9. **Migration de Code Inter-Framework** (`laboratoire/migration/`)
+**Commande** : `git-ia-migrate`  
+Automatise la migration entre versions/frameworks (Jest → Vitest, Swagger 2.0 → OpenAPI 3.0, Angular 15 → 17).
+
+**Statut** : 📝 Idée documentée - Effort estimé : 60h
+
+---
+
+##### 10. **Performance Audit + Suggestions** (`laboratoire/performance/`)
+**Commande** : `git-ia-perf`  
+Analyse performances, détecte goulots d'étranglement, suggère optimisations.
+
+**Statut** : 📝 Idée documentée - Effort estimé : 50h
+
+---
+
+##### 11. **Security Policy Generator** (`laboratoire/security/`)
+**Commande** : `git-ia-security`  
+Génère SECURITY.md, SBOM, scan de secrets hardcodés, politique de dépendances.
+
+**Statut** : 📝 Idée documentée - Effort estimé : 40h
+
+---
+
+##### 12. **Database Schema Management** (`laboratoire/database/`)
+**Commande** : `git-ia-db`  
+Génère migrations, explique changements, valide cohérence DB ↔ ORM.
+
+**Statut** : 📝 Idée documentée - Effort estimé : 50h
+
+---
+
+##### 13. **CI/CD Pipeline Generator** (`laboratoire/cicd/`)
+**Commande** : `git-ia-cicd`  
+Génère et optimise pipelines CI/CD (GitHub Actions, GitLab CI, Jenkins).
+
+**Statut** : 📝 Idée documentée - Effort estimé : 70h
+
+---
+
+### 🚀 Comment contribuer à ces scénarios
+
+Les scénarios du `laboratoire/` sont des **work-in-progress** documentés. Si vous souhaitez :
+
+1. **Implémenter un scénario** :
+   - Lire le fichier Markdown correspondant
+   - Créer le script CLI dans `src/git_ia_assistant/cli/`
+   - Implémenter les classes nécessaires
+   - Ajouter les prompts dans `src/git_ia_assistant/prompts/`
+   - Mettre à jour `pyproject.toml` avec la nouvelle commande
+   - Documenter dans le README principal
+
+2. **Proposer un nouveau scénario** :
+   - Créer un fichier Markdown dans `laboratoire/<categorie>/`
+   - Documenter : Objectif, Workflow, Exemples, API/Dépendances
+   - Respecter le format des scénarios existants
+   - Soumettre une Pull Request
+
+3. **Améliorer un scénario existant** :
+   - Ajouter des cas d'usage
+   - Proposer des optimisations
+   - Enrichir les exemples de code
+   - Documenter des edge cases
+
+### 📋 Template pour nouveaux scénarios
+
+```markdown
+# Nom du scénario
+
+## Vue d'ensemble
+[Description brève de l'objectif]
+
+## Objectif
+[Ce que le scénario doit accomplir]
+
+## Workflow
+1. Étape 1
+2. Étape 2
+...
+
+## Commande proposée
+```bash
+git-ia-nouvelle-commande [options]
+```
+
+## Implémentation
+[Architecture, classes, fonctions nécessaires]
+
+## Exemples d'usage
+[Cas d'usage concrets]
+
+## Dépendances
+[APIs, bibliothèques, services requis]
+
+## Sécurité
+[Considérations de sécurité, gestion des secrets]
+
+## Intégrations
+[Comment s'intègre avec les outils existants]
+```
+
+### 📊 Vue d'ensemble des scénarios
+
+| # | Scénario | Priorité | Effort | Statut |
+|---|----------|----------|--------|--------|
+| 1 | Commit + Versioning | ✅ Implémenté | - | ✅ Disponible |
+| 2 | SonarQube + IA | 🟠 Moyenne | - | 📝 Documenté |
+| 3 | JIRA Integration | 🟠 Moyenne | - | 📝 Documenté |
+| 4 | Lint & Format | 🔴 Haute | 40h | 📝 Documenté |
+| 5 | Coverage & Tests | 🔴 Haute | 30h | 📝 Documenté |
+| 6 | Scaffold Full-Stack | 🟠 Moyenne | 80h | 📝 Documenté |
+| 7 | Dependencies | 🟠 Moyenne | 50h | 📝 Documenté |
+| 8 | API Documentation | 🟠 Moyenne | 60h | 📝 Documenté |
+| 9 | Migration | 🟣 Basse | 60h | 💡 Idée |
+| 10 | Performance | 🟣 Basse | 50h | 💡 Idée |
+| 11 | Security | 🟣 Basse | 40h | 💡 Idée |
+| 12 | Database | 🟣 Basse | 50h | 💡 Idée |
+| 13 | CI/CD | 🟣 Basse | 70h | 💡 Idée |
+
+**Total effort estimé** : ~580 heures pour tous les scénarios
+
+---
 
 ## 📄 Licence
 MIT
