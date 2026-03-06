@@ -9,7 +9,12 @@ DESCRIPTION
     
     Deux modes de fonctionnement :
     1. **Fichiers spécifiés ou modifiés** : Analyse les fichiers modifiés localement
-    2. **Aucun fichier modifié** : Analyse tous les commits de la branche actuelle (par rapport à master/main)
+    2. **Aucun fichier modifié** : Analyse tous les commits de la branche actuelle (par rapport à la branche parent)
+    
+    **Détection intelligente de la branche parent** :
+    - Analyse du reflog Git pour trouver d'où la branche actuelle a été créée (checkout -b)
+    - Fallback sur les branches principales si le reflog ne trouve rien (origin/main, origin/master, main, master)
+    - Support des workflows complexes avec branches intermédiaires
     
     Le script utilise le prompt mr_review_prompt.md pour une analyse complète incluant :
     - Résumé exécutif et niveau de risque
@@ -54,9 +59,10 @@ from python_commun.ai.ia_assistant_cli_utils import detecter_ia
 from python_commun.ai.prompt import charger_prompt, formatter_prompt
 from python_commun.logging import logger
 from python_commun.system.system import detect_lang_repo
-from python_commun.ai.copilot import envoyer_prompt_copilot
-from python_commun.ai.gemini import envoyer_prompt_gemini
-from python_commun.ai.ollama import envoyer_prompt_ollama
+from python_commun.ai.ia_assistant_cli_utils import detecter_ia
+from python_commun.ai.prompt import charger_prompt, formatter_prompt
+from python_commun.logging import logger
+from python_commun.system.system import detect_lang_repo
 
 
 def _parser_options() -> argparse.Namespace:
@@ -93,28 +99,66 @@ def _parser_options() -> argparse.Namespace:
 
 def detecter_branche_base(repo) -> str:
     """
-    Détecte automatiquement la branche de base (master ou main).
+    Détecte automatiquement la branche de base en analysant le reflog Git.
+    
+    Stratégies (dans l'ordre de priorité) :
+    1. Analyse du reflog HEAD pour trouver d'où la branche actuelle a été créée
+    2. Fallback sur les branches principales (origin/main, origin/master, main, master)
+    3. Fallback ultime sur la première branche remote trouvée
     
     :param repo: Objet GitPython du dépôt
     :return: Nom de la branche de base trouvée
     """
-    # Priorité : origin/main, origin/master, main, master
-    branches_possibles = ['origin/main', 'origin/master', 'main', 'master']
+    import re
     
-    for branch_name in branches_possibles:
+    current_branch = repo.active_branch.name
+    
+    # Stratégie 1 : Analyser le reflog pour trouver la branche source
+    try:
+        # Parcourir le reflog HEAD pour trouver le checkout initial vers cette branche
+        for entry in repo.head.log():
+            msg = entry.message
+            
+            # Rechercher "checkout: moving from <source> to <current_branch>"
+            if 'checkout: moving from' in msg and f'to {current_branch}' in msg:
+                match = re.search(r'checkout: moving from ([^\s]+) to', msg)
+                if match:
+                    source_branch = match.group(1)
+                    
+                    # Vérifier que la branche source existe encore
+                    try:
+                        # Essayer de résoudre la référence
+                        repo.commit(source_branch)
+                        logger.log_debug(True, f"Branche de base détectée via reflog : {source_branch}")
+                        return source_branch
+                    except (git.exc.BadName, ValueError):
+                        # La branche source n'existe plus, continuer la recherche
+                        logger.log_debug(True, f"Branche {source_branch} trouvée dans reflog mais n'existe plus")
+                        pass
+    except Exception as e:
+        logger.log_debug(True, f"Erreur lors de l'analyse du reflog : {e}")
+    
+    # Stratégie 2 : Fallback sur les branches principales standards
+    branches_principales = ['origin/main', 'origin/master', 'main', 'master']
+    
+    for branch_name in branches_principales:
         try:
             for ref in repo.references:
                 if ref.name == branch_name:
+                    logger.log_debug(True, f"Branche de base fallback : {branch_name}")
                     return branch_name
         except Exception:
             continue
     
-    # Fallback : première branche remote trouvée
+    # Stratégie 3 : Fallback ultime sur la première branche remote
     for ref in repo.references:
-        if ref.name.startswith('origin/'):
+        if ref.name.startswith('origin/') and ref.name != f'origin/{current_branch}':
+            logger.log_debug(True, f"Branche de base fallback (première remote) : {ref.name}")
             return ref.name
     
-    return "master"  # Fallback ultime
+    # Si rien trouvé, retourner master par défaut
+    logger.log_warn("Impossible de détecter la branche de base, utilisation de 'master' par défaut")
+    return "master"
 
 
 def recuperer_commits_branche(repo, base_branch: str, current_branch: str) -> list:
@@ -264,9 +308,14 @@ def main() -> None:
     langage = detect_lang_repo(chemin_racine)
     ia_utilisee = args.ia or detecter_ia()
     
+    # Dossier des prompts (src/git_ia_assistant/prompts/)
+    dossier_prompts = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "prompts")
+    )
+    
     # Chargement et formatage du prompt
     try:
-        prompt_template = charger_prompt("review/mr_review_prompt.md")
+        prompt_template = charger_prompt("review/mr_review_prompt.md", dossier_prompts)
     except FileNotFoundError as e:
         logger.die(f"Prompt introuvable : {e}")
         return
@@ -290,13 +339,16 @@ def main() -> None:
     logger.log_info(f"Revue de code en cours avec {ia_utilisee}...")
     
     try:
-        # Appel direct de l'IA avec le prompt
+        # Import conditionnel pour éviter les erreurs si les dépendances ne sont pas installées
         if ia_utilisee == "copilot":
+            from python_commun.ai.copilot import envoyer_prompt_copilot
             review = envoyer_prompt_copilot(prompt)
         elif ia_utilisee == "gemini":
+            from python_commun.ai.gemini_utils import envoyer_prompt_gemini
             review = envoyer_prompt_gemini(prompt)
         elif ia_utilisee == "ollama":
-            review = envoyer_prompt_ollama(prompt)
+            from python_commun.ai.ollama_utils import appeler_ollama
+            review = appeler_ollama(prompt)
         else:
             logger.die(f"IA non supportée : {ia_utilisee}")
             return
