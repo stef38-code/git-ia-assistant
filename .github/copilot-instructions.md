@@ -369,13 +369,13 @@ Beaucoup de commandes utilisent `InquirerPy` pour les prompts interactifs et les
 #### Données interdites
 
 ❌ **JAMAIS** inclure dans le code :
-- URLs internes d'entreprise (ex: `git-prd.server.lan`, `*.company.internal`)
-- Codes de projets privés (ex: `A1322`, codes métiers spécifiques)
+- URLs internes d'entreprise (ex:  `*.company.internal`)
+- Codes de projets privés (ex: `AXXX`, codes métiers spécifiques)
 - Noms de personnes, usernames, emails d'entreprise
 - Tokens/credentials réels (ex: `glpat-xxxxxxxxxxxxxxxxxxxx`)
 - Adresses IP privées (`192.168.*`, `10.*`, `172.*`)
-- Hostnames de machines internes (ex: `L9067222`)
-- Chemins absolus spécifiques à un utilisateur (ex: `/home/appuser`)
+- Hostnames de machines internes 
+- Chemins absolus spécifiques à un utilisateur 
 
 #### Bonnes pratiques
 
