@@ -117,6 +117,104 @@ function configure_aliases {
     done
 }
 
+function create_ia_wrapper {
+    echo "--- Création du wrapper 'ia' avec fzf ---"
+    
+    SCRIPTS_DIR="${HOME}/.local/share/scripts"
+    IA_SCRIPT="${SCRIPTS_DIR}/ia.sh"
+    
+    mkdir -p "$SCRIPTS_DIR"
+    
+    # Créer le script ia.sh avec fzf
+    cat > "$IA_SCRIPT" << 'EOFSCRIPT'
+#!/usr/bin/env bash
+# Wrapper interactif pour git-ia-assistant avec fzf
+
+# Liste des commandes disponibles
+COMMANDS=(
+    "git-ia-commit"
+    "git-ia-commit-version"
+    "git-ia-review"
+    "git-ia-mr"
+    "git-ia-squash"
+    "git-ia-changelog"
+    "git-ia-explain"
+    "git-ia-test"
+    "git-ia-doc"
+    "git-ia-refacto"
+)
+
+# Vérifier si fzf est installé
+if ! command -v fzf >/dev/null 2>&1; then
+    echo "❌ Erreur: 'fzf' n'est pas installé."
+    echo "Installation recommandée:"
+    echo "  - Ubuntu/Debian: sudo apt install fzf"
+    echo "  - macOS: brew install fzf"
+    echo "  - Arch: sudo pacman -S fzf"
+    exit 1
+fi
+
+# Si un argument est fourni, l'utiliser directement
+if [ $# -gt 0 ]; then
+    cmd="$1"
+    shift
+    "$cmd" "$@"
+    exit $?
+fi
+
+# Sélection interactive avec fzf
+selected=$(printf "%s\n" "${COMMANDS[@]}" | fzf \
+    --height=60% \
+    --border=rounded \
+    --prompt="🤖 Sélectionnez une commande IA > " \
+    --header="Utilisez ↑/↓ pour naviguer, Enter pour sélectionner, Esc pour annuler" \
+    --preview='
+        cmd={}
+        if command -v "$cmd" >/dev/null 2>&1; then
+            "$cmd" --help 2>&1 || echo "Aucune aide disponible pour $cmd"
+        else
+            echo "❌ Commande '\''$cmd'\'' non trouvée"
+            echo ""
+            echo "Vérifiez que git-ia-assistant est correctement installé."
+            echo "PATH actuel: $PATH"
+        fi
+    ' \
+    --preview-window=right:60%:wrap \
+    --color="border:#6272a4,prompt:#50fa7b,pointer:#ff79c6,marker:#f1fa8c,header:#8be9fd")
+
+# Vérifier si une commande a été sélectionnée
+if [ -z "$selected" ]; then
+    echo "Aucune commande sélectionnée."
+    exit 0
+fi
+
+# Exécuter la commande sélectionnée
+echo "🚀 Exécution de: $selected"
+echo ""
+"$selected"
+EOFSCRIPT
+
+    chmod +x "$IA_SCRIPT"
+    
+    # Créer le lien symbolique (remplacer si existe déjà)
+    echo "Création du lien symbolique $BIN_DEST/ia..."
+    ln -sf "$IA_SCRIPT" "$BIN_DEST/ia"
+    
+    echo "✅ Wrapper 'ia' créé avec succès !"
+    echo "   Script: $IA_SCRIPT"
+    echo "   Lien: $BIN_DEST/ia"
+    
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo ""
+        echo "⚠️  ATTENTION: 'fzf' n'est pas installé sur ce système."
+        echo "   Le wrapper 'ia' nécessite fzf pour fonctionner."
+        echo "   Installation recommandée:"
+        echo "     - Ubuntu/Debian: sudo apt install fzf"
+        echo "     - macOS: brew install fzf"
+        echo "     - Arch: sudo pacman -S fzf"
+    fi
+}
+
 function main {
     check_environment
     fetch_source
@@ -125,14 +223,16 @@ function main {
     install_dependencies
     configure_symlinks
     configure_aliases
+    create_ia_wrapper
 
     echo ""
     echo "Installation terminée avec succès !"
     echo "Les outils sont disponibles dans $BIN_DEST"
     echo "Les alias ont été configurés dans $ALIAS_FILE"
+    echo "Le wrapper interactif 'ia' est disponible : utilisez 'ia' pour un menu interactif"
     echo "Assurez-vous que ce répertoire est dans votre PATH et que $ALIAS_FILE est sourcé dans votre .bashrc ou .zshrc."
     echo "Exemple : [ -f ~/.aliases ] && . ~/.aliases"
-    echo "Pour vérifier : ia-commit --help"
+    echo "Pour vérifier : ia-commit --help ou simplement : ia"
 }
 
 main

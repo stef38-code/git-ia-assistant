@@ -69,6 +69,51 @@ source .venv/bin/activate
 
 Les commandes (`git-ia-commit`, etc.) seront alors disponibles dans votre terminal tant que l'environnement est actif.
 
+## 🎯 Utilisation du wrapper interactif `ia`
+
+Après installation, un wrapper interactif `ia` est disponible pour sélectionner visuellement les commandes avec **fzf** :
+
+```bash
+ia
+```
+
+**Fonctionnalités :**
+- 📋 **Menu interactif** avec toutes les commandes disponibles
+- 👁️ **Preview en temps réel** : affiche le `--help` de la commande sélectionnée
+- ⌨️ **Navigation au clavier** : ↑/↓ pour naviguer, Enter pour sélectionner, Esc pour annuler
+- 🎨 **Interface colorée** avec thème Dracula
+
+**Prérequis :**
+- `fzf` doit être installé (recommandé mais non obligatoire)
+  ```bash
+  # Ubuntu/Debian
+  sudo apt install fzf
+  
+  # macOS
+  brew install fzf
+  
+  # Arch Linux
+  sudo pacman -S fzf
+  ```
+
+**Utilisation alternative** (si vous connaissez déjà la commande) :
+```bash
+ia git-ia-commit --help
+ia git-ia-review mon_fichier.py
+```
+
+**Commandes disponibles via le wrapper :**
+- `git-ia-commit` - Génération de commits
+- `git-ia-commit-version` - Versioning automatique
+- `git-ia-review` - Revue de code locale
+- `git-ia-mr` - Revue de MR/PR
+- `git-ia-squash` - Stratégie de squash
+- `git-ia-changelog` - Génération de changelog
+- `git-ia-explain` - Explication de code
+- `git-ia-test` - Génération de tests
+- `git-ia-doc` - Documentation automatique
+- `git-ia-refacto` - Suggestions de refactoring
+
 ## ⚙️ Configuration requise
 
 ### 🔑 Token d'accès pour les MR/PR (GitLab et GitHub)

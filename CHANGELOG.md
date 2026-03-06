@@ -8,6 +8,13 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [0.4.0] - 2026-03-06
 
 ### Ajouté
+- **Wrapper interactif `ia` avec fzf** : Menu interactif pour sélectionner visuellement les commandes
+  - Création automatique du script `~/.local/share/scripts/ia.sh` lors de l'installation
+  - Lien symbolique `~/.local/bin/ia` (remplacé à chaque installation)
+  - Preview en temps réel affichant le `--help` de la commande sélectionnée
+  - Navigation au clavier (↑/↓/Enter/Esc) avec thème coloré Dracula
+  - Mode direct : `ia git-ia-commit --help` ou `ia git-ia-review fichier.py`
+  - Détection automatique de fzf avec instructions d'installation si manquant
 - **Nouvelle commande `git-ia-commit-version`** : Workflow automatisé de commit avec versioning
   - Génération du message de commit avec IA
   - Détection automatique du type de projet (Python, Java, Node.js, Go, Rust, .NET)
@@ -23,6 +30,12 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Git push avec nouvelles branches** : Détection automatique de l'absence d'upstream et ajout de `--set-upstream origin <branche>`
 - **Détection de HEAD détaché** : Bloque le push avec message d'erreur explicite si en mode détaché
 - **Message "Aucun fichier spécifié"** : N'affiche plus ce message si aucun fichier n'est détecté
+
+### Amélioré
+- **Refactoring `review_my_code_cli.py`** : Découpage de la fonction main() en 6 fonctions thématiques
+  - Réduction de main() de 108 → 45 lignes (-58%)
+  - Amélioration de la lisibilité et testabilité
+  - Mutualisation de 5 fonctions Git dans `python_commun/git/git_core.py`
 
 ## [0.3.0] - 2026-03-06
 
