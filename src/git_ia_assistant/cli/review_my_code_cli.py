@@ -12,12 +12,12 @@ OPTIONS
     fichiers                    Liste des fichiers à reviewer (défaut: fichiers modifiés)
     -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
     -l, --langage LANG          Définit le langage du projet (détection auto si absent)
-    --dryrun                    Simulation, affiche le prompt sans appel à l'IA
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
     -h, --help                  Afficher l'aide du script
 
 EXEMPLES
     python ia_assistant_review.py -ia gemini -l python fichier.py
-    python ia_assistant_review.py --dryrun
+    python ia_assistant_review.py --dry-run
     python ia_assistant_review.py
 
 FUNCTIONS
@@ -72,7 +72,6 @@ def _parser_options() -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        dest="dryrun",
         help="Simule la review et affiche le prompt envoyé à l'IA",
     )
     parser.add_argument("-h", "--help", action="help", help="Affiche l'aide du script")
@@ -159,13 +158,13 @@ def main() -> None:
         logger.log_warn("Le prompt généré est vide, la revue est annulée.")
         return
 
-    if args.dryrun:
+    if args.dry_run:
         logger.log_console(f"[DRYRUN] IA utilisée : {ia_utilisee}")
         logger.log_console(f"[DRYRUN] Prompt qui serait envoyé à l'IA :\n{prompt}")
         return
 
     logger.log_info(f"Revue de code en cours avec {ia_utilisee}...")
-    logger.log_debug(args.dryrun, f"Prompt envoyé à l'IA :\n{prompt}")
+    logger.log_debug(args.dry_run, f"Prompt envoyé à l'IA :\n{prompt}")
     assistant.generer_review()
 
 

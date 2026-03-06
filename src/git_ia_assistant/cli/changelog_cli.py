@@ -11,12 +11,12 @@ DESCRIPTION
 OPTIONS
     -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté)
     -c, --commits N             Nombre de commits à traiter (défaut: 10)
-    --dryrun                    Simulation, affiche le prompt sans appel à l'IA
+    --dry-run                   Simulation, affiche le prompt sans appel à l'IA
     -h, --help                  Afficher l'aide du script
 
 EXEMPLES
     python ia_assistant_changelog.py -ia gemini -c 5
-    python ia_assistant_changelog.py --dryrun
+    python ia_assistant_changelog.py --dry-run
     python ia_assistant_changelog.py -c 20
 
 FUNCTIONS
@@ -63,10 +63,8 @@ def _parser_options() -> Tuple[argparse.Namespace, List[str]]:
         help="Nombre de commits à traiter (défaut: 10)",
     )
     parser.add_argument(
-        "--dryrun",
         "--dry-run",
         action="store_true",
-        dest="dryrun",
         help="Simule la génération et affiche le prompt envoyé à l'IA",
     )
     parser.add_argument("-h", "--help", action="help", help="Affiche l'aide du script")
@@ -91,7 +89,7 @@ def main() -> None:
         messages = assistant.recuperer_commits()
         prompt = assistant.generer_prompt(messages)
 
-        if args.dryrun:
+        if args.dry_run:
             logger.log_console(f"[DRYRUN] IA utilisée : {ia_utilisee}")
             logger.log_console(f"[DRYRUN] Prompt qui serait envoyé à l'IA :\n{prompt}")
             return
