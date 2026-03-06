@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-ia-assistant"
-version = "0.3.0"
+version = "0.4.0"
 authors = [
   { name="Hussard", email="hussard@example.com" },
 ]
@@ -25,10 +25,13 @@ dependencies = [
     "InquirerPy",
     "python-gitlab",
     "PyGithub",
+    "tomli; python_version < '3.11'",
+    "tomli_w",
 ]
 
 [project.scripts]
 git-ia-commit = "git_ia_assistant.cli.commit_cli:main"
+git-ia-commit-version = "git_ia_assistant.cli.commit_version_cli:main"
 git-ia-review = "git_ia_assistant.cli.review_cli:main"
 git-ia-mr = "git_ia_assistant.cli.mr_review_cli:main"
 git-ia-squash = "git_ia_assistant.cli.squash_cli:main"

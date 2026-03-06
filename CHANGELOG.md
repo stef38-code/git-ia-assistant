@@ -5,6 +5,25 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-06
+
+### Ajouté
+- **Nouvelle commande `git-ia-commit-version`** : Workflow automatisé de commit avec versioning
+  - Génération du message de commit avec IA
+  - Détection automatique du type de projet (Python, Java, Node.js, Go, Rust, .NET)
+  - Incrémentation automatique de version selon SemVer (feat→MINOR, fix→PATCH, BREAKING→MAJOR)
+  - Mise à jour automatique du CHANGELOG.md
+  - Mise à jour du fichier de version (pyproject.toml, pom.xml, package.json, Cargo.toml, *.csproj)
+  - Support des options `--dry-run`, `--no-version`, `--no-changelog`
+  - Alias : `ia-commit-version`
+- **Documentation du workflow** : Fichier `outil_commit_developpement.md` décrivant le processus complet
+- **Dépendances** : Ajout de `tomli_w` pour l'écriture de fichiers TOML
+
+### Corrigé
+- **Git push avec nouvelles branches** : Détection automatique de l'absence d'upstream et ajout de `--set-upstream origin <branche>`
+- **Détection de HEAD détaché** : Bloque le push avec message d'erreur explicite si en mode détaché
+- **Message "Aucun fichier spécifié"** : N'affiche plus ce message si aucun fichier n'est détecté
+
 ## [0.3.0] - 2026-03-06
 
 ### Ajouté
