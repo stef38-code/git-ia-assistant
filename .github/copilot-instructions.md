@@ -266,6 +266,122 @@ if [ "$CURRENT_VERSION" == "$LAST_TAG" ]; then
 fi
 ```
 
+### Gestion du sous-module python_commun
+
+**Règle obligatoire** : Lors de modifications dans `libs/python_commun`, mettre à jour également ses fichiers de versioning et documentation.
+
+#### Fichiers à maintenir
+
+Pour chaque modification dans le sous-module `libs/python_commun/`, **TOUJOURS** mettre à jour :
+
+1. **`libs/python_commun/pyproject.toml`** - Version du sous-module
+2. **`libs/python_commun/CHANGELOG.md`** - Historique des changements
+3. **`libs/python_commun/README.md`** - Documentation (si nécessaire)
+
+#### Workflow de modification du sous-module
+
+```bash
+# 1. Naviguer dans le sous-module
+cd libs/python_commun
+
+# 2. Créer une branche pour la modification
+git checkout -b feature/nouvelle-fonction
+
+# 3. Développer la fonctionnalité
+# ... modifications du code ...
+
+# 4. Incrémenter la version dans pyproject.toml
+# Exemple: 0.1.0 → 0.2.0 (nouvelle fonctionnalité)
+#          0.2.0 → 0.2.1 (correction de bug)
+
+# 5. Mettre à jour CHANGELOG.md
+# Ajouter une nouvelle section avec la version et la date
+# Documenter les changements sous [Added], [Changed], [Fixed], etc.
+
+# 6. Commiter les changements dans le sous-module
+git add .
+git-ia-commit
+git push origin feature/nouvelle-fonction
+
+# 7. Merger dans master du sous-module
+git checkout master
+git merge feature/nouvelle-fonction
+git push origin master
+
+# 8. Retourner au projet principal
+cd ../..
+
+# 9. Mettre à jour le pointeur du sous-module dans git-ia-assistant
+git add libs/python_commun
+git commit -m "chore(deps): mise à jour python_commun vers v0.2.0"
+git push
+```
+
+#### Versioning du sous-module
+
+Le sous-module suit également le **Semantic Versioning** :
+
+- **MAJOR** : Changements incompatibles (rupture d'API)
+  - Renommage de fonctions publiques
+  - Changement de signatures de fonctions
+  - Suppression de modules
+
+- **MINOR** : Nouvelles fonctionnalités compatibles
+  - Nouvelles fonctions/modules
+  - Nouvelles options de configuration
+  - Support de nouveaux langages/frameworks
+
+- **PATCH** : Corrections et améliorations mineures
+  - Corrections de bugs
+  - Optimisations de performance
+  - Améliorations de logs
+
+#### Synchronisation des versions
+
+Lorsque vous modifiez `python_commun` :
+
+1. **Dans le sous-module** : Incrémenter la version selon les règles SemVer
+2. **Dans le projet principal** : Documenter la mise à jour du sous-module dans le CHANGELOG
+
+Exemple dans `git-ia-assistant/CHANGELOG.md` :
+```markdown
+## [0.4.0] - 2026-03-06
+
+### Changed
+- Mise à jour de python_commun vers v0.2.0
+  - Nouvelles fonctions de détection de frameworks
+  - Utilitaires Git pour comparaison de branches
+```
+
+#### Création des fichiers manquants
+
+Si les fichiers n'existent pas dans le sous-module, les créer :
+
+**CHANGELOG.md** (structure de base) :
+```markdown
+# Changelog
+
+Tous les changements notables apportés à ce projet seront documentés dans ce fichier.
+
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
+et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
+
+## [0.1.0] - YYYY-MM-DD
+
+### Added
+- Fonctionnalité initiale
+```
+
+**README.md** (si absent) : Documenter la structure, l'installation et les exemples d'usage
+
+#### Règles importantes
+
+- ✅ **TOUJOURS** commiter dans le sous-module AVANT le projet principal
+- ✅ **TOUJOURS** incrémenter la version du sous-module pour les changements fonctionnels
+- ✅ **TOUJOURS** documenter les changements dans les deux CHANGELOG (sous-module + projet)
+- ❌ **NE JAMAIS** modifier directement dans le sous-module sans commiter/pusher
+- ❌ **NE JAMAIS** oublier de mettre à jour le pointeur du sous-module dans le projet principal
+
 ### Points d'entrée CLI
 
 Toutes les commandes sont définies dans `pyproject.toml` sous `[project.scripts]` :
