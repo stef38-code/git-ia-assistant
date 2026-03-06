@@ -293,9 +293,10 @@ def main() -> None:
     fichiers_a_analyser = args.fichier
     if not fichiers_a_analyser:
         fichiers_a_analyser = liste_fichier_non_suivis_et_modifies()
-        logger.log_info(
-            f"Aucun fichier spécifié. {len(fichiers_a_analyser)} fichier(s) modifié(s) ou non suivi(s) détecté(s)."
-        )
+        if fichiers_a_analyser:
+            logger.log_info(
+                f"{len(fichiers_a_analyser)} fichier(s) modifié(s) ou non suivi(s) détecté(s)."
+            )
 
     if not fichiers_a_analyser:
         logger.log_warn("Aucun fichier à commiter. Le script est terminé.")
