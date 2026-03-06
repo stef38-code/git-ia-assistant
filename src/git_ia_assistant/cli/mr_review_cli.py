@@ -50,7 +50,7 @@ from python_commun.vcs.diff_stats import (
 )
 from python_commun.ai.ia_assistant_cli_utils import detecter_ia
 from python_commun.logging import logger
-from python_commun.system.system import vide_repertoire, detect_lang_repo
+from python_commun.system.system import vide_repertoire, detect_lang_and_framework
 from python_commun.network.url_utils import (
     creer_url_ssh,
     rechercher_information_depuis_url,
@@ -189,9 +189,9 @@ def main() -> None:
     fichier_checklist = OUT_DIR / f"checklist_{numero_merge}.md"
     ecrire_checklist_mr(fichier_checklist, args.url)
 
-    # Détection du langage du projet
-    langage_utilise = detect_lang_repo(repo_local_path)
-    logger.log_info(f"Langage détecté : {langage_utilise}")
+    # Détection du langage et framework du projet
+    langage_framework = detect_lang_and_framework(repo_local_path)
+    logger.log_info(f"Langage/Framework détecté : {langage_framework}")
 
     # Utilisation du pattern Factory pour instancier la classe IA appropriée
     ia_class = IaAssistantMrFactory.get_mr_class(ia_utilisee)
@@ -201,7 +201,7 @@ def main() -> None:
         numero_mr=numero_merge,
         out_dir=OUT_DIR,
         dry_run=args.dry_run,
-        langage=langage_utilise,
+        langage=langage_framework,
     )
 
     # Génération de la revue via l'IA

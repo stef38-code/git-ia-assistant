@@ -8,6 +8,14 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [0.4.0] - 2026-03-06
 
 ### Ajouté
+- **Détection automatique des frameworks** : Les commandes `git-ia-review` et `git-ia-mr` détectent maintenant les frameworks utilisés
+  - Analyse automatique des fichiers de dépendances (pom.xml, package.json, requirements.txt, etc.)
+  - Support Java (Spring Boot, Quarkus, Hibernate, JUnit, AssertJ)
+  - Support JavaScript/TypeScript (Angular avec version, React, Vue, Express, NestJS, PrimeNG, Jest, Playwright)
+  - Support Python (Django, Flask, FastAPI, PyTest, SQLAlchemy)
+  - Support PHP (Laravel, Symfony), Ruby (Rails, Sinatra), Go (Gin, Echo, Fiber)
+  - Support Rust (Actix-web, Rocket), .NET (ASP.NET Core, Entity Framework Core)
+  - Affichage dans le prompt : "Java / Spring Boot, Hibernate, AssertJ" ou "TypeScript / Angular 17, PrimeNG, Jest"
 - **Wrapper interactif `ia` avec fzf** : Menu interactif pour sélectionner visuellement les commandes
   - Création automatique du script `~/.local/share/scripts/ia.sh` lors de l'installation
   - Lien symbolique `~/.local/bin/ia` (remplacé à chaque installation)

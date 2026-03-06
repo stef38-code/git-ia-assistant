@@ -173,9 +173,11 @@ def _charger_et_formater_prompt(chemin_racine, url, resume, diff):
     :param url: URL ou description de la source
     :param resume: Résumé de l'analyse
     :param diff: Diff à analyser
-    :return: Prompt formaté
+    :return: Prompt formaté et langage/framework détectés
     """
-    langage = detect_lang_repo(chemin_racine)
+    from python_commun.system.system import detect_lang_and_framework
+    
+    langage_framework = detect_lang_and_framework(chemin_racine)
     
     dossier_prompts = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "prompts")
@@ -191,11 +193,11 @@ def _charger_et_formater_prompt(chemin_racine, url, resume, diff):
         prompt_template,
         url=url,
         resume=resume,
-        langage=langage,
+        langage=langage_framework,
         diff=diff
     )
     
-    return prompt, langage
+    return prompt, langage_framework
 
 
 def _generer_review_avec_ia(prompt, ia_utilisee):
