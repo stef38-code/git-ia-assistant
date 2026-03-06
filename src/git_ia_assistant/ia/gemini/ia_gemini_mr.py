@@ -55,6 +55,7 @@ class IaGeminiMr(IaAssistantMr):
                 url=self.url_mr,
                 resume=contenu_resume,
                 diff=contenu_diff,
+                langage=self.langage,
             )
 
             if self.dry_run:

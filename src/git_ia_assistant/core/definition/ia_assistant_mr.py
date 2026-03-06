@@ -23,6 +23,8 @@ DATA
         Numéro de la MR/PR.
     out_dir: Path
         Répertoire de sortie pour les fichiers générés.
+    langage: str
+        Langage principal du projet détecté.
     dry_run: bool
         Mode simulation.
 """
@@ -45,6 +47,7 @@ class IaAssistantMr(IaAssistant):
         numero_mr: str,
         out_dir: Path,
         dry_run: bool = False,
+        langage: str = "Unknown",
     ):
         super().__init__()
         self.url_mr = url_mr
@@ -52,6 +55,7 @@ class IaAssistantMr(IaAssistant):
         self.numero_mr = numero_mr
         self.out_dir = out_dir
         self.dry_run = dry_run
+        self.langage = langage
 
     @abstractmethod
     def generer_revue_mr(
