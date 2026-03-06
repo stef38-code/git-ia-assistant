@@ -71,7 +71,7 @@ def obtenir_revue_ollama(chemin_fichier: str, version: str = "3.x") -> None:
     except FileNotFoundError:
         logger.die(f"Le fichier {chemin_fichier} n'a pas été trouvé.")
 
-    prompt_template = ollama_utils.charger_prompt("python_review_prompt.md")
+    prompt_template = ollama_utils.charger_prompt("review/python_review_prompt.md")
     prompt = prompt_template.format(code=code, version=version)
 
     logger.log_info(f"Analyse Ollama ({MODELE_PYTHON}) en cours...")

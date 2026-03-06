@@ -101,7 +101,7 @@ def generate_review_prompt(
     :raises FileNotFoundError: Si le template markdown du langage n'existe pas
     :return: Prompt formaté prêt à être envoyé à l'IA
     """
-    prompt_filename = f"{language.lower()}_review_prompt.md"
+    prompt_filename = f"review/{language.lower()}_review_prompt.md"
     dossier_prompts = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "prompts")
     )

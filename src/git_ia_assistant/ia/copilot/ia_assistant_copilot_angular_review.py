@@ -19,7 +19,7 @@ class IaAssistantCopilotAngularReview(IaAssistantTypeReview):
     """
 
     def generer_review(self):
-        prompt_template = charger_prompt("angular_review_prompt.md", self.dossier_prompts)
+        prompt_template = charger_prompt("review/angular_review_prompt.md", self.dossier_prompts)
         with open(self.fichier, "r", encoding="utf-8") as f:
             code = f.read()
         prompt = formatter_prompt(

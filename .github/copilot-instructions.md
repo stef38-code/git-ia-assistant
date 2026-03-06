@@ -173,6 +173,99 @@ Lors de la modification du prompt de commit (`commit_message_prompt.md`) :
 - Pas de signatures dans les messages générés
 - Messages en français par défaut
 
+### Gestion des versions
+
+**Règle obligatoire** : Mettre à jour la version dans `pyproject.toml` pour chaque modification significative du projet.
+
+#### Versioning sémantique (SemVer)
+
+Format : `MAJOR.MINOR.PATCH` (ex: `0.3.0`)
+
+- **MAJOR** : Changements incompatibles avec les versions précédentes
+  - Modification de l'API publique
+  - Suppression de commandes CLI
+  - Changement de structure de configuration
+
+- **MINOR** : Nouvelles fonctionnalités compatibles
+  - Ajout de nouvelles commandes (`git-ia-xxx`)
+  - Nouveaux fournisseurs d'IA
+  - Nouvelles options CLI
+  - Nouveaux prompts
+
+- **PATCH** : Corrections de bugs et améliorations mineures
+  - Corrections de bugs
+  - Améliorations de prompts existants
+  - Optimisations de performance
+  - Mises à jour de documentation
+
+#### Quand incrémenter la version
+
+**Toujours incrémenter** pour :
+- ✅ Ajout/modification de fonctionnalités
+- ✅ Corrections de bugs
+- ✅ Modifications des prompts qui changent le comportement
+- ✅ Ajout de nouvelles dépendances
+- ✅ Changements dans les tests de sécurité
+
+**Pas d'incrémentation** pour :
+- ❌ Modifications de README uniquement
+- ❌ Ajout de commentaires dans le code
+- ❌ Reformatage de code (sans changement de logique)
+- ❌ Modifications de `.github/copilot-instructions.md`
+
+#### Mise à jour du fichier
+
+```toml
+# pyproject.toml
+[project]
+name = "git-ia-assistant"
+version = "0.3.0"  # ← Modifier ici
+```
+
+#### Workflow recommandé
+
+```bash
+# 1. Avant de commencer une modification
+git checkout -b feature/nouvelle-fonctionnalité
+
+# 2. Développer la fonctionnalité
+# ... modifications du code ...
+
+# 3. Incrémenter la version dans pyproject.toml
+# 0.3.0 → 0.4.0 (nouvelle fonctionnalité)
+# 0.3.0 → 0.3.1 (correction de bug)
+
+# 4. Mettre à jour CHANGELOG.md
+echo "## [0.4.0] - $(date +%Y-%m-%d)" >> CHANGELOG.md
+echo "### Added" >> CHANGELOG.md
+echo "- Description de la fonctionnalité" >> CHANGELOG.md
+
+# 5. Commiter avec git-ia-commit
+git add pyproject.toml CHANGELOG.md
+git-ia-commit
+
+# 6. Créer un tag après merge sur main
+git tag -a v0.4.0 -m "Release version 0.4.0"
+git push origin v0.4.0
+```
+
+#### Vérification automatique
+
+Créer un pre-commit hook pour vérifier la cohérence :
+```bash
+# .git/hooks/pre-commit
+#!/bin/bash
+CURRENT_VERSION=$(grep '^version =' pyproject.toml | cut -d'"' -f2)
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+
+if [ "$CURRENT_VERSION" == "$LAST_TAG" ]; then
+    echo "⚠️  La version dans pyproject.toml ($CURRENT_VERSION) n'a pas été incrémentée !"
+    echo "   Dernière version : $LAST_TAG"
+    echo "   Mettre à jour pyproject.toml avant de commiter."
+    exit 1
+fi
+```
+
 ### Points d'entrée CLI
 
 Toutes les commandes sont définies dans `pyproject.toml` sous `[project.scripts]` :
@@ -363,3 +456,219 @@ Avant de pousser sur GitHub :
 - [ ] Uniquement des chemins relatifs ou variables
 - [ ] Le `.gitignore` protège les fichiers sensibles
 - [ ] Le sous-module `python_commun` est aussi vérifié
+
+### Tests de sécurité recommandés
+
+Pour un projet manipulant des tokens et interagissant avec des APIs externes, les tests de sécurité sont **essentiels**.
+
+#### 1. Secrets & Tokens
+
+**Objectif** : Garantir qu'aucun secret n'est exposé dans les logs, le code ou les outputs.
+
+```python
+# Tests à implémenter
+def test_no_token_in_logs():
+    """Vérifie que les tokens ne sont jamais loggués."""
+    # Simuler un appel avec token
+    # Vérifier que le token est masqué dans les logs
+
+def test_no_hardcoded_secrets():
+    """Scanne le code source pour détecter les secrets hardcodés."""
+    # Utiliser des patterns regex pour détecter glpat-, ghp_, etc.
+    # Échouer si un pattern suspect est trouvé
+
+def test_token_masking_in_output():
+    """Vérifie que les credentials sont masqués dans les sorties CLI."""
+    # Tester les commandes avec --dry-run
+    # Vérifier que les tokens apparaissent comme "***" ou "glpat-xxxx..."
+```
+
+**Outils recommandés** :
+- `detect-secrets` : Scanner automatique de secrets dans le code
+- `truffleHog` : Détection de secrets dans l'historique Git
+- Pattern custom : `r"(glpat-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36,})"`
+
+#### 2. Validation des entrées
+
+**Objectif** : Prévenir les injections et les chemins malveillants.
+
+```python
+# Tests à implémenter
+def test_path_traversal_prevention():
+    """Vérifie que les path traversal sont bloqués."""
+    malicious_paths = ["../../etc/passwd", "/etc/shadow", "../.env"]
+    # Tester que ces chemins sont rejetés ou normalisés
+
+def test_command_injection_prevention():
+    """Vérifie que les commandes shell sont sécurisées."""
+    # Tester avec des inputs contenant ; && || ` $ ( )
+    # Vérifier qu'aucune injection n'est possible
+
+def test_diff_sanitization():
+    """Vérifie que les diffs Git sont sanitizés avant envoi à l'IA."""
+    # Créer un diff contenant des caractères spéciaux
+    # Vérifier qu'ils sont échappés ou filtrés
+```
+
+**Bonnes pratiques** :
+- Utiliser `shlex.quote()` pour échapper les arguments shell
+- Valider les chemins avec `Path.resolve()` et vérifier qu'ils restent dans le projet
+- Limiter la longueur des diffs envoyés aux APIs (prévention de DoS)
+
+#### 3. Scan de dépendances
+
+**Objectif** : Détecter les vulnérabilités dans les dépendances tierces.
+
+```bash
+# Commandes à intégrer dans CI/CD
+pip install pip-audit safety
+
+# Scanner les vulnérabilités connues
+pip-audit --require-hashes --desc
+safety check --json
+
+# Analyse statique du code Python
+pip install bandit
+bandit -r src/ -f json -o bandit-report.json
+```
+
+**Configuration GitHub Actions** :
+```yaml
+# .github/workflows/security.yml
+name: Security Scan
+on: [push, pull_request]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install security tools
+        run: |
+          pip install pip-audit bandit safety
+      - name: Run pip-audit
+        run: pip-audit --desc
+      - name: Run bandit
+        run: bandit -r src/ -ll
+      - name: Run safety
+        run: safety check
+```
+
+#### 4. Sécurité des APIs externes
+
+**Objectif** : Sécuriser les communications avec GitHub, GitLab, Gemini, Ollama.
+
+```python
+# Tests à implémenter
+def test_https_only():
+    """Vérifie que seules les URLs HTTPS sont acceptées."""
+    insecure_urls = ["http://api.github.com", "http://gitlab.com"]
+    # Vérifier qu'elles sont rejetées ou converties en HTTPS
+
+def test_request_timeout():
+    """Vérifie que toutes les requêtes ont un timeout."""
+    # Tester que requests.get/post ont timeout=30
+    # Prévention de hang indéfini
+
+def test_ssl_verification():
+    """Vérifie que la vérification SSL est active."""
+    # Tester que verify=True (jamais verify=False)
+    # Échouer si SSL est désactivé
+
+def test_rate_limiting():
+    """Vérifie que le rate limiting est respecté."""
+    # Tester que les requêtes répétées sont throttled
+    # Prévention de ban par les APIs
+```
+
+**Configuration recommandée** :
+```python
+# ✅ BON - Configuration sécurisée
+import requests
+
+session = requests.Session()
+session.verify = True  # Jamais False
+session.timeout = 30  # Toujours un timeout
+
+# Vérifier les URLs
+if not url.startswith("https://"):
+    raise ValueError("HTTPS requis pour les APIs externes")
+```
+
+#### 5. Protection des données sensibles
+
+**Objectif** : Minimiser l'exposition des données dans les prompts envoyés aux IAs.
+
+```python
+# Tests à implémenter
+def test_no_secrets_in_prompts():
+    """Vérifie que les secrets ne sont pas envoyés aux APIs d'IA."""
+    # Créer un diff contenant un token fictif
+    # Vérifier qu'il est filtré avant envoi
+
+def test_diff_size_limit():
+    """Vérifie que les diffs sont limités en taille."""
+    # Tester avec un diff de 10MB
+    # Vérifier qu'il est tronqué ou rejeté
+
+def test_sensitive_file_filtering():
+    """Vérifie que les fichiers sensibles sont exclus."""
+    sensitive_files = [".env", "secrets.yml", "credentials.json"]
+    # Vérifier qu'ils ne sont jamais inclus dans les diffs
+```
+
+**Liste de fichiers à exclure** :
+```python
+SENSITIVE_PATTERNS = [
+    r"\.env(\.|$)",
+    r".*secret.*",
+    r".*credential.*",
+    r".*password.*",
+    r".*token.*",
+    r"id_rsa",
+    r"\.pem$",
+    r"\.key$",
+]
+```
+
+#### 6. Checklist des tests de sécurité
+
+Avant chaque release :
+- [ ] Aucun secret hardcodé détecté par `detect-secrets`
+- [ ] Aucune vulnérabilité critique dans `pip-audit`
+- [ ] Score Bandit ≥ B (pas de problème high severity)
+- [ ] Tous les appels réseau utilisent HTTPS + timeout
+- [ ] Les tokens sont masqués dans tous les outputs
+- [ ] Les chemins de fichiers sont validés contre path traversal
+- [ ] Les diffs sont sanitizés avant envoi aux APIs d'IA
+- [ ] Le `.gitignore` protège tous les fichiers sensibles
+- [ ] Les variables d'environnement sont documentées (sans valeurs réelles)
+
+#### 7. Commandes de vérification rapide
+
+```bash
+# Scan complet de sécurité
+chmod +x scripts/security-check.sh
+./scripts/security-check.sh
+
+# Contenu suggéré pour scripts/security-check.sh :
+#!/bin/bash
+set -e
+
+echo "🔍 Scan des secrets hardcodés..."
+detect-secrets scan --baseline .secrets.baseline
+
+echo "🔍 Scan des vulnérabilités de dépendances..."
+pip-audit --desc
+
+echo "🔍 Analyse statique de sécurité..."
+bandit -r src/ -ll -f screen
+
+echo "🔍 Vérification des patterns dangereux..."
+grep -r "verify=False" src/ && echo "❌ SSL verification disabled!" && exit 1
+grep -r "http://" src/ --include="*.py" | grep -v "localhost" && echo "❌ HTTP found!" && exit 1
+
+echo "✅ Tous les tests de sécurité sont passés!"
+```

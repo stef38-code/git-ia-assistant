@@ -38,7 +38,7 @@ class IaAssistantDoc(IaAssistant):
             else:
                 self.doc_format = "Markdown"
 
-        template = charger_prompt("doc_generation_prompt.md", self.dossier_prompts)
+        template = charger_prompt("code_quality/doc_generation_prompt.md", self.dossier_prompts)
         return formatter_prompt(
             template,
             code=code,

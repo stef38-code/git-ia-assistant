@@ -30,7 +30,7 @@ class IaAssistantRefacto(IaAssistant):
         langage = detect_lang_repo(os.path.dirname(self.fichier))
         version = self.version or "dernière version stable"
 
-        template = charger_prompt("refacto_prompt.md", self.dossier_prompts)
+        template = charger_prompt("code_quality/refacto_prompt.md", self.dossier_prompts)
         return formatter_prompt(template, code=code, langage=langage, version=version)
 
     def refactoriser_code(self) -> str:

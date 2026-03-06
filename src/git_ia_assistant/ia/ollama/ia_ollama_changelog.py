@@ -25,7 +25,7 @@ class IaOllamaChangelog(IaAssistantChangelog):
         return prompt
 
     def generer_changelog(self, messages):
-        modele_prompt = charger_prompt("changelog_prompt.md", self.dossier_prompts)
+        modele_prompt = charger_prompt("git_history/changelog_prompt.md", self.dossier_prompts)
         texte_commits = "\n".join(
             f"- {commit.hexsha[:7]}: {commit.summary}" for commit in messages
         )

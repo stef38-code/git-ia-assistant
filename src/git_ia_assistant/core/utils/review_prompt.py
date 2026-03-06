@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    review_prompt - Générateur de prompt pour la relecture de code Python MR/PR
+    review_prompt - Générateur de prompt pour la relecture de code MR/PR
 
 DESCRIPTION
-    Génère un prompt à partir des informations d'une MR/PR pour l'IA, en utilisant le template markdown python_review_prompt.md.
+    Génère un prompt à partir des informations d'une MR/PR pour l'IA, en utilisant le template markdown prompts/review/<langage>_review_prompt.md.
+    
+    Ce module est un utilitaire qui charge dynamiquement le template de prompt approprié selon le langage détecté.
 
 FUNCTIONS
     generate(title, description, files, diff, author, language, version)
@@ -37,8 +39,10 @@ def generate(
     :raises FileNotFoundError: Si le template markdown du langage n'existe pas
     :return: Prompt formaté prêt à être envoyé à l'IA
     """
-    prompt_filename = f"{language.lower()}_review_prompt.md"
-    prompt_path = os.path.join(os.path.dirname(__file__), prompt_filename)
+    # Remonter de core/utils vers le répertoire prompts
+    prompts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "prompts"))
+    prompt_filename = f"review/{language.lower()}_review_prompt.md"
+    prompt_path = os.path.join(prompts_dir, prompt_filename)
     if not os.path.exists(prompt_path):
         raise FileNotFoundError(
             f"Le template de prompt pour le langage '{language}' est introuvable: {prompt_filename}"

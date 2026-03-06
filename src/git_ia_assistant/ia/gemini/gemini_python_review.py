@@ -78,7 +78,7 @@ def obtenir_revue_gemini(chemin_fichier: str, version: str = "3.x") -> None:
         logger.die(f"Le fichier {chemin_fichier} n'a pas été trouvé.")
         return
 
-    prompt_template = gemini_utils.charger_prompt("python_review_prompt.md")
+    prompt_template = gemini_utils.charger_prompt("review/python_review_prompt.md")
     prompt = prompt_template.format(code=code, version=version)
 
     logger.log_info("Analyse Gemini en cours...")

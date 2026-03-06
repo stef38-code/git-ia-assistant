@@ -24,7 +24,7 @@ class IaAssistantExplain(IaAssistant):
         with open(self.fichier, "r", encoding="utf-8") as f:
             code = f.read()
         
-        template = charger_prompt("explain_prompt.md", self.dossier_prompts)
+        template = charger_prompt("git_history/explain_prompt.md", self.dossier_prompts)
         return formatter_prompt(template, code=code)
 
     def expliquer_code(self) -> str:

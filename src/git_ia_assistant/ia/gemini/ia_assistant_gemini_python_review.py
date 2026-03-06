@@ -19,7 +19,7 @@ class IaAssistantGeminiPythonReview(IaAssistantTypeReview):
     """
 
     def generer_review(self):
-        prompt_template = charger_prompt("python_review_prompt.md", self.dossier_prompts)
+        prompt_template = charger_prompt("review/python_review_prompt.md", self.dossier_prompts)
         with open(self.fichiers[0], "r", encoding="utf-8") as f:
             code = f.read()
         prompt = formatter_prompt(
@@ -42,7 +42,7 @@ class IaAssistantGeminiPythonReview(IaAssistantTypeReview):
 
         contexte_imports = self._extraire_contexte_imports(chemin_fichier, code)
         
-        prompt_template = charger_prompt("python_review_prompt.md", self.dossier_prompts)
+        prompt_template = charger_prompt("review/python_review_prompt.md", self.dossier_prompts)
         prompt = formatter_prompt(
             prompt_template, code=code, version=self.version or "3.x"
         )

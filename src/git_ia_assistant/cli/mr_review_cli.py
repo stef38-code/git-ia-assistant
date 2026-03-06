@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    mr_cli - Effectue la relecture d'une MR/PR avec l'IA choisie (Copilot, Gemini, Ollama).
+    mr_review_cli - Effectue la relecture d'une MR/PR avec l'IA choisie (Copilot, Gemini, Ollama).
 
 DESCRIPTION
     Script Python pour relire une Merge Request (GitLab) ou Pull Request (GitHub) à l'aide d'une IA.

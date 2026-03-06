@@ -44,7 +44,7 @@ class IaAssistantTest(IaAssistant):
         # Instructions spécifiques
         framework_instructions = self._get_framework_instructions()
 
-        template = charger_prompt("test_generation_prompt.md", self.dossier_prompts)
+        template = charger_prompt("code_quality/test_generation_prompt.md", self.dossier_prompts)
         return formatter_prompt(
             template,
             code=code,

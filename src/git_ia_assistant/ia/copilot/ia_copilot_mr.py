@@ -48,7 +48,7 @@ class IaCopilotMr(IaAssistantMr):
 
             # Charger et formatter le prompt
             prompt_template = charger_prompt(
-                "mr_review_prompt.md", self.dossier_prompts
+                "review/mr_review_prompt.md", self.dossier_prompts
             )
             prompt = formatter_prompt(
                 prompt_template,

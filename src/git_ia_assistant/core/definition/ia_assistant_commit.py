@@ -159,7 +159,7 @@ class IaAssistantCommit(IaAssistant):
             langage = "python"
 
         from python_commun.ai.prompt import charger_prompt
-        prompt_template = charger_prompt("optimise_commit_prompt.md", self.dossier_prompts)
+        prompt_template = charger_prompt("commits/optimise_commit_prompt.md", self.dossier_prompts)
         
         prompt = prompt_template.format(
             diff=diff,
@@ -207,7 +207,7 @@ class IaAssistantCommit(IaAssistant):
             langage = "python"
         
         from python_commun.ai.prompt import charger_prompt
-        prompt_template = charger_prompt("commit_message_prompt.md", self.dossier_prompts)
+        prompt_template = charger_prompt("commits/commit_message_prompt.md", self.dossier_prompts)
         if "[Prompt" in prompt_template:
              logger.log_error(f"Fichier de prompt non trouvé dans {self.dossier_prompts}")
              prompt = f"Génère un message de commit au format Conventional Commits pour les changements suivants :\n{diff}"

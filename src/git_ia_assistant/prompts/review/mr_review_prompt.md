@@ -43,6 +43,37 @@ Identifie uniquement les vrais problèmes de sécurité :
 **Format :** Pour chaque problème, indique :
 - 🔴 **Fichier:Ligne** - Description du risque + Code vulnérable + Solution corrigée
 
+**Si des tests de sécurité manquent**, propose des tests avec ce format :
+
+🛡️ **Tests de sécurité suggérés pour {Fichier}:**
+
+1. **Nom du test:** `test_security_nom_descriptif()`
+   - **Scénario:** Description de l'attaque ou vulnérabilité testée
+   - **Comportement attendu:** Protection/rejet attendu
+   - **Données de test:** Payload malveillant utilisé
+   - **Exemple de code:**
+     ```{langage}
+     def test_security_nom_descriptif():
+         # Given (Arrange) - Préparer l'attaque
+         malicious_input = "payload malveillant"
+         # When (Act) - Tenter l'attaque
+         result = fonction_protegee(malicious_input)
+         # Then (Assert) - Vérifier la protection
+         assert result.is_safe() or expect_exception
+     ```
+
+**Critères pour suggérer des tests de sécurité :**
+- Entrées utilisateur non validées (formulaires, API, paramètres)
+- Requêtes SQL/NoSQL construites dynamiquement
+- Manipulation de fichiers avec chemins fournis par l'utilisateur
+- Authentification/autorisation ajoutée sans tests
+- Génération/stockage de tokens/sessions
+- Upload de fichiers sans validation
+- Désérialisation de données externes
+- Appels système avec paramètres utilisateur
+- Opérations sensibles (changement password, suppression données)
+- CORS, CSP ou headers de sécurité modifiés
+
 ### 3. **Bugs et logique métier** 🐛
 Recherche les erreurs potentielles :
 - Bugs évidents (null pointer, division par zéro, index out of bounds)
@@ -144,7 +175,21 @@ Structure ta réponse en Markdown selon ce template :
 [2-3 phrases] + **Niveau de risque : [FAIBLE/MOYEN/ÉLEVÉ/CRITIQUE]**
 
 ## ⚠️ Sécurité
-[Problèmes identifiés avec format spécifié, ou "RAS"]
+**Problèmes identifiés:**
+[Liste des problèmes avec format: 🔴 Fichier:Ligne - Description + Code + Solution, ou "RAS"]
+
+**Tests de sécurité suggérés (si manquants):**
+
+🛡️ **Fichier: {nom_fichier}**
+1. **test_security_nom_descriptif()**
+   - Scénario: [description de l'attaque testée]
+   - Comportement attendu: [protection/rejet attendu]
+   - Payload: [données malveillantes]
+   - Exemple: [code ou pseudo-code]
+
+[Répéter pour chaque vulnérabilité nécessitant des tests]
+
+[Si tous les tests de sécurité sont présents, indiquer "RAS - Tests de sécurité adéquats"]
 
 ## 🐛 Bugs et logique métier
 [Problèmes identifiés avec format spécifié, ou "RAS"]

@@ -70,7 +70,7 @@ def obtenir_revue_ia(
     except FileNotFoundError:
         logger.die(f"Le fichier {chemin_fichier} n'a pas été trouvé.")
         return
-    prompt_template = charger_prompt("python_review_prompt.md")
+    prompt_template = charger_prompt("review/python_review_prompt.md")
     prompt = formatter_prompt(prompt_template, code=code, version=version)
     if ia == "copilot":
         reponse = envoyer_prompt_copilot(prompt)

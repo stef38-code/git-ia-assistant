@@ -48,7 +48,7 @@ def obtenir_revue_gemini(chemin_fichier: str, version: str = "15") -> None:
         logger.die(f"Le fichier {chemin_fichier} n'a pas été trouvé.")
         return
 
-    prompt_template = gemini_utils.charger_prompt("angular_review_prompt.md")
+    prompt_template = gemini_utils.charger_prompt("review/angular_review_prompt.md")
     prompt = prompt_template.format(code=code, version=version)
 
     logger.log_info(f"Analyse Gemini en cours (Angular {version})...")

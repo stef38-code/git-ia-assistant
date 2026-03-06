@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-ia-assistant"
-version = "0.2.1"
+version = "0.3.0"
 authors = [
   { name="Hussard", email="hussard@example.com" },
 ]
@@ -30,7 +30,7 @@ dependencies = [
 [project.scripts]
 git-ia-commit = "git_ia_assistant.cli.commit_cli:main"
 git-ia-review = "git_ia_assistant.cli.review_cli:main"
-git-ia-mr = "git_ia_assistant.cli.mr_cli:main"
+git-ia-mr = "git_ia_assistant.cli.mr_review_cli:main"
 git-ia-squash = "git_ia_assistant.cli.squash_cli:main"
 git-ia-changelog = "git_ia_assistant.cli.changelog_cli:main"
 git-ia-explain = "git_ia_assistant.cli.explain_cli:main"
@@ -42,4 +42,10 @@ git-ia-refacto = "git_ia_assistant.cli.refacto_cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"git_ia_assistant" = ["prompts/*.md"]
+"git_ia_assistant" = [
+    "prompts/*.md",
+    "prompts/commits/*.md",
+    "prompts/review/*.md",
+    "prompts/code_quality/*.md",
+    "prompts/git_history/*.md"
+]

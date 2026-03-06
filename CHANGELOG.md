@@ -5,6 +5,63 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-06
+
+### Ajouté
+- **Tests unitaires manquants** : Le prompt de revue MR/PR suggère automatiquement des tests unitaires avec :
+  - Nom du test + Scénario + Comportement attendu + Données de test + Exemple de code
+  - Format Given/When/Then (Arrange/Act/Assert)
+  - Adaptation au framework de test (PyTest, JUnit, Jest, etc.)
+  - 5 critères pour suggérer des tests (nouvelle logique, API publiques, cas limites, gestion d'erreurs, logique complexe)
+
+- **Tests de sécurité automatiques** : Le prompt de revue MR/PR détecte les vulnérabilités et suggère des tests de sécurité :
+  - Couverture OWASP Top 10 (Injection SQL, XSS, Auth, Path Traversal, Data Exposure, CORS)
+  - Format identique aux tests unitaires avec payload d'attaque
+  - 10 critères de détection de vulnérabilités
+  - Exemples de tests pour 6 types de vulnérabilités
+
+- **Détection automatique du langage** : Le prompt de revue MR/PR utilise désormais `detect_lang_repo()` pour s'adapter au langage du projet
+  - Placeholder `{langage}` ajouté au template
+  - Support Python, Java, Angular, et autres langages détectés
+
+- **Documentation complète** : Nouveau README.md dans `prompts/` documentant :
+  - Structure des 4 catégories (commits, review, code_quality, git_history)
+  - Utilisation des placeholders
+  - Guide d'ajout de nouveaux prompts
+
+### Changé
+- **Refonte complète du prompt MR/PR** (`mr_review_prompt.md`) :
+  - 68 → 244 lignes (+259%)
+  - 8 sections structurées avec emojis (⚠️ 🐛 🚀 🛠️ ✅ 🚫 ✨ 📊)
+  - Niveaux de risque définis (FAIBLE/MOYEN/ÉLEVÉ/CRITIQUE)
+  - Section sécurité enrichie (11 → 42 lignes, +282%)
+  - Section tests enrichie (6 → 34 lignes)
+  - Template de réponse Markdown standardisé
+  - Élimination de toutes les données privées (références Jenkins/Vault)
+
+- **Réorganisation des prompts** :
+  - Structure hiérarchique en 4 sous-répertoires thématiques
+  - `commits/` : commit_message, optimise_commit, squash (3 fichiers)
+  - `review/` : python, java, angular, mr_review (4 fichiers)
+  - `code_quality/` : test_generation, doc_generation, refacto (3 fichiers)
+  - `git_history/` : changelog, explain (2 fichiers)
+  - 41 fichiers Python mis à jour pour les nouveaux chemins
+  - `pyproject.toml` : package-data avec sous-répertoires
+
+- **Renommage** :
+  - `mr_cli.py` → `mr_review_cli.py` (nom plus explicite)
+  - `debug/mr_cli/` → `debug/mr_review_cli/`
+  - Point d'entrée `pyproject.toml` mis à jour
+
+- **Déplacement de review_prompt.py** :
+  - `prompts/review_prompt.py` → `core/utils/review_prompt.py`
+  - Séparation claire : templates (.md) vs code (.py)
+  - Création du répertoire `core/utils/` pour les utilitaires
+
+### Corrigé
+- Chemins relatifs dans `review_prompt.py` pour charger les templates depuis `core/utils/`
+- Chemins d'imports dans 41 fichiers Python suite à la réorganisation des prompts
+
 ## [0.2.1] - 2026-02-22
 
 ### Ajouté
