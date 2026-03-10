@@ -46,9 +46,9 @@ class IaGeminiMr(IaAssistantMr):
                 resume_path.read_text(encoding="utf-8") if resume_path.exists() else ""
             )
 
-            # Charger et formatter le prompt
+            # Charger et formatter le prompt adapté au langage détecté
             prompt_template = charger_prompt(
-                "review/mr_review_prompt.md", self.dossier_prompts
+                self._choisir_prompt_mr(), self.dossier_prompts
             )
             
             # Formatter les informations de migration
@@ -74,6 +74,7 @@ class IaGeminiMr(IaAssistantMr):
                 langage_expertise=langage_expertise,
                 migration_detectee=migration_detectee,
                 migration_info=migration_details.strip() if migration_details else "Aucune migration détectée",
+                version_cible=self._get_version_cible(),
             )
 
             # Sauvegarde du prompt généré pour analyse future

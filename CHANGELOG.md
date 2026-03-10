@@ -5,6 +5,23 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.3] - 2026-03-10
+
+### Ajouté
+- **Prompts MR spécialisés par langage** : `git-ia-mr` sélectionne automatiquement le prompt adapté au langage détecté
+  - `mr_review_java_prompt.md` : critères Spring Security, JPA/Hibernate N+1, `@Transactional`, Records, Jakarta EE
+  - `mr_review_python_prompt.md` : critères type hints, mutable defaults, context managers, `async/await`, PyTest
+  - `mr_review_angular_prompt.md` : critères memory leaks RxJS, XSS/DomSanitizer, Signals, `OnPush`, `trackBy`
+  - Fallback automatique sur le prompt générique pour les autres langages (Go, PHP, etc.)
+- **`IaAssistantMr._choisir_prompt_mr()`** : méthode de sélection du prompt basée sur le langage détecté
+
+## [0.9.2] - 2026-03-10
+
+### Corrigé
+- **`git-ia-mr` hors dépôt Git** : l'exécution depuis un répertoire non-git échouait avec "Le répertoire actuel n'est pas un dépôt Git."
+  - `IaAssistant.__init__()` accepte maintenant `require_repo: bool = True`
+  - `IaAssistantMr` passe `require_repo=False` car la revue MR/PR fonctionne entièrement via URL distante
+
 ## [0.9.1] - 2026-03-09
 
 ### Corrigé

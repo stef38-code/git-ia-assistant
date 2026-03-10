@@ -455,6 +455,13 @@ def main() -> None:
                 logger.log_info("ℹ️  Aucune migration de version détectée")
     else:
         logger.log_info("[Dry Run] Détection de migration ignorée en mode dry-run")
+
+    # Extraction des versions actuelles du projet (toujours, même sans migration)
+    versions_actuelles = {}
+    try:
+        versions_actuelles = extraire_toutes_versions(repo_local_path)
+    except Exception:
+        pass
     
     # Adapter le langage/framework pour indiquer la version de destination si migration
     langage_framework = langage_framework_base
@@ -498,6 +505,7 @@ def main() -> None:
         dry_run=args.dry_run,
         langage=langage_framework,
         migration_info=migration_info,
+        versions_actuelles=versions_actuelles,
     )
 
     # Génération de la revue via l'IA

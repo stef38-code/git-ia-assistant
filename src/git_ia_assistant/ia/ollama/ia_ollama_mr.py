@@ -74,6 +74,7 @@ class IaOllamaMr(IaAssistantMr):
                 langage_expertise=langage_expertise,
                 migration_detectee=migration_detectee,
                 migration_info=migration_details.strip() if migration_details else "Aucune migration détectée",
+                version_cible=self._get_version_cible(),
             )
 
             # Sauvegarde du prompt généré pour analyse future

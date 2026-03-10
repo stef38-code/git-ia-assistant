@@ -14,7 +14,7 @@ Git IA Assistant automatise les tâches répétitives de Git (commits, revues, d
 ### Installation (Linux / macOS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/stef38-code/git-ia-assistant/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/stef38-code/git-ia-assistant/master/install.sh | bash
 ```
 
 Options disponibles :

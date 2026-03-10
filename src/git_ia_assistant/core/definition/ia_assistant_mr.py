@@ -29,12 +29,31 @@ DATA
         Mode simulation.
     migration_info: dict
         Informations sur les migrations détectées (detected: bool, migrations: list).
+    versions_actuelles: dict
+        Versions actuelles des langages/frameworks détectées dans le projet
+        (ex: {"angular": "20.1.0", "typescript": "5.4.0"}).
+
+FUNCTIONS
+    _choisir_prompt_mr()
+        Sélectionne le fichier de prompt adapté au langage détecté.
+    _get_version_cible()
+        Retourne la version majeure cible du langage (migration ou version actuelle).
 """
 
 from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
 from git_ia_assistant.core.definition.ia_assistant import IaAssistant
+
+# Correspondance langage détecté → fichier de prompt spécialisé
+_PROMPT_PAR_LANGAGE = {
+    "java": "review/mr_review_java_prompt.md",
+    "spring": "review/mr_review_java_prompt.md",
+    "python": "review/mr_review_python_prompt.md",
+    "angular": "review/mr_review_angular_prompt.md",
+    "typescript": "review/mr_review_angular_prompt.md",
+}
+_PROMPT_GENERIQUE = "review/mr_review_prompt.md"
 
 
 class IaAssistantMr(IaAssistant):
@@ -51,6 +70,7 @@ class IaAssistantMr(IaAssistant):
         dry_run: bool = False,
         langage: str = "Unknown",
         migration_info: dict = None,
+        versions_actuelles: dict = None,
     ):
         super().__init__(require_repo=False)
         self.url_mr = url_mr
@@ -60,6 +80,51 @@ class IaAssistantMr(IaAssistant):
         self.dry_run = dry_run
         self.langage = langage
         self.migration_info = migration_info or {"detected": False, "migrations": []}
+        self.versions_actuelles = versions_actuelles or {}
+
+    def _choisir_prompt_mr(self) -> str:
+        """
+        Sélectionne le fichier de prompt adapté au langage détecté.
+
+        Parcourt les mots-clés du langage détecté pour trouver un prompt
+        spécialisé. Retourne le prompt générique si aucune correspondance.
+
+        :return: Chemin relatif du fichier de prompt à utiliser.
+        """
+        langage_lower = self.langage.lower()
+        for mot_cle, chemin_prompt in _PROMPT_PAR_LANGAGE.items():
+            if mot_cle in langage_lower:
+                return chemin_prompt
+        return _PROMPT_GENERIQUE
+
+    def _get_version_cible(self) -> str:
+        """
+        Retourne la version majeure cible du langage/framework principal.
+
+        Priorité :
+        1. Version de destination si une migration est détectée dans migration_info.
+        2. Version actuelle depuis versions_actuelles (cas sans migration).
+        3. Chaîne vide si aucune information de version disponible.
+
+        :return: Version majeure (ex: "20") ou chaîne vide.
+        """
+        langage_lower = self.langage.lower()
+
+        # 1. Migration détectée : utiliser la version de destination
+        if self.migration_info.get("detected", False):
+            for mig in self.migration_info.get("migrations", []):
+                mig_langage = mig.get("langage", "").lower()
+                if mig_langage and mig_langage in langage_lower:
+                    version = mig.get("version_target", "")
+                    return version.split(".")[0] if version else ""
+
+        # 2. Pas de migration : utiliser la version actuelle du projet
+        if self.versions_actuelles:
+            for langage, version in self.versions_actuelles.items():
+                if langage.lower() in langage_lower:
+                    return version.split(".")[0] if version else ""
+
+        return ""
 
     @abstractmethod
     def generer_revue_mr(
