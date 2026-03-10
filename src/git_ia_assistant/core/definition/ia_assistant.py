@@ -28,14 +28,14 @@ class IaAssistant:
     Classe de base qui initialise le dépôt Git commun à tous les assistants.
     """
 
-    def __init__(self):
-        try:
-            self.repo = git.Repo(search_parent_directories=True)
-            # Détermine le dossier des prompts (src/git_ia_assistant/prompts/)
-            # par rapport à la racine du projet git-ia-assistant
-            self.dossier_prompts = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), "..", "..", "prompts")
-            )
-        except (git.InvalidGitRepositoryError, git.NoSuchPathError):
-            logger.die("Le répertoire actuel n'est pas un dépôt Git.")
-            raise
+    def __init__(self, require_repo: bool = True):
+        self.dossier_prompts = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "prompts")
+        )
+        self.repo = None
+        if require_repo:
+            try:
+                self.repo = git.Repo(search_parent_directories=True)
+            except (git.InvalidGitRepositoryError, git.NoSuchPathError):
+                logger.die("Le répertoire actuel n'est pas un dépôt Git.")
+                raise

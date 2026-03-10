@@ -52,7 +52,7 @@ class IaAssistantMr(IaAssistant):
         langage: str = "Unknown",
         migration_info: dict = None,
     ):
-        super().__init__()
+        super().__init__(require_repo=False)
         self.url_mr = url_mr
         self.plateforme = plateforme
         self.numero_mr = numero_mr
