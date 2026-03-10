@@ -173,7 +173,14 @@ Identifie les problèmes de performance critiques :
 - Préférences sur l'organisation des imports
 
 **Format :** Pour chaque point :
-- 🔵 **Fichier:Ligne** - Problème de maintenabilité + Refactoring suggéré
+- 🔵 **Fichier:Ligne** - Description du problème de maintenabilité
+  ```typescript
+  // Code actuel
+  ```
+  💡 **Solution proposée :**
+  ```typescript
+  // Code refactorisé
+  ```
 
 ### 6. **Tests Angular (Jest / Jasmine / Cypress)** ✅
 
@@ -260,7 +267,7 @@ Structure ta réponse en Markdown selon ce template :
 [Problèmes avec format spécifié, ou "RAS"]
 
 ## 🛠️ Maintenabilité
-[Points importants uniquement, ou "RAS"]
+[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests Angular
 **Checklist:**

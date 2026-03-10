@@ -82,7 +82,7 @@ Identifie uniquement les vrais problèmes de sécurité :
 
 #### Gestion des secrets
 - Variables d'environnement non injectées via `@Value` ou `@ConfigurationProperties`
-- Credentials dans les `application.properties` committés (sauf placeholders `${ENV_VAR}`)
+- Credentials dans les `application.properties` committés (sauf placeholders `${{ENV_VAR}}`)
 
 **Format :** Pour chaque problème :
 - 🔴 **Fichier:Ligne** - Description du risque + Code vulnérable + Solution corrigée
@@ -98,13 +98,13 @@ Identifie uniquement les vrais problèmes de sécurité :
      ```java
      @Test
      @WithMockUser(roles = "USER")
-     void test_security_nom_descriptif() {
+     void test_security_nom_descriptif() {{
          // Given
          // When
          mockMvc.perform(get("/endpoint-protege"))
          // Then
              .andExpect(status().isForbidden());
-     }
+     }}
      ```
 
 ### 3. **Bugs et logique métier Java** 🐛
@@ -157,7 +157,7 @@ Identifie les problèmes de performance critiques :
 #### Qualité Java
 - Code dupliqué significatif (DRY)
 - Méthodes dépassant 50 lignes ou imbrication > 3 niveaux
-- Checked exceptions swallowed (`catch (Exception e) {}`)
+- Checked exceptions swallowed (`catch (Exception e) {{}}`)
 - `instanceof` en cascade → envisager polymorphisme ou pattern matching (Java 17+)
 
 **Ne commente PAS :**
@@ -166,7 +166,14 @@ Identifie les problèmes de performance critiques :
 - Préférences sur l'ordre des imports
 
 **Format :** Pour chaque point :
-- 🔵 **Fichier:Ligne** - Problème de maintenabilité + Refactoring suggéré
+- 🔵 **Fichier:Ligne** - Description du problème de maintenabilité
+  ```java
+  // Code actuel
+  ```
+  💡 **Solution proposée :**
+  ```java
+  // Code refactorisé
+  ```
 
 ### 6. **Tests JUnit / Spring** ✅
 
@@ -188,7 +195,7 @@ Vérifie :
    - **Exemple de code:**
      ```java
      @Test
-     void nomMethode_contexte_resultatAttendu() {
+     void nomMethode_contexte_resultatAttendu() {{
          // Given
          when(repository.findById(1L)).thenReturn(Optional.of(entity));
          // When
@@ -196,7 +203,7 @@ Vérifie :
          // Then
          assertThat(result).isNotNull();
          verify(repository).findById(1L);
-     }
+     }}
      ```
 
 ### 7. **Points bloquants** 🚫
@@ -254,7 +261,7 @@ Structure ta réponse en Markdown selon ce template :
 [Problèmes avec format spécifié, ou "RAS"]
 
 ## 🛠️ Maintenabilité
-[Points importants uniquement, ou "RAS"]
+[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests JUnit
 **Checklist:**

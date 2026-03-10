@@ -175,7 +175,14 @@ Identifie les problèmes de performance critiques :
 - Préférences personnelles non critiques
 
 **Format :** Pour chaque point :
-- 🔵 **Fichier:Ligne** - Problème de maintenabilité + Refactoring suggéré
+- 🔵 **Fichier:Ligne** - Description du problème de maintenabilité
+  ```
+  // Code actuel
+  ```
+  💡 **Solution proposée :**
+  ```
+  // Code refactorisé
+  ```
 
 ### 6. **Tests et CI/CD** ✅
 Vérifie :
@@ -275,7 +282,7 @@ Structure ta réponse en Markdown selon ce template :
 [Problèmes identifiés avec format spécifié, ou "RAS"]
 
 ## 🛠️ Maintenabilité
-[Points importants uniquement, ou "RAS"]
+[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests
 **Checklist:**
