@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Classe pour la suggestion de squash avec Gemini.
+Exemple d'utilisation :
+    squash = IaGeminiSquash(10)
+    commits = squash.recuperer_commits()
+    squash.generer_squash(commits)
+"""
+from ia_assistant.definition.ia_assistant_squash import IaAssistantSquash
+from ia_assistant.commun.prompt import charger_prompt, formatter_prompt
+from ia_assistant.commun import gemini_utils, logger
+
+class IaGeminiSquash(IaAssistantSquash):
+    """
+    Classe pour la suggestion de squash avec Gemini.
+    """
+    def recuperer_commits(self):
+        commits = list(self.repo.iter_commits(max_count=self.nb_commits))
+        return [f"- {c.hexsha[:7]} : {c.summary}" for c in commits]
+    def generer_squash(self, commits):
+        prompt_template = charger_prompt('squash_prompt.md')
+        commits_str = "\n".join(commits)
+        prompt = formatter_prompt(prompt_template, commits=commits_str)
+        logger.log_info("Gemini réfléchit à la stratégie de squash...")
+        model = gemini_utils.configurer_gemini()
+        reponse = model.models.generate_content(
+            model=gemini_utils.MODEL_NAME,
+            contents=prompt
+        )
+        return reponse.text

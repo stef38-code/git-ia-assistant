@@ -1,0 +1,13 @@
+# Mapping des commandes pour le menu interactif
+# Format: commande: sous_repertoire/nom_du_script.py
+
+git-ia-commit: commits/commit_cli.py
+git-ia-commit-version: commits/commit_version_cli.py
+git-ia-review: review/review_my_code_cli.py
+git-ia-mr: review/mr_review_cli.py
+git-ia-squash: commits/squash_cli.py
+git-ia-changelog: git_history/changelog_cli.py
+git-ia-explain: git_history/explain_cli.py
+git-ia-test: code_quality/test_cli.py
+git-ia-doc: code_quality/doc_cli.py
+git-ia-refacto: code_quality/refacto_cli.py
