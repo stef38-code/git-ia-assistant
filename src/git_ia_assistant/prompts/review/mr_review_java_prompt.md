@@ -143,7 +143,25 @@ Identifie les problèmes de performance critiques :
 **Format :** Pour chaque problème :
 - 🟡 **Fichier:Ligne** - Impact performance + Code actuel + Optimisation proposée
 
-### 5. **Qualité et maintenabilité Java** 🛠️
+### 5. **Architecture et Patterns** 🏗️
+
+Identifie les opportunités d'amélioration structurelle et de design :
+
+#### Patterns et Principes
+- **Complexité Cognitive :** Signaler les fonctions avec trop d'imbrications (> 3 niveaux) ou une logique conditionnelle dense. Suggérer l'usage de *Guard Clauses* (retours anticipés).
+- **Duplication (DRY) :** Repérer les blocs de code similaires et suggérer une mutualisation (ex: extraction vers une classe utilitaire ou un service Spring).
+- **Design Patterns :** Suggérer des patterns adaptés (ex: *Strategy* pour remplacer des `if/else` sur types, *Factory* pour la création de beans complexes, *Template Method* pour factoriser des algorithmes).
+- **Principe de Responsabilité Unique (SRP) :** Signaler si un service ou contrôleur fait "trop de choses".
+
+#### Spécificités Java / Spring
+- **Programmation Orientée Aspect (AOP) :** Utiliser des annotations personnalisées ou `@Around` pour les comportements transverses (logging, métriques).
+- **Spring Events :** Utiliser `ApplicationEventPublisher` pour découpler les services.
+- **Délégués JPA :** Préférer les spécifications (`Specification`) pour construire des requêtes dynamiques réutilisables.
+
+**Format :** Pour chaque point :
+- 🟣 **Fichier:Ligne** - [Type: Complexité/Pattern/DRY] : Description + Solution proposée
+
+### 6. **Qualité et maintenabilité Java** 🛠️
 
 Évalue uniquement les points importants :
 
@@ -260,8 +278,8 @@ Structure ta réponse en Markdown selon ce template :
 ## 🚀 Performance JPA / Spring
 [Problèmes avec format spécifié, ou "RAS"]
 
-## 🛠️ Maintenabilité
-[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
+## 🛠️ Maintenabilité et Architecture
+[Format: 🔵 ou 🟣 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests JUnit
 **Checklist:**

@@ -5,6 +5,29 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2026-03-11
+
+### Ajouté
+- **Suite de tests unitaires** : Création des premiers tests unitaires pour `IaAssistantMr` et `IaAssistantMrFactory`.
+  - Couverture de la sélection de prompt (langage seul, IA spécifique, générique).
+  - Validation de l'extraction de la version cible (migration et projet).
+  - Validation de l'instanciation via la Factory.
+- **Dépendances de développement** : Ajout de `pytest` et `pytest-mock` dans `optional-dependencies`.
+
+## [0.9.5] - 2026-03-11
+
+### Ajouté
+- **Support natif des serveurs MCP (Model Context Protocol)** :
+  - Nouvelle option `--mcp` pour `git-ia-mr`.
+  - Génération dynamique d'une configuration MCP (`mcp-config.json`) basée sur le contexte.
+  - Support des serveurs : `git`, `github`/`gitlab`, `sequential-thinking`, `typescript`, `angular` et `sonarqube`.
+  - Intégration directe avec Copilot CLI via le flag `--additional-mcp-config`.
+- **Répertoire dédié MCP** : Centralisation de la logique dans `cli/mcp/` avec le `McpConfigManager`.
+- **Prompt Angular Gemini optimisé** : Nouveau prompt `mr_review_angular_gemini_prompt.md` incluant des instructions de "Chain of Thought" pour exploiter le contexte étendu.
+
+### Amélioré
+- **`python_commun`** : Mise à jour de `envoyer_prompt_copilot` pour supporter les configurations MCP externes.
+
 ## [0.9.4] - 2026-03-11
 
 ### Ajouté

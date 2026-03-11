@@ -70,6 +70,7 @@ class IaAssistantMrFactory:
         langage: str = "Unknown",
         migration_info: dict = None,
         versions_actuelles: dict = None,
+        mcp_config_path: Path = None,
     ) -> IaAssistantMr:
         """
         Instancie la classe de revue MR/PR appropriée.
@@ -83,6 +84,7 @@ class IaAssistantMrFactory:
         :param langage: Langage détecté.
         :param migration_info: Infos de migration.
         :param versions_actuelles: Versions actuelles.
+        :param mcp_config_path: Chemin vers la config MCP.
         :return: Une instance de IaAssistantMr.
         """
         mr_class = cls.get_mr_class(ia)
@@ -96,4 +98,5 @@ class IaAssistantMrFactory:
             migration_info=migration_info,
             versions_actuelles=versions_actuelles,
             ia_name=ia,
+            mcp_config_path=mcp_config_path,
         )

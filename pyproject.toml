@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-ia-assistant"
-version = "0.9.4"
+version = "0.9.6"
 authors = [
   { name="stef38-code", email="73640160+stef38-code@users.noreply.github.com" },
 ]
@@ -28,6 +28,12 @@ dependencies = [
     "tomli; python_version < '3.11'",
     "tomli_w",
     "toml>=0.10.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-mock>=3.10.0",
 ]
 
 [project.scripts]

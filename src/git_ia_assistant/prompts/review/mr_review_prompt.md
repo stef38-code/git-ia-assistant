@@ -160,7 +160,20 @@ Identifie les problèmes de performance critiques :
 **Format :** Pour chaque problème :
 - 🟡 **Fichier:Ligne** - Impact performance + Code actuel + Optimisation proposée
 
-### 5. **Qualité et maintenabilité** 🛠️
+### 5. **Architecture et Patterns** 🏗️
+
+Identifie les opportunités d'amélioration structurelle et de design :
+
+#### Patterns et Principes
+- **Complexité Cognitive :** Signaler les fonctions avec trop d'imbrications (> 3 niveaux) ou une logique conditionnelle dense. Suggérer l'usage de *Guard Clauses* (retours anticipés).
+- **Duplication (DRY) :** Repérer les blocs de code similaires et suggérer une mutualisation.
+- **Design Patterns :** Suggérer des patterns adaptés si la logique est complexe (ex: *Strategy*, *Factory*, *Decorator*).
+- **Principe de Responsabilité Unique (SRP) :** Signaler si une entité fait "trop de choses".
+
+**Format :** Pour chaque point :
+- 🟣 **Fichier:Ligne** - [Type: Complexité/Pattern/DRY] : Description + Solution proposée
+
+### 6. **Qualité et maintenabilité** 🛠️
 Évalue uniquement les points importants :
 - Code dupliqué significatif (DRY)
 - Complexité cognitive élevée (fonctions >50 lignes, imbrication >3 niveaux)
@@ -281,8 +294,8 @@ Structure ta réponse en Markdown selon ce template :
 ## 🚀 Performance
 [Problèmes identifiés avec format spécifié, ou "RAS"]
 
-## 🛠️ Maintenabilité
-[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
+## 🛠️ Maintenabilité et Architecture
+[Format: 🔵 ou 🟣 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests
 **Checklist:**

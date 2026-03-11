@@ -150,7 +150,25 @@ Identifie les problèmes de performance critiques :
 **Format :** Pour chaque problème :
 - 🟡 **Fichier:Ligne** - Impact performance + Code actuel + Optimisation proposée
 
-### 5. **Qualité et maintenabilité Angular** 🛠️
+### 5. **Architecture et Patterns** 🏗️
+
+Identifie les opportunités d'amélioration structurelle et de design :
+
+#### Patterns et Principes
+- **Complexité Cognitive :** Signaler les fonctions avec trop d'imbrications (> 3 niveaux) ou une logique conditionnelle dense. Suggérer l'usage de *Guard Clauses* (retours anticipés).
+- **Duplication (DRY) :** Repérer les blocs de code similaires et suggérer une mutualisation (ex: extraction vers un composant partagé ou un service).
+- **Design Patterns :** Suggérer des patterns adaptés (ex: *Strategy* pour remplacer des `if/else` sur types, *Factory* pour la création d'objets complexes, *Decorator* pour les comportements transverses).
+- **Principe de Responsabilité Unique (SRP) :** Signaler si un composant fait "trop de choses" (logique métier + UI + I/O).
+
+#### Spécificités Angular / TypeScript
+- **Signals vs Observables :** Choisir le pattern de réactivité le plus adapté (Signals pour l'état local/UI, RxJS pour les flux de données asynchrones complexes).
+- **Composition vs Héritage :** Préférer la composition de composants et les directives au lieu de l'héritage de classes.
+- **Pipes purs :** Utiliser des pipes pour transformer les données dans les templates au lieu de fonctions dans la classe.
+
+**Format :** Pour chaque point :
+- 🟣 **Fichier:Ligne** - [Type: Complexité/Pattern/DRY] : Description + Solution proposée
+
+### 6. **Qualité et maintenabilité Angular** 🛠️
 
 Évalue uniquement les points importants :
 
@@ -266,8 +284,8 @@ Structure ta réponse en Markdown selon ce template :
 ## 🚀 Performance Angular
 [Problèmes avec format spécifié, ou "RAS"]
 
-## 🛠️ Maintenabilité
-[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
+## 🛠️ Maintenabilité et Architecture
+[Format: 🔵 ou 🟣 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests Angular
 **Checklist:**

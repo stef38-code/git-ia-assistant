@@ -34,6 +34,8 @@ DATA
         (ex: {"angular": "20.1.0", "typescript": "5.4.0"}).
     ia_name: str
         Nom de l'IA utilisée (copilot, gemini, ollama).
+    mcp_config_path: Path
+        Chemin vers le fichier de configuration MCP optionnel.
 
 FUNCTIONS
     _choisir_prompt_mr()
@@ -74,7 +76,8 @@ class IaAssistantMr(IaAssistant):
         langage: str = "Unknown",
         migration_info: dict = None,
         versions_actuelles: dict = None,
-        ia_name: str = "auto",
+        ia_name: str = "auto",  # Type hint str explicite
+        mcp_config_path: Path = None,
     ):
         super().__init__(require_repo=False)
         self.url_mr = url_mr
@@ -86,6 +89,7 @@ class IaAssistantMr(IaAssistant):
         self.migration_info = migration_info or {"detected": False, "migrations": []}
         self.versions_actuelles = versions_actuelles or {}
         self.ia_name = ia_name
+        self.mcp_config_path = mcp_config_path
 
     def _choisir_prompt_mr(self) -> str:
         """

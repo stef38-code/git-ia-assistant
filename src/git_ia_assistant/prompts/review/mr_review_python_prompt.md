@@ -134,7 +134,25 @@ Identifie les problèmes de performance critiques :
 **Format :** Pour chaque problème :
 - 🟡 **Fichier:Ligne** - Impact performance + Code actuel + Optimisation proposée
 
-### 5. **Qualité et maintenabilité Python** 🛠️
+### 5. **Architecture et Patterns** 🏗️
+
+Identifie les opportunités d'amélioration structurelle et de design :
+
+#### Patterns et Principes
+- **Complexité Cognitive :** Signaler les fonctions avec trop d'imbrications (> 3 niveaux) ou une logique conditionnelle dense. Suggérer l'usage de *Guard Clauses* (retours anticipés).
+- **Duplication (DRY) :** Repérer les blocs de code similaires et suggérer une mutualisation ou l'extraction de fonctions/classes utilitaires.
+- **Design Patterns :** Suggérer des patterns adaptés si la logique est complexe (ex: *Strategy* pour remplacer des `if/else` sur types, *Factory* pour la création d'objets, *Decorator* pour les comportements transverses).
+- **Principe de Responsabilité Unique (SRP) :** Signaler si une classe ou fonction fait "trop de choses".
+
+#### Spécificités Python
+- **Protocoles / Abstraction :** Utiliser `typing.Protocol` pour le typage structurel au lieu de l'héritage rigide.
+- **Décorateurs :** Utiliser des décorateurs pour extraire la logique transverse (logging, validation, cache).
+- **Context Managers :** Suggérer `contextlib.contextmanager` pour simplifier la gestion de ressources personnalisées.
+
+**Format :** Pour chaque point :
+- 🟣 **Fichier:Ligne** - [Type: Complexité/Pattern/DRY] : Description + Solution proposée
+
+### 6. **Qualité et maintenabilité Python** 🛠️
 
 Évalue uniquement les points importants :
 
@@ -249,8 +267,8 @@ Structure ta réponse en Markdown selon ce template :
 ## 🚀 Performance Python
 [Problèmes avec format spécifié, ou "RAS"]
 
-## 🛠️ Maintenabilité
-[Format: 🔵 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
+## 🛠️ Maintenabilité et Architecture
+[Format: 🔵 ou 🟣 **Fichier:Ligne** - Description + code actuel + solution proposée, ou "RAS"]
 
 ## ✅ Tests PyTest
 **Checklist:**

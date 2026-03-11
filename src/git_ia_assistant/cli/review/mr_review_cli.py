@@ -19,11 +19,12 @@ OPTIONS
     -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté via IA_SELECTED ou copilot)
     --dry-run                   Simulation, affiche le prompt sans appel à l'IA
     --publier                   Publier le rapport de revue comme commentaire dans la MR/PR
+    --mcp                       Activer l'utilisation des serveurs MCP (git, plateforme, langage)
     -h, --help                  Afficher l'aide du script
 
 EXEMPLES
     git-ia-mr -u https://gitlab.com/repo/-/merge_requests/1 --dry-run
-    git-ia-mr -u https://github.com/user/repo/pull/456 -ia gemini
+    git-ia-mr -u https://github.com/user/repo/pull/456 -ia gemini --mcp
     git-ia-mr --url https://gitlab.com/org/project/-/merge_requests/123
     git-ia-mr -u https://gitlab.com/repo/-/merge_requests/1 --publier
 """
@@ -60,6 +61,7 @@ from python_commun.network.url_utils import (
 )
 from python_commun.cli.usage import usage
 from git_ia_assistant.core.definition.ia_assistant_mr_factory import IaAssistantMrFactory
+from git_ia_assistant.cli.mcp.mcp_config_manager import McpConfigManager
 
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/mrOrpr"
@@ -165,6 +167,11 @@ def _parser_options() -> argparse.Namespace:
         action="store_true", 
         help="Publier le rapport de revue comme commentaire dans la MR/PR"
     )
+    parser.add_argument(
+        "--mcp", 
+        action="store_true", 
+        help="Activer l'utilisation des serveurs MCP (git, plateforme, langage)"
+    )
     return parser.parse_args()
 
 
@@ -189,8 +196,9 @@ def extraire_branches_mr(url: str, plateforme: str, espace_projet: str, numero_m
             mr = project.mergerequests.get(numero_mr)
             return mr.source_branch, mr.target_branch
         elif plateforme.lower() == "github":
-            from github import Github
-            g = Github(token)
+            from github import Github, Auth
+            auth = Auth.Token(token)
+            g = Github(auth=auth)
             repo = g.get_repo(espace_projet)
             pr = repo.get_pull(numero_mr)
             return pr.head.ref, pr.base.ref
@@ -220,27 +228,27 @@ def extraire_version_fichier(repo_path: Path, branche: str) -> dict:
         current_branch = repo.active_branch.name if repo.active_branch else None
         try:
             repo.git.checkout(branche)
-        except Exception:
-            # Impossible de checkout - retour d'un dict vide (silencieux)
+        except Exception as e:
+            logger.log_debug(f"Impossible de checkout la branche {branche}: {e}")
             return versions
         
         # Extraction des versions via python_commun
         try:
             versions = extraire_toutes_versions(repo_path)
-        except Exception:
-            # Erreur lors de l'extraction - retour d'un dict vide (silencieux)
+        except Exception as e:
+            logger.log_debug(f"Erreur lors de l'extraction des versions sur {branche}: {e}")
             pass
         
         # Retour à la branche d'origine
         if current_branch:
             try:
                 repo.git.checkout(current_branch)
-            except Exception:
-                # Impossible de retourner à la branche - non critique
+            except Exception as e:
+                logger.log_debug(f"Impossible de retourner sur {current_branch}: {e}")
                 pass
                 
-    except Exception:
-        # Erreur générale (ex: pas un dépôt Git) - retour d'un dict vide (silencieux)
+    except Exception as e:
+        logger.log_debug(f"Erreur Git générale dans extraire_version_fichier: {e}")
         pass
     
     return versions
@@ -495,6 +503,17 @@ def main() -> None:
             logger.log_error("❌ Abandon de la génération de la revue en raison de la taille excessive.")
             return
 
+    # Gestion de la configuration MCP si demandée
+    mcp_config_path = None
+    if args.mcp:
+        logger.log_info("🔧 Activation du support MCP...")
+        mcp_config_path = McpConfigManager.generer_config(
+            out_dir=OUT_DIR,
+            plateforme=plateforme,
+            langage=langage_framework,
+            token=git_token
+        )
+
     # Utilisation du pattern Factory pour instancier la classe IA appropriée
     ia_instance = IaAssistantMrFactory.create_mr_instance(
         ia=ia_utilisee,
@@ -506,6 +525,7 @@ def main() -> None:
         langage=langage_framework,
         migration_info=migration_info,
         versions_actuelles=versions_actuelles,
+        mcp_config_path=mcp_config_path,
     )
 
     # Génération de la revue via l'IA
