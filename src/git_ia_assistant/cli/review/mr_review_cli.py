@@ -379,7 +379,8 @@ def main() -> None:
             plateforme=plateforme,
             espace_projet=espace_projet,
             url_mr=args.url,
-            token=git_token
+            token=git_token,
+            repo_path=repo_local_path
         )
         
         if not has_rights:
@@ -511,8 +512,8 @@ def main() -> None:
             out_dir=OUT_DIR,
             plateforme=plateforme,
             langage=langage_framework,
-            token=git_token
-        )
+            token=git_token,
+            repo_path=repo_local_path)
 
     # Utilisation du pattern Factory pour instancier la classe IA appropriée
     ia_instance = IaAssistantMrFactory.create_mr_instance(
@@ -565,7 +566,8 @@ def main() -> None:
                     plateforme=plateforme,
                     espace_projet=espace_projet,
                     url_mr=args.url,
-                    token=git_token
+                    token=git_token,
+            repo_path=repo_local_path
                 )
                 
                 if not success:

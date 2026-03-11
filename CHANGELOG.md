@@ -5,6 +5,16 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.7] - 2026-03-11
+
+### Ajouté
+- **Enrichissement des serveurs MCP** : Ajout des serveurs `filesystem` et `search` (ripgrep) pour permettre à l'IA d'analyser l'intégralité du code source et d'effectuer des recherches textuelles performantes.
+- **Sécurisation MCP** : Restriction automatique des accès `filesystem` et `search` au seul répertoire du dépôt cloné (`repo_path`).
+
+### Amélioré
+- **`git-ia-mr`** : Passage automatique du contexte local (`repo_path`) au gestionnaire de configuration MCP pour une analyse d'impact plus profonde.
+
+
 ## [0.9.6] - 2026-03-11
 
 ### Ajouté
