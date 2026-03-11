@@ -24,6 +24,7 @@ DATA
 
 from git_ia_assistant.core.definition.ia_assistant_mr import IaAssistantMr
 import importlib
+from pathlib import Path
 
 
 class IaAssistantMrFactory:
@@ -56,3 +57,43 @@ class IaAssistantMrFactory:
             return IaAssistantMr
         module = importlib.import_module(module_name)
         return getattr(module, class_name)
+
+    @classmethod
+    def create_mr_instance(
+        cls,
+        ia: str,
+        url_mr: str,
+        plateforme: str,
+        numero_mr: str,
+        out_dir: Path,
+        dry_run: bool = False,
+        langage: str = "Unknown",
+        migration_info: dict = None,
+        versions_actuelles: dict = None,
+    ) -> IaAssistantMr:
+        """
+        Instancie la classe de revue MR/PR appropriée.
+
+        :param ia: Le nom de l'IA (copilot, gemini, ollama).
+        :param url_mr: URL de la MR/PR.
+        :param plateforme: Plateforme (gitlab ou github).
+        :param numero_mr: Numéro de la MR/PR.
+        :param out_dir: Répertoire de sortie.
+        :param dry_run: Mode simulation.
+        :param langage: Langage détecté.
+        :param migration_info: Infos de migration.
+        :param versions_actuelles: Versions actuelles.
+        :return: Une instance de IaAssistantMr.
+        """
+        mr_class = cls.get_mr_class(ia)
+        return mr_class(
+            url_mr=url_mr,
+            plateforme=plateforme,
+            numero_mr=numero_mr,
+            out_dir=out_dir,
+            dry_run=dry_run,
+            langage=langage,
+            migration_info=migration_info,
+            versions_actuelles=versions_actuelles,
+            ia_name=ia,
+        )

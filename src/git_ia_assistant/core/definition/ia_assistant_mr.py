@@ -32,14 +32,17 @@ DATA
     versions_actuelles: dict
         Versions actuelles des langages/frameworks détectées dans le projet
         (ex: {"angular": "20.1.0", "typescript": "5.4.0"}).
+    ia_name: str
+        Nom de l'IA utilisée (copilot, gemini, ollama).
 
 FUNCTIONS
     _choisir_prompt_mr()
-        Sélectionne le fichier de prompt adapté au langage détecté.
+        Sélectionne le fichier de prompt adapté au langage détecté et à l'IA.
     _get_version_cible()
         Retourne la version majeure cible du langage (migration ou version actuelle).
 """
 
+import os
 from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
@@ -71,6 +74,7 @@ class IaAssistantMr(IaAssistant):
         langage: str = "Unknown",
         migration_info: dict = None,
         versions_actuelles: dict = None,
+        ia_name: str = "auto",
     ):
         super().__init__(require_repo=False)
         self.url_mr = url_mr
@@ -81,20 +85,44 @@ class IaAssistantMr(IaAssistant):
         self.langage = langage
         self.migration_info = migration_info or {"detected": False, "migrations": []}
         self.versions_actuelles = versions_actuelles or {}
+        self.ia_name = ia_name
 
     def _choisir_prompt_mr(self) -> str:
         """
-        Sélectionne le fichier de prompt adapté au langage détecté.
+        Sélectionne le fichier de prompt adapté au langage détecté et à l'IA utilisée.
 
-        Parcourt les mots-clés du langage détecté pour trouver un prompt
-        spécialisé. Retourne le prompt générique si aucune correspondance.
+        Logique de recherche :
+        1. Prompt spécifique au langage ET à l'IA (ex: mr_review_angular_gemini_prompt.md)
+        2. Prompt spécifique au langage (ex: mr_review_angular_prompt.md)
+        3. Prompt générique spécifique à l'IA (ex: mr_review_gemini_prompt.md)
+        4. Prompt générique par défaut (mr_review_prompt.md)
 
         :return: Chemin relatif du fichier de prompt à utiliser.
         """
         langage_lower = self.langage.lower()
+        ia_suffix = f"_{self.ia_name}" if self.ia_name != "auto" else ""
+        
+        # 1. & 2. Recherche par langage
         for mot_cle, chemin_prompt in _PROMPT_PAR_LANGAGE.items():
             if mot_cle in langage_lower:
+                # Tenter la version spécifique à l'IA (ex: angular_gemini)
+                if ia_suffix:
+                    chemin_ia_specifique = chemin_prompt.replace("_prompt.md", f"{ia_suffix}_prompt.md")
+                    full_path = os.path.join(self.dossier_prompts, chemin_ia_specifique)
+                    if os.path.exists(full_path):
+                        return chemin_ia_specifique
+                
+                # Sinon retourner le prompt langage par défaut
                 return chemin_prompt
+        
+        # 3. Tenter le générique spécifique à l'IA
+        if ia_suffix:
+            chemin_generique_ia = _PROMPT_GENERIQUE.replace("_prompt.md", f"{ia_suffix}_prompt.md")
+            full_path = os.path.join(self.dossier_prompts, chemin_generique_ia)
+            if os.path.exists(full_path):
+                return chemin_generique_ia
+                
+        # 4. Retourner le prompt générique par défaut
         return _PROMPT_GENERIQUE
 
     def _get_version_cible(self) -> str:

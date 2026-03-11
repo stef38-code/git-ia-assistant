@@ -5,6 +5,17 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.4] - 2026-03-11
+
+### Ajouté
+- **Spécialisation des prompts par modèle IA** : Support de prompts dédiés selon l'IA utilisée (Gemini, Copilot, Ollama).
+  - Priorité de recherche : `{langage}_{ia}_prompt.md` -> `{langage}_prompt.md` -> `mr_review_{ia}_prompt.md` -> prompt générique.
+  - Ajout du prompt spécialisé `mr_review_angular_gemini_prompt.md` exploitant la fenêtre de contexte étendue de Gemini (Chain of Thought).
+- **Refactoring Factory** : Introduction de `IaAssistantMrFactory.create_mr_instance` pour une instanciation centralisée et typée, gérant l'injection du nom de l'IA.
+
+### Amélioré
+- **Sélection dynamique du prompt pour Ollama** : Utilise désormais `_choisir_prompt_mr()` au lieu d'un prompt générique hardcodé, permettant de bénéficier des prompts spécialisés par langage.
+
 ## [0.9.3] - 2026-03-10
 
 ### Ajouté

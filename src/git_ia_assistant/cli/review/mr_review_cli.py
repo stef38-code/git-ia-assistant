@@ -496,8 +496,8 @@ def main() -> None:
             return
 
     # Utilisation du pattern Factory pour instancier la classe IA appropriée
-    ia_class = IaAssistantMrFactory.get_mr_class(ia_utilisee)
-    ia_instance = ia_class(
+    ia_instance = IaAssistantMrFactory.create_mr_instance(
+        ia=ia_utilisee,
         url_mr=args.url,
         plateforme=plateforme,
         numero_mr=numero_merge,
