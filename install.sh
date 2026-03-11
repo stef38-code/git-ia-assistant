@@ -79,12 +79,12 @@ trap cleanup EXIT
 function check_environment {
     echo "--- Vérification de l'environnement ---"
     if ! command -v git >/dev/null 2>&1; then
-        echo "Erreur: 'git' n'est pas installé sur votre système."
+        echo "❌ Erreur: 'git' n'est pas installé. Git est obligatoire pour utiliser cet outil."
         exit 1
     fi
 
     if ! command -v python3 >/dev/null 2>&1; then
-        echo "Erreur: 'python3' n'est pas installé sur votre système."
+        echo "❌ Erreur: 'python3' est introuvable. Python 3 doit être obligatoirement présent sur votre système."
         exit 1
     fi
 }

@@ -10,9 +10,11 @@ Git IA Assistant offre un ensemble complet d'outils pour automatiser et enrichir
     *   **Commits partiels** (`--partiel`) : Découpe un fichier en plusieurs commits via `git add -p`.
 *   **Revue de Code** (`git-ia-review`) : Analyse vos fichiers locaux modifiés et propose des suggestions d'amélioration (lisibilité, bugs potentiels, bonnes pratiques). Supporte l'extraction de contexte pour les imports Python.
 *   **Revue de MR/PR** (`git-ia-mr`) : Automatise la relecture des *Merge Requests* (GitLab) et *Pull Requests* (GitHub) en téléchargeant le diff et en générant un rapport complet incluant une **analyse de sécurité** et une **évaluation du risque**.
-    *   **Détection de migration** : Identifie automatiquement les changements de version (Python, Java, Node.js, Angular, React)
-    *   **Publication automatique** (`--publier`) : Publie le rapport directement comme commentaire dans la MR/PR
-    *   **Protection volumétrique** : Analyse la taille et refuse les MR trop volumineuses avec suggestions
+    *   **Support MCP** (`--mcp`) : Connecte l'IA à des serveurs externes (Git, plateforme, documentation Angular/TS) pour enrichir le contexte de la revue.
+    *   **Prompts spécialisés** : Sélectionne automatiquement le meilleur prompt selon le langage détecté ET le modèle d'IA utilisé (ex: optimisation *Chain of Thought* pour Gemini).
+    *   **Détection de migration** : Identifie automatiquement les changements de version (Python, Java, Node.js, Angular, React).
+    *   **Publication automatique** (`--publier`) : Publie le rapport directement comme commentaire dans la MR/PR.
+    *   **Protection volumétrique** : Analyse la taille et refuse les MR trop volumineuses avec suggestions.
 *   **Stratégie de Squash** (`git-ia-squash`) : Analyse votre historique récent pour suggérer quels commits fusionner lors d'un `git rebase -i`.
 *   **Génération de Changelog** (`git-ia-changelog`) : Produit un fichier `CHANGELOG.md` structuré à partir de l'historique des commits.
 
