@@ -5,6 +5,57 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2026-03-11
+
+### Ajouté
+- **Suite de tests unitaires** : Création des premiers tests unitaires pour `IaAssistantMr` et `IaAssistantMrFactory`.
+  - Couverture de la sélection de prompt (langage seul, IA spécifique, générique).
+  - Validation de l'extraction de la version cible (migration et projet).
+  - Validation de l'instanciation via la Factory.
+- **Dépendances de développement** : Ajout de `pytest` et `pytest-mock` dans `optional-dependencies`.
+
+## [0.9.5] - 2026-03-11
+
+### Ajouté
+- **Support natif des serveurs MCP (Model Context Protocol)** :
+  - Nouvelle option `--mcp` pour `git-ia-mr`.
+  - Génération dynamique d'une configuration MCP (`mcp-config.json`) basée sur le contexte.
+  - Support des serveurs : `git`, `github`/`gitlab`, `sequential-thinking`, `typescript`, `angular` et `sonarqube`.
+  - Intégration directe avec Copilot CLI via le flag `--additional-mcp-config`.
+- **Répertoire dédié MCP** : Centralisation de la logique dans `cli/mcp/` avec le `McpConfigManager`.
+- **Prompt Angular Gemini optimisé** : Nouveau prompt `mr_review_angular_gemini_prompt.md` incluant des instructions de "Chain of Thought" pour exploiter le contexte étendu.
+
+### Amélioré
+- **`python_commun`** : Mise à jour de `envoyer_prompt_copilot` pour supporter les configurations MCP externes.
+
+## [0.9.4] - 2026-03-11
+
+### Ajouté
+- **Spécialisation des prompts par modèle IA** : Support de prompts dédiés selon l'IA utilisée (Gemini, Copilot, Ollama).
+  - Priorité de recherche : `{langage}_{ia}_prompt.md` -> `{langage}_prompt.md` -> `mr_review_{ia}_prompt.md` -> prompt générique.
+  - Ajout du prompt spécialisé `mr_review_angular_gemini_prompt.md` exploitant la fenêtre de contexte étendue de Gemini (Chain of Thought).
+- **Refactoring Factory** : Introduction de `IaAssistantMrFactory.create_mr_instance` pour une instanciation centralisée et typée, gérant l'injection du nom de l'IA.
+
+### Amélioré
+- **Sélection dynamique du prompt pour Ollama** : Utilise désormais `_choisir_prompt_mr()` au lieu d'un prompt générique hardcodé, permettant de bénéficier des prompts spécialisés par langage.
+
+## [0.9.3] - 2026-03-10
+
+### Ajouté
+- **Prompts MR spécialisés par langage** : `git-ia-mr` sélectionne automatiquement le prompt adapté au langage détecté
+  - `mr_review_java_prompt.md` : critères Spring Security, JPA/Hibernate N+1, `@Transactional`, Records, Jakarta EE
+  - `mr_review_python_prompt.md` : critères type hints, mutable defaults, context managers, `async/await`, PyTest
+  - `mr_review_angular_prompt.md` : critères memory leaks RxJS, XSS/DomSanitizer, Signals, `OnPush`, `trackBy`
+  - Fallback automatique sur le prompt générique pour les autres langages (Go, PHP, etc.)
+- **`IaAssistantMr._choisir_prompt_mr()`** : méthode de sélection du prompt basée sur le langage détecté
+
+## [0.9.2] - 2026-03-10
+
+### Corrigé
+- **`git-ia-mr` hors dépôt Git** : l'exécution depuis un répertoire non-git échouait avec "Le répertoire actuel n'est pas un dépôt Git."
+  - `IaAssistant.__init__()` accepte maintenant `require_repo: bool = True`
+  - `IaAssistantMr` passe `require_repo=False` car la revue MR/PR fonctionne entièrement via URL distante
+
 ## [0.9.1] - 2026-03-09
 
 ### Corrigé

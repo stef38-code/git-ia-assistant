@@ -27,6 +27,9 @@ class IaCopilotMr(IaAssistantMr):
     Implémentation Copilot pour la revue de Merge Request / Pull Request.
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def generer_revue_mr(
         self, diff_path: Path, resume_path: Path
     ) -> Optional[str]:
@@ -46,9 +49,9 @@ class IaCopilotMr(IaAssistantMr):
                 resume_path.read_text(encoding="utf-8") if resume_path.exists() else ""
             )
 
-            # Charger et formatter le prompt
+            # Charger et formatter le prompt adapté au langage détecté et au modèle
             prompt_template = charger_prompt(
-                "review/mr_review_prompt.md", self.dossier_prompts
+                self._choisir_prompt_mr(), self.dossier_prompts
             )
             
             # Formatter les informations de migration
@@ -74,6 +77,7 @@ class IaCopilotMr(IaAssistantMr):
                 langage_expertise=langage_expertise,
                 migration_detectee=migration_detectee,
                 migration_info=migration_details.strip() if migration_details else "Aucune migration détectée",
+                version_cible=self._get_version_cible(),
             )
 
             # Sauvegarde du prompt généré pour analyse future
