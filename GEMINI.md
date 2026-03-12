@@ -46,6 +46,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../libs/python_commun/src")))
 ```
 
+### 3.4. Normes de Qualité de Code
+- **Nommage Explicite** : NE JAMAIS utiliser de variables à un seul caractère (ex: `i`, `j`, `x`). Les noms doivent être explicites et descriptifs (ex: `index`, `compteur`, `chemin_fichier`).
+- **Nettoyage des Imports** : Supprimer systématiquement tous les imports inutilisés après chaque modification.
+- **Complexité Cognitive** : Surveiller le niveau de complexité cognitive des fonctions. Si une fonction devient trop complexe ou trop longue, elle DOIT être refactorisée en sous-fonctions plus simples.
+- **Type Hinting** : Utiliser les annotations de type Python pour tous les paramètres de fonction et les valeurs de retour.
+- **Principe DRY** : Éviter la duplication de code en factorisant les logiques communes dans `libs/python_commun`.
+
 ## 4. Gestion des Versions et Commits
 
 ### Versioning Sémantique (SemVer)

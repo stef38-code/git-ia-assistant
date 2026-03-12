@@ -59,6 +59,14 @@ source .venv/bin/activate
 
 ## Conventions et règles obligatoires
 
+### Qualité du code
+
+- **Nommage des variables** : NE JAMAIS utiliser de variables à un seul caractère. Utiliser des noms descriptifs et explicites.
+- **Nettoyage** : Supprimer systématiquement les imports inutilisés.
+- **Refactoring** : Vérifier la complexité cognitive des fonctions. Refactorer si elle est trop élevée (fonctions trop longues ou trop imbriquées).
+- **Type Hinting** : Utiliser les Type Hints Python pour améliorer la robustesse et la documentation du code.
+- **Modularité** : Suivre le principe de responsabilité unique (SRP).
+
 ### Scripts avec un main (paramètres CLI)
 
 **Paramètres CLI obligatoires** :
