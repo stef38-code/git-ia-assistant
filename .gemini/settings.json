@@ -10,7 +10,29 @@
     },
     "server-ripgrep": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-ripgrep"]
+      "args": ["-y", "mcp-ripgrep@latest"]
+    },
+    "server-sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "mcp-server-git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"]
+    },
+    "server-github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${env:GIT_TOKEN}"
+      }
+    },
+    "gitlab": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gitlab"],
+      "env": {
+        "GITLAB_PRIVATE_TOKEN": "${env:GITLAB_PRIVATE_TOKEN}"
+      }
     }
   }
 }
