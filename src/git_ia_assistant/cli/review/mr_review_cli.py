@@ -229,14 +229,14 @@ def extraire_version_fichier(repo_path: Path, branche: str) -> dict:
         try:
             repo.git.checkout(branche)
         except Exception as e:
-            logger.log_debug(f"Impossible de checkout la branche {branche}: {e}")
+            logger.log_debug(False, f"Impossible de checkout la branche {branche}: {e}")
             return versions
         
         # Extraction des versions via python_commun
         try:
             versions = extraire_toutes_versions(repo_path)
         except Exception as e:
-            logger.log_debug(f"Erreur lors de l'extraction des versions sur {branche}: {e}")
+            logger.log_debug(False, f"Erreur lors de l'extraction des versions sur {branche}: {e}")
             pass
         
         # Retour à la branche d'origine
@@ -244,11 +244,11 @@ def extraire_version_fichier(repo_path: Path, branche: str) -> dict:
             try:
                 repo.git.checkout(current_branch)
             except Exception as e:
-                logger.log_debug(f"Impossible de retourner sur {current_branch}: {e}")
+                logger.log_debug(False, f"Impossible de retourner sur {current_branch}: {e}")
                 pass
                 
     except Exception as e:
-        logger.log_debug(f"Erreur Git générale dans extraire_version_fichier: {e}")
+        logger.log_debug(False, f"Erreur Git générale dans extraire_version_fichier: {e}")
         pass
     
     return versions

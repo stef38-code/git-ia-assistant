@@ -5,6 +5,20 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.8] - 2026-03-12
+
+### Corrigé
+- **`McpConfigManager`** : Correction du serveur MCP `git` — le package `@modelcontextprotocol/server-git` n'existe pas sur npm. Remplacement par `mcp-server-git` (package Python officiel), lancé via `uvx mcp-server-git`.
+
+### Ajouté
+- **Vérification des serveurs MCP** : Nouvelle méthode statique `McpConfigManager.verifier_installation()`.
+  - Détecte automatiquement le type de lanceur (`uvx` pour les packages Python, `npx` pour les packages npm).
+  - Vérifie la présence de `npx`/`node` (Node.js ≥ 18) et de `uvx`/`uv` dans le PATH.
+  - Contrôle l'installation de chaque package via `npm list -g` (npm) et `pip show` (Python).
+  - Affiche un message d'erreur détaillé avec les commandes d'installation pour chaque serveur manquant.
+  - Vérifie la présence des variables d'environnement requises (`GITHUB_PERSONAL_ACCESS_TOKEN`, `GITLAB_PRIVATE_TOKEN`, `SONAR_TOKEN`).
+- **`INSTALLATION_INSTRUCTIONS`** : Dictionnaire centralisé des instructions d'installation pour chacun des 9 serveurs MCP supportés.
+
 ## [0.9.7] - 2026-03-11
 
 ### Ajouté
