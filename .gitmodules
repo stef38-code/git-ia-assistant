@@ -2,3 +2,4 @@
         path = libs/python_commun
         url = https://github.com/stef38-code/python_commun.git
         ignore = dirty
+        branch = master
