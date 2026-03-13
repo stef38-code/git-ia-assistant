@@ -538,7 +538,40 @@ def main() -> None:
     )
 
     # Génération de la revue via l'IA
-    result = ia_instance.generer_revue_mr(fichier_diff, fichier_resume)
+    result = None
+    try:
+        result = ia_instance.generer_revue_mr(fichier_diff, fichier_resume)
+    except Exception as e:
+        err_msg = str(e).lower()
+        logger.log_error(f"❌ Échec lors de la génération de la revue : {e}")
+
+        # Détection simple d'une erreur liée au quota/jetons et basculement automatique
+        if ia_utilisee != 'ollama' and ('quota' in err_msg or 'token' in err_msg or 'jeton' in err_msg or 'exceeded' in err_msg):
+            logger.log_info("")
+            logger.log_info("⚠️  Quota de jetons détecté/potentiellement épuisé pour l'IA choisie.")
+            logger.log_info("ℹ️  Basculement automatique vers le modèle local 'ollama' (ne consomme pas de quota distant) pour tenter de générer la revue.")
+            try:
+                ia_fallback = IaAssistantMrFactory.create_mr_instance(
+                    ia='ollama',
+                    url_mr=args.url,
+                    plateforme=plateforme,
+                    numero_mr=numero_merge,
+                    out_dir=OUT_DIR,
+                    dry_run=args.dry_run,
+                    langage=langage_framework,
+                    migration_info=migration_info,
+                    versions_actuelles=versions_actuelles,
+                    mcp_config_path=mcp_config_path,
+                )
+                result = ia_fallback.generer_revue_mr(fichier_diff, fichier_resume)
+                if result:
+                    logger.log_success("✅ Revue générée via le fallback 'ollama'.")
+                else:
+                    logger.log_error("❌ Le fallback 'ollama' n'a pas permis de générer la revue.")
+            except Exception as e2:
+                logger.log_error(f"❌ Échec du fallback vers 'ollama' : {e2}")
+        else:
+            logger.log_error("❌ La génération a échoué et n'est pas liée clairement au quota. Voir l'erreur ci-dessus.")
 
     # En mode dry-run, la méthode retourne None après affichage
     if args.dry_run:

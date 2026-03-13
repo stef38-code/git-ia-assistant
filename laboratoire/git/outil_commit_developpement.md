@@ -395,6 +395,76 @@ def parser_semver(version: str) -> dict:
     }
 ```
 
+## Étape 3.5 : Contrôle de la nécessité de changement de version
+
+### Principe
+
+Avant de calculer une nouvelle version, il faut vérifier si la version actuelle a déjà été publiée (c'est-à-dire si un tag Git lui correspond).
+
+- **Tag Git absent** → La version actuelle n'a pas encore été publiée → **Pas de changement de numéro de version** nécessaire.
+- **Tag Git présent** → La version a été publiée → **Calcul et proposition d'une nouvelle version**.
+
+### Vérification de l'existence du tag Git
+
+```python
+def verifier_tag_git_existe(version: str) -> bool:
+    """
+    Vérifie si un tag Git correspond à la version donnée.
+
+    Accepte les formats 'v{version}' (ex: v0.3.0) et '{version}' (ex: 0.3.0).
+
+    Args:
+        version: Version à vérifier (ex: "0.3.0")
+
+    Returns:
+        bool: True si le tag existe, False sinon
+    """
+    import git
+
+    repo = git.Repo('.')
+    tags_existants = [str(tag) for tag in repo.tags]
+
+    return f"v{version}" in tags_existants or version in tags_existants
+```
+
+### Détermination de la nécessité d'un changement de version
+
+```python
+def determiner_necessite_changement_version(version_actuelle: str) -> bool:
+    """
+    Détermine si un changement de numéro de version est nécessaire.
+
+    Règle : si le tag Git pour la version actuelle est absent, cela signifie
+    que la version courante n'a pas encore été publiée. Dans ce cas, aucun
+    changement de numéro de version n'est requis.
+
+    Args:
+        version_actuelle: Version courante du projet (ex: "0.3.0")
+
+    Returns:
+        bool: True si un changement de version est nécessaire, False sinon
+    """
+    tag_existe = verifier_tag_git_existe(version_actuelle)
+
+    if not tag_existe:
+        logger.log_info(
+            f"ℹ️  Le tag v{version_actuelle} n'existe pas dans Git.\n"
+            f"   La version {version_actuelle} n'a pas encore été publiée.\n"
+            f"   Aucun changement de numéro de version nécessaire."
+        )
+        return False
+
+    logger.log_info(f"✅ Tag v{version_actuelle} trouvé – calcul de la nouvelle version...")
+    return True
+```
+
+### Impact sur le workflow
+
+| Situation                         | Comportement                                              |
+|-----------------------------------|-----------------------------------------------------------|
+| Tag absent (version non publiée)  | Version inchangée, ajout dans la section existante du CHANGELOG |
+| Tag présent (version publiée)     | Calcul d'une nouvelle version, nouvelle section dans le CHANGELOG |
+
 ## Étape 4 : Analyse du type de modification
 
 ### Parsing du message de commit
@@ -505,57 +575,106 @@ def calculer_nouvelle_version(version_actuelle: str, type_commit: dict, config: 
 
 ## Étape 5 : Confirmation utilisateur
 
-### Interface interactive
+### Confirmation du changement de version
+
+La confirmation utilise une saisie texte simple `(y|yes|oui) / (n|no|non)`.
+**Un refus ne bloque pas le programme** : le commit se poursuit sans changer la version.
 
 ```python
-def confirmer_incrementation_version(version_actuelle: str, nouvelle_version: str, type_commit: dict) -> bool:
+REPONSES_OUI = {"y", "yes", "oui", "o"}
+REPONSES_NON = {"n", "no", "non"}
+
+
+def demander_confirmation(question: str) -> bool:
+    """
+    Pose une question de confirmation texte (y/n).
+
+    Accepte : y, yes, oui, o  → True
+              n, no,  non     → False
+    Redemande en cas de saisie invalide.
+
+    Args:
+        question: Texte de la question à afficher
+
+    Returns:
+        bool: True si l'utilisateur accepte, False sinon
+    """
+    while True:
+        reponse = input(f"{question} [y/n] : ").strip().lower()
+        if reponse in REPONSES_OUI:
+            return True
+        if reponse in REPONSES_NON:
+            return False
+        print("  ⚠️  Réponse invalide. Entrez 'y' (oui) ou 'n' (non).")
+
+
+def confirmer_incrementation_version(
+    version_actuelle: str,
+    nouvelle_version: str,
+    type_commit: dict
+) -> str | None:
     """
     Demande confirmation à l'utilisateur pour l'incrémentation de version.
+
+    Affiche le résumé et propose :
+    - Accepter la version calculée
+    - Saisir manuellement une version différente
+    - Refuser l'incrémentation (le programme continue sans changer la version)
+
+    Args:
+        version_actuelle: Version courante du projet (ex: "0.3.0")
+        nouvelle_version: Version calculée (ex: "0.4.0")
+        type_commit: Résultat de analyser_type_commit()
+
+    Returns:
+        str | None: Nouvelle version acceptée, version saisie manuellement,
+                    ou None si l'utilisateur refuse l'incrémentation.
     """
-    from InquirerPy import inquirer
-    
     print(f"\n{'='*60}")
     print(f"📦 Incrémentation de version")
     print(f"{'='*60}")
     print(f"Version actuelle   : {version_actuelle}")
     print(f"Nouvelle version   : {nouvelle_version}")
     print(f"Type de commit     : {type_commit['type']}")
-    print(f"Breaking change    : {'Oui' if type_commit['breaking'] else 'Non'}")
-    print(f"{'='*60}\n")
-    
-    choix = inquirer.select(
-        message="Incrémenter la version ?",
-        choices=[
-            {"name": f"✅ Oui, utiliser {nouvelle_version}", "value": "yes"},
-            {"name": "✏️  Modifier manuellement", "value": "edit"},
-            {"name": "❌ Non, ne pas incrémenter", "value": "no"},
-        ],
-        default="yes"
-    ).execute()
-    
-    if choix == "yes":
-        return nouvelle_version
-    elif choix == "edit":
-        return saisir_version_manuelle(version_actuelle)
-    else:
-        return None  # Pas d'incrémentation
+    print(f"Breaking change    : {'Oui ⚠️' if type_commit['breaking'] else 'Non'}")
+    print(f"{'='*60}")
+
+    if not demander_confirmation(f"Incrémenter la version ({version_actuelle} → {nouvelle_version}) ?"):
+        # Proposer une saisie manuelle avant d'abandonner
+        if demander_confirmation("Voulez-vous saisir une version manuellement ?"):
+            return saisir_version_manuelle(version_actuelle)
+        logger.log_info("ℹ️  Incrémentation refusée – le commit se poursuivra sans changement de version.")
+        return None
+
+    return nouvelle_version
+
 
 def saisir_version_manuelle(version_actuelle: str) -> str:
-    """Permet à l'utilisateur de saisir manuellement une version."""
-    from InquirerPy import inquirer
-    
+    """
+    Permet à l'utilisateur de saisir manuellement une version SemVer.
+
+    Redemande tant que le format n'est pas valide.
+
+    Args:
+        version_actuelle: Version de référence affichée comme exemple
+
+    Returns:
+        str: Version valide saisie par l'utilisateur
+    """
     while True:
-        version = inquirer.text(
-            message=f"Nouvelle version (actuelle: {version_actuelle})",
-            default=version_actuelle,
-            validate=lambda v: valider_semver(v) or "Format invalide (ex: 1.0.0)"
-        ).execute()
-        
+        version = input(
+            f"Nouvelle version (actuelle : {version_actuelle}, ex: 1.0.0) : "
+        ).strip()
+
         if valider_semver(version):
             return version
+
+        print(f"  ⚠️  Format invalide '{version}'. Format attendu : MAJOR.MINOR.PATCH (ex: 1.0.0)")
 ```
 
 ## Étape 6 : Mise à jour du CHANGELOG.md
+
+> Règle importante : n'ajouter au CHANGELOG.md que les informations nécessaires. Si une information est déjà présente dans le CHANGELOG, ne pas modifier le fichier pour éviter les doublons.
 
 ### Format Keep a Changelog
 
@@ -586,27 +705,87 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Tests de sécurité pour OWASP Top 10
 ```
 
-### Génération automatique
+### Deux modes de mise à jour du CHANGELOG
+
+| Mode                       | Condition                             | Comportement                                           |
+|----------------------------|---------------------------------------|--------------------------------------------------------|
+| **Nouvelle section**       | `nouvelle_version != version_actuelle` | Insère une section `## [X.Y.Z]` en haut               |
+| **Ajout dans l'existante** | `nouvelle_version == version_actuelle` | Complète la section `## [X.Y.Z]` déjà présente        |
+
+> **Note :** Dans les deux cas, une confirmation `(y|yes|oui)/(n|no|non)` est demandée.  
+> Un refus n'interrompt pas le programme – le commit continue sans modifier le CHANGELOG.
+
+### Génération et mise à jour avec confirmation
 
 ```python
-def mettre_a_jour_changelog(
+def proposer_mise_a_jour_changelog(
     fichier_changelog: Path,
     nouvelle_version: str,
+    version_actuelle: str,
     type_commit: dict,
     message_commit: str
-) -> None:
+) -> bool:
     """
-    Met à jour CHANGELOG.md avec la nouvelle version.
-    
+    Propose la mise à jour du CHANGELOG.md et demande confirmation.
+
+    Deux comportements selon que la version a changé ou non :
+    - Si nouvelle_version != version_actuelle → nouvelle section ## [X.Y.Z]
+    - Si nouvelle_version == version_actuelle → ajout dans la section existante
+
+    La confirmation est demandée avant toute écriture.
+    Un refus n'interrompt pas le programme.
+
     Args:
         fichier_changelog: Chemin vers CHANGELOG.md
-        nouvelle_version: Version à ajouter (ex: "0.4.0")
+        nouvelle_version: Version cible (peut être identique à version_actuelle)
+        version_actuelle: Version courante du projet
         type_commit: Résultat de analyser_type_commit()
         message_commit: Message de commit complet
+
+    Returns:
+        bool: True si le changelog a été mis à jour, False sinon
+    """
+    entree_generee = _generer_entree_changelog(nouvelle_version, type_commit)
+
+    print(f"\n{'='*60}")
+    print(f"📋 Mise à jour proposée pour CHANGELOG.md")
+    print(f"{'='*60}")
+
+    if nouvelle_version != version_actuelle:
+        print(f"Mode        : Nouvelle section ## [{nouvelle_version}]")
+    else:
+        print(f"Mode        : Ajout dans la section existante ## [{version_actuelle}]")
+
+    print(f"\nContenu à ajouter :\n{'-'*40}")
+    print(entree_generee.strip())
+    print(f"{'='*60}")
+
+    if not demander_confirmation("Mettre à jour le CHANGELOG.md ?"):
+        logger.log_info("ℹ️  Mise à jour du CHANGELOG refusée – le commit continue sans modification.")
+        return False
+
+    if nouvelle_version != version_actuelle:
+        mettre_a_jour_changelog_nouvelle_section(fichier_changelog, nouvelle_version, entree_generee)
+    else:
+        mettre_a_jour_changelog_section_existante(fichier_changelog, version_actuelle, entree_generee)
+
+    logger.log_info(f"✅ CHANGELOG.md mis à jour (version {nouvelle_version})")
+    return True
+
+
+def _generer_entree_changelog(version: str, type_commit: dict) -> str:
+    """
+    Génère le bloc de texte à insérer dans le CHANGELOG.
+
+    Args:
+        version: Version cible
+        type_commit: Résultat de analyser_type_commit()
+
+    Returns:
+        str: Bloc Markdown prêt à l'insertion
     """
     from datetime import date
-    
-    # Mapper le type de commit vers la catégorie du changelog
+
     MAPPING_CATEGORIES = {
         'feat': 'Added',
         'fix': 'Fixed',
@@ -619,69 +798,116 @@ def mettre_a_jour_changelog(
         'ci': 'CI/CD',
         'chore': 'Maintenance',
         'revert': 'Removed',
-        'security': 'Security',  # Type custom
+        'security': 'Security',
     }
-    
-    categorie = MAPPING_CATEGORIES.get(type_commit['type'], 'Changed')
-    
-    # Si BREAKING CHANGE, ajouter aussi dans Security
-    if type_commit['breaking']:
-        categorie = 'Security'
-    
-    # Extraire les points du body
+
+    categorie = 'Security' if type_commit['breaking'] else MAPPING_CATEGORIES.get(type_commit['type'], 'Changed')
+
     body_lines = type_commit.get('body', '').strip().split('\n')
     points = [
         ligne.strip('- ').strip()
         for ligne in body_lines
         if ligne.strip().startswith('-')
     ]
-    
-    # Si pas de points dans le body, utiliser la description
+
     if not points:
         points = [type_commit['description']]
-    
-    # Créer la nouvelle entrée
-    nouvelle_entree = f"""## [{nouvelle_version}] - {date.today()}
 
-### {categorie}
-"""
+    entree = f"### {categorie}\n"
     for point in points:
-        nouvelle_entree += f"- {point}\n"
-    
-    nouvelle_entree += "\n"
-    
-    # Insérer dans le changelog
+        entree += f"- {point}\n"
+
+    return entree
+
+
+def mettre_a_jour_changelog_nouvelle_section(
+    fichier_changelog: Path,
+    nouvelle_version: str,
+    contenu_section: str
+) -> None:
+    """
+    Insère une nouvelle section ## [X.Y.Z] - YYYY-MM-DD en tête du changelog.
+
+    Args:
+        fichier_changelog: Chemin vers CHANGELOG.md
+        nouvelle_version: Version de la nouvelle section
+        contenu_section: Corps Markdown de la section (### Added, etc.)
+    """
+    import re
+    from datetime import date
+
+    entete_section = f"## [{nouvelle_version}] - {date.today()}\n\n"
+    nouvelle_entree = entete_section + contenu_section + "\n"
+
     if not fichier_changelog.exists():
-        # Créer un nouveau changelog
-        contenu = f"""# Changelog
-
-Toutes les modifications notables de ce projet seront documentées dans ce fichier.
-
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-{nouvelle_entree}"""
+        contenu = (
+            "# Changelog\n\n"
+            "Toutes les modifications notables de ce projet seront documentées dans ce fichier.\n\n"
+            "Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\n"
+            "et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n\n"
+            + nouvelle_entree
+        )
     else:
-        # Insérer après l'en-tête
-        with open(fichier_changelog, 'r', encoding='utf-8') as f:
-            contenu = f.read()
-        
-        # Trouver la position d'insertion (après le préambule)
+        with open(fichier_changelog, 'r', encoding='utf-8') as fichier:
+            contenu = fichier.read()
+
+        # Insérer après le préambule (avant la première section ##)
         pattern = r'(# Changelog.*?adhère à.*?\n\n)'
-        match = re.search(pattern, contenu, re.DOTALL)
-        
-        if match:
-            position = match.end()
+        correspondance = re.search(pattern, contenu, re.DOTALL)
+
+        if correspondance:
+            position = correspondance.end()
             contenu = contenu[:position] + nouvelle_entree + contenu[position:]
         else:
-            # Fallback : insérer au début
             contenu = nouvelle_entree + contenu
-    
-    # Écrire le fichier
-    with open(fichier_changelog, 'w', encoding='utf-8') as f:
-        f.write(contenu)
-    
-    logger.log_info(f"CHANGELOG.md mis à jour avec la version {nouvelle_version}")
+
+    with open(fichier_changelog, 'w', encoding='utf-8') as fichier:
+        fichier.write(contenu)
+
+
+def mettre_a_jour_changelog_section_existante(
+    fichier_changelog: Path,
+    version_actuelle: str,
+    contenu_a_ajouter: str
+) -> None:
+    """
+    Ajoute du contenu dans la section ## [version_actuelle] déjà présente.
+
+    Si la section n'existe pas encore, crée une nouvelle section.
+
+    Args:
+        fichier_changelog: Chemin vers CHANGELOG.md
+        version_actuelle: Version dont la section sera complétée
+        contenu_a_ajouter: Corps Markdown à insérer (### Added, etc.)
+    """
+    import re
+
+    if not fichier_changelog.exists():
+        # Pas de changelog → créer avec une section neuve
+        mettre_a_jour_changelog_nouvelle_section(fichier_changelog, version_actuelle, contenu_a_ajouter)
+        return
+
+    with open(fichier_changelog, 'r', encoding='utf-8') as fichier:
+        contenu = fichier.read()
+
+    # Chercher la section de la version actuelle
+    pattern_section = rf'(## \[{re.escape(version_actuelle)}\][^\n]*\n)'
+    correspondance = re.search(pattern_section, contenu)
+
+    if not correspondance:
+        # Section absente → créer une nouvelle section
+        logger.log_info(
+            f"ℹ️  Section [{version_actuelle}] absente du CHANGELOG – création d'une nouvelle section."
+        )
+        mettre_a_jour_changelog_nouvelle_section(fichier_changelog, version_actuelle, contenu_a_ajouter)
+        return
+
+    # Insérer le contenu juste après le titre de la section
+    position_insertion = correspondance.end()
+    contenu = contenu[:position_insertion] + "\n" + contenu_a_ajouter + contenu[position_insertion:]
+
+    with open(fichier_changelog, 'w', encoding='utf-8') as fichier:
+        fichier.write(contenu)
 ```
 
 ### Gestion des catégories multiples
