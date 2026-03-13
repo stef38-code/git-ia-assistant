@@ -27,6 +27,9 @@ Git IA Assistant automatise les tâches répétitives de Git (commits, revues, d
 
 ## 📦 Démarrage rapide
 
+> Note importante : Lors de la mise à jour du CHANGELOG.md, n'ajouter que les informations nécessaires. Si une information est déjà présente dans le CHANGELOG, ne pas modifier le fichier pour éviter les doublons.
+
+
 ### Installation (Linux / macOS)
 
 ```bash

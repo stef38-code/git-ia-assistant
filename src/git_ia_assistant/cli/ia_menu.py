@@ -17,6 +17,8 @@ THÉMATIQUES DU CODE
 
 import os
 import sys
+import shutil
+import re
 from typing import List, Optional, Dict
 from pathlib import Path
 
@@ -49,7 +51,7 @@ from python_commun.cli.menu_utils import (
 )
 from python_commun.cli.usage import colorier_aide
 from python_commun.logging import logger
-from python_commun.system.system import executer_commande
+from python_commun.system.system import executer_commande, executer_capture
 
 # ==============================================================================
 # 1. CONFIGURATION
@@ -61,17 +63,50 @@ CONFIG_FILE = CLI_DIR.parent / "config" / "ia_menu.yaml"
 
 COMMAND_MAPPING = charger_config_yaml(str(CONFIG_FILE))
 
+
+def resolve_command_path(cmd_name: str) -> Path:
+    """Résout le chemin d'exécution d'une commande en priorité vers l'exécutable installé.
+
+    Ordre de résolution :
+      1) ~/.local/bin/<cmd>
+      2) chemin trouvé par `which` (PATH)
+      3) fallback : chemin source dans le dépôt (COMMAND_MAPPING)
+    Retourne un Path (peut ne pas exister).
+    """
+    # 1) ~/.local/bin
+    local_bin = Path.home() / ".local" / "bin" / cmd_name
+    if local_bin.exists() and os.access(str(local_bin), os.X_OK):
+        return local_bin
+
+    # 2) which (PATH)
+    which_path = shutil.which(cmd_name)
+    if which_path:
+        return Path(which_path)
+
+    # 3) fallback vers le fichier source référencé dans COMMAND_MAPPING
+    mapped = CLI_DIR / COMMAND_MAPPING.get(cmd_name, "")
+    return mapped
+
+
 # ==============================================================================
 # 2. INTERFACE UTILISATEUR (UI)
 # ==============================================================================
 
 class MasterSelector:
-    """Sélecteur maître à double panneau avec rafraîchissement automatique."""
+    """Sélecteur maître à double panneau avec rafraîchissement automatique.
+
+    Ajout : saisie filtrée. L'utilisateur peut taper pour filtrer la liste des
+    commandes. Backspace supprime, Escape vide le filtre. La navigation par
+    flèches fonctionne toujours sur la liste filtrée.
+    """
     def __init__(self):
         self.mode = "help"
         self.selected_value = None
-        self.commands = list(COMMAND_MAPPING.keys())
+        # garder la liste complète et une vue filtrée
+        self.all_commands = list(COMMAND_MAPPING.keys())
+        self.commands = self.all_commands.copy()
         self.index = 0
+        self.filter_text = ""
 
         # Panneau droit : Utilisation de FormattedTextControl pour le support ANSI
         self.details_control = FormattedTextControl(text=ANSI(""))
@@ -82,18 +117,34 @@ class MasterSelector:
         self.kb = KeyBindings()
         self._setup_keybindings()
         self.menu_control = FormattedTextControl(self._get_menu_text)
-        self.menu_window = Window(content=self.menu_control, width=35)
+        self.menu_window = Window(content=self.menu_control, width=40)
 
         self._update_details()
+
+    def _apply_filter(self):
+        if not self.filter_text:
+            self.commands = self.all_commands.copy()
+        else:
+            ft = self.filter_text.lower()
+            self.commands = [c for c in self.all_commands if ft in c.lower()]
+        # ajuster l'index
+        if not self.commands:
+            self.index = 0
+        else:
+            self.index = max(0, min(self.index, len(self.commands) - 1))
 
     def _setup_keybindings(self):
         @self.kb.add("up")
         def _(event):
+            if not self.commands:
+                return
             self.index = (self.index - 1) % len(self.commands)
             self._update_details()
 
         @self.kb.add("down")
         def _(event):
+            if not self.commands:
+                return
             self.index = (self.index + 1) % len(self.commands)
             self._update_details()
 
@@ -109,6 +160,9 @@ class MasterSelector:
 
         @self.kb.add("enter")
         def _(event):
+            if not self.commands:
+                # rien à sélectionner
+                return
             self.selected_value = self.commands[self.index]
             event.app.exit()
 
@@ -119,9 +173,49 @@ class MasterSelector:
             self.selected_value = None
             event.app.exit()
 
+        # Backspace pour enlever un caractère du filtre
+        @self.kb.add("backspace")
+        def _(event):
+            if self.filter_text:
+                self.filter_text = self.filter_text[:-1]
+                self._apply_filter()
+                self._update_details()
+
+        # Escape pour vider le filtre
+        @self.kb.add("escape")
+        def _(event):
+            if self.filter_text:
+                self.filter_text = ""
+                self._apply_filter()
+                self._update_details()
+
+        # Capturer les caractères imprimables pour construire le filtre
+        @self.kb.add("<any>")
+        def _(event):
+            try:
+                key = event.key_sequence[0].key
+            except Exception:
+                return
+            # Accepter uniquement les caractères imprimables simples
+            if isinstance(key, str) and len(key) == 1 and key.isprintable():
+                self.filter_text += key
+                self._apply_filter()
+                self._update_details()
+            # Permettre TAB ou autres touches de passer
+
     def _get_menu_text(self):
-        """Génère le texte enrichi du menu gauche."""
+        """Génère le texte enrichi du menu gauche, incluant la ligne de filtre."""
         fragments = []
+        # Ligne de filtre
+        if self.filter_text:
+            fragments.append(("fg:ansiblue", f" Filter: {self.filter_text} \n\n"))
+        else:
+            fragments.append(("fg:ansigray italic", " Tapez pour filtrer, Esc pour effacer. \n\n"))
+
+        if not self.commands:
+            fragments.append(("fg:ansired", "   Aucun résultat pour ce filtre\n"))
+            return fragments
+
         for i, cmd in enumerate(self.commands):
             if i == self.index:
                 fragments.append(("bg:ansiyellow fg:ansiblack", f" > {cmd} "))
@@ -132,15 +226,88 @@ class MasterSelector:
 
     def _update_details(self):
         """Met à jour le panneau droit avec coloration ANSI."""
+        if not self.commands:
+            # afficher message informatif
+            self.frame_right.title = " Détails "
+            self.details_control.text = ANSI("\n🔎 Aucun élément correspondant au filtre.\n")
+            return
+
         cmd = self.commands[self.index]
-        script_path = CLI_DIR / COMMAND_MAPPING[cmd]
-        
-        # Vérification de l'existence du script
+        script_path = resolve_command_path(cmd)
+
+        # Vérification de l'existence du script/exécutable
         if not script_path.exists():
             self.details_control.text = ANSI(f"\n❌ Fichier introuvable :\n{script_path}")
             return
 
-        doc = extraire_docstring(str(script_path))
+        # Si le chemin résolu est un script Python, extraire la docstring directement.
+        source_for_doc = script_path
+        if script_path.suffix != ".py":
+            # Essayer d'extraire la cible Python d'un wrapper bash (ex: scripts créés par l'install)
+            try:
+                content = script_path.read_text()
+                m = re.search(r'python3?\s+\"([^\"]+\.py)\"', content)
+                if m:
+                    candidate_str = m.group(1)
+                    # Remplacer les variables $INSTALL_DIR ou ${INSTALL_DIR} par le chemin d'installation par défaut
+                    install_dir_guess = str(Path.home() / '.local' / 'share' / 'git-ia-assistant')
+                    candidate_str = candidate_str.replace('$INSTALL_DIR', install_dir_guess).replace('${INSTALL_DIR}', install_dir_guess)
+                    candidate = Path(candidate_str)
+                    if not candidate.is_absolute():
+                        # tenter une résolution relative au dépôt
+                        candidate = (CLI_DIR / candidate).resolve()
+                    # Si le chemin n'existe pas (wrapper pointant vers INSTALL_DIR), essayer la copie dans le dépôt (recherche de '/src/')
+                    if not candidate.exists():
+                        repo_root = CLI_DIR
+                        # remonter jusqu'à la racine du dépôt : chercher 'src' dans parents
+                        for _ in range(6):
+                            repo_root = repo_root.parent
+                        # essayer d'extraire le suffixe 'src/...'
+                        s = candidate_str
+                        idx = s.find('/src/')
+                        if idx == -1:
+                            idx = s.find('src/')
+                        if idx != -1:
+                            suffix = s[idx:]
+                            candidate_alt = (repo_root / suffix).resolve()
+                            if candidate_alt.exists():
+                                candidate = candidate_alt
+                    if candidate.exists():
+                        source_for_doc = candidate
+            except Exception:
+                # Fallback: on utilisera le binaire/exécutable pour informer l'utilisateur
+                source_for_doc = script_path
+
+        # Extraire la docstring si possible
+        doc = extraire_docstring(str(source_for_doc))
+        if not doc or not doc.strip():
+            # Tentative de fallback : exécuter l'exécutable avec --help et capturer la sortie
+            try:
+                proc = executer_capture([str(script_path), "--help"], check=False)
+                # Prefer stdout, fallback to stderr if stdout empty
+                if proc.stdout:
+                    help_text = proc.stdout.decode() if isinstance(proc.stdout, (bytes, bytearray)) else proc.stdout
+                else:
+                    help_text = proc.stderr.decode() if proc.stderr else ""
+            except Exception:
+                help_text = ""
+
+            if help_text.strip():
+                # Afficher la sortie --help (colorisée si possible)
+                os.environ["FORCE_COLOR"] = "1"
+                try:
+                    colored = colorier_aide(help_text)
+                except Exception:
+                    colored = help_text
+                self.frame_right.title = f" Aide: {cmd} "
+                self.details_control.text = ANSI(colored)
+                return
+
+            # Si tout échoue, informer l'utilisateur
+            self.details_control.text = ANSI(
+                f"\nℹ️  Exécutable trouvé : {script_path}\nImpossible d'extraire la docstring ou d'obtenir '--help'." 
+            )
+            return
         
         if self.mode == "help":
             content = extraire_aide_commande(doc)
@@ -187,11 +354,60 @@ class MasterSelector:
 
 def gerer_workflow_dynamique(cmd_name: str) -> List[str]:
     """Extrait et demande les arguments nécessaires via InquirerPy."""
-    script_path = CLI_DIR / COMMAND_MAPPING[cmd_name]
-    doc = extraire_docstring(str(script_path))
-    
+    script_path = resolve_command_path(cmd_name)
+
+    doc = ""
+    if script_path.exists():
+        if script_path.suffix == ".py":
+            try:
+                doc = extraire_docstring(str(script_path))
+            except Exception:
+                doc = ""
+        else:
+            # tenter d'extraire la cible Python d'un wrapper
+            try:
+                content = script_path.read_text()
+                m = re.search(r'python3?\s+\"([^\"]+\.py)\"', content)
+                if m:
+                    candidate_str = m.group(1)
+                    install_dir_guess = str(Path.home() / '.local' / 'share' / 'git-ia-assistant')
+                    candidate_str = candidate_str.replace('$INSTALL_DIR', install_dir_guess).replace('${INSTALL_DIR}', install_dir_guess)
+                    candidate = Path(candidate_str)
+                    if not candidate.is_absolute():
+                        candidate = (CLI_DIR / candidate).resolve()
+                    if not candidate.exists():
+                        repo_root = CLI_DIR
+                        for _ in range(6):
+                            repo_root = repo_root.parent
+                        s = candidate_str
+                        idx = s.find('/src/')
+                        if idx == -1:
+                            idx = s.find('src/')
+                        if idx != -1:
+                            suffix = s[idx:]
+                            candidate_alt = (repo_root / suffix).resolve()
+                            if candidate_alt.exists():
+                                candidate = candidate_alt
+                    if candidate.exists():
+                        doc = extraire_docstring(str(candidate))
+            except Exception:
+                # fallback: on pourra exécuter le binaire pour obtenir l'aide si nécessaire
+                doc = ""
+
+    # Si docstring vide, tenter de récupérer l'aide via --help
+    if not doc and script_path.exists():
+        try:
+            proc = executer_capture([str(script_path), "--help"], check=False)
+            if proc.stdout:
+                help_text = proc.stdout.decode() if isinstance(proc.stdout, (bytes, bytearray)) else proc.stdout
+            else:
+                help_text = proc.stderr.decode() if proc.stderr else ""
+            doc = help_text
+        except Exception:
+            doc = ""
+
     args = []
-    
+
     # 1. Saisie des arguments OBLIGATOIRES
     obligatoires = extraire_options_obligatoires(doc)
     if obligatoires:

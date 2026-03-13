@@ -38,7 +38,7 @@ ALIAS_FILE="${HOME}/.aliases"
 TMP_DIR=$(mktemp -d)
 
 # Commandes disponibles
-COMMANDS=("git-ia-commit" "git-ia-commit-version" "git-ia-review" "git-ia-mr" "git-ia-squash" "git-ia-changelog" "git-ia-explain" "git-ia-test" "git-ia-doc" "git-ia-refacto" "git-ia-menu")
+COMMANDS=("git-ia-commit" "git-ia-commit-version" "git-ia-commit-v2" "git-ia-review" "git-ia-mr" "git-ia-squash" "git-ia-changelog" "git-ia-explain" "git-ia-test" "git-ia-doc" "git-ia-refacto" "git-ia-menu")
 
 function cleanup {
     if [ -d "$TMP_DIR" ]; then
@@ -163,7 +163,17 @@ function configure_symlinks {
 
     for cmd in "${COMMANDS[@]}"; do
         echo "Lien symbolique pour $cmd..."
-        ln -sf "$INSTALL_DIR/venv/bin/$cmd" "$BIN_DEST/$cmd"
+        # Si le binaire n'existe pas dans l'environnement, créer un wrapper qui invoque le script python correspondant
+        if [ -x "$INSTALL_DIR/venv/bin/$cmd" ]; then
+            ln -sf "$INSTALL_DIR/venv/bin/$cmd" "$BIN_DEST/$cmd"
+        else
+            # créer un petit wrapper exécutable dans bin dest
+            cat > "$BIN_DEST/$cmd" <<EOF
+#!/usr/bin/env bash
+python3 "$INSTALL_DIR/src/git_ia_assistant/cli/commits/commit_v2.py" "\$@"
+EOF
+            chmod +x "$BIN_DEST/$cmd"
+        fi
     done
 }
 
@@ -176,9 +186,7 @@ function configure_aliases {
     fi
 
     for cmd in "${COMMANDS[@]}"; do
-        # Format de l'alias: ia-commit pour git-ia-commit
-        alias_name=$(echo "$cmd" | sed 's/git-//')
-        alias_cmd="alias $alias_name='$cmd'"
+        alias_cmd="alias $alias_name='$cmd'" # ex: alias ia-commit='git-ia-commit'
         
         if grep -q "alias $alias_name=" "$ALIAS_FILE"; then
             echo "L'alias '$alias_name' est déjà présent dans $ALIAS_FILE."
@@ -195,7 +203,8 @@ function create_ia_wrapper {
     # Créer le lien symbolique ia -> git-ia-menu (remplacer si existe déjà)
     echo "Création du lien symbolique $BIN_DEST/ia..."
     ln -sf "$INSTALL_DIR/venv/bin/git-ia-menu" "$BIN_DEST/ia"
-    
+
+
     # Ajouter l'alias explicite dans .aliases si pas déjà présent
     if [ -f "$ALIAS_FILE" ]; then
         if ! grep -q "alias ia=" "$ALIAS_FILE"; then
