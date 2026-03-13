@@ -266,7 +266,7 @@ def detecter_migration(repo_path: Path, source_branch: str, target_branch: str) 
     if not source_branch or not target_branch:
         return {"detected": False, "migrations": []}
     
-    logger.log_info(f"Détection de migration entre {source_branch} → {target_branch}")
+    logger.log_info(f"Merge entre {source_branch} → {target_branch}")
     
     # Extraire les versions de chaque branche
     versions_source = extraire_version_fichier(repo_path, source_branch)
