@@ -592,4 +592,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print()
+        logger.log_warn("Interruption par l'utilisateur (Ctrl+C) — arrêt propre.")
