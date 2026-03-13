@@ -513,6 +513,21 @@ def main() -> None:
             langage=langage_framework,
             token=git_token,
             repo_path=repo_local_path)
+        if mcp_config_path and mcp_config_path.exists():
+            import json
+            config = json.loads(mcp_config_path.read_text())
+            serveurs = list(config.get("mcpServers", {}).keys())
+            logger.log_info(f"📋 Config MCP générée : {mcp_config_path}")
+            logger.log_info(f"🔌 Serveurs MCP configurés ({len(serveurs)}) : {', '.join(serveurs)}")
+            logger.log_info("🔍 Vérification de la disponibilité des serveurs MCP...")
+            tous_ok = McpConfigManager.verifier_installation(servers=serveurs)
+            if tous_ok:
+                logger.log_info("✅ Tous les serveurs MCP sont prêts — ils seront utilisés par Copilot")
+            else:
+                logger.log_warn("⚠️  Certains serveurs MCP sont indisponibles — Copilot fonctionnera sans eux")
+        else:
+            logger.log_warn("⚠️  Échec de la génération de la config MCP — Copilot fonctionnera sans MCP")
+            mcp_config_path = None
 
     # Utilisation du pattern Factory pour instancier la classe IA appropriée
     ia_instance = IaAssistantMrFactory.create_mr_instance(
