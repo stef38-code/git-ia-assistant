@@ -596,4 +596,4 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print()
-        logger.log_warn("Interruption par l'utilisateur (Ctrl+C) — arrêt propre.")
+        logger.log_warn("Interruption par l'utilisateur")
