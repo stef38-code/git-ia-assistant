@@ -5,7 +5,20 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.8] - 2026-03-12
+## [0.9.9] - 2026-03-13
+
+### Corrigé
+- **`git-ia-mr`** : Suppression du paramètre `repo_path` inexistant dans les appels à `verifier_droits_publication_mr()` et `publier_commentaire_mr()` — causait une `UnboundLocalError` puis un `TypeError`.
+- **`git-ia-mr`** : Reformulation du message de détection de branches : "Détection de migration entre" → "Merge entre".
+- **`git-ia-mr`** : Suppression de la vérification bloquante des serveurs MCP (`verifier_installation()`) qui gelait le script plusieurs secondes.
+- **`git-ia-mr`** : Interception propre du `KeyboardInterrupt` (Ctrl+C) — affiche `⚠ Interruption par l'utilisateur` au lieu d'une stacktrace.
+
+### Ajouté
+- **`git-ia-mr --mcp`** : Affichage du chemin du fichier `mcp-config.json` généré et de la liste des serveurs MCP configurés.
+
+### Technique
+- **Submodule `python_commun`** : Configuration pour suivre la branche `master` (`branch = master` dans `.gitmodules`).
+
 
 ### Corrigé
 - **`McpConfigManager`** : Correction du serveur MCP `git` — le package `@modelcontextprotocol/server-git` n'existe pas sur npm. Remplacement par `mcp-server-git` (package Python officiel), lancé via `uvx mcp-server-git`.
