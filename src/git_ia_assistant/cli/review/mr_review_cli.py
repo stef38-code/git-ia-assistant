@@ -566,7 +566,6 @@ def main() -> None:
                     espace_projet=espace_projet,
                     url_mr=args.url,
                     token=git_token,
-            repo_path=repo_local_path
                 )
                 
                 if not success:
