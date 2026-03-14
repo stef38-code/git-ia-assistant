@@ -165,6 +165,11 @@ def _parser_options() -> argparse.Namespace:
         action="store_true", 
         help="Publier le rapport de revue comme commentaire dans la MR/PR"
     )
+    parser.add_argument(
+        "--clear",
+        action="store_true",
+        help="Vider le répertoire de sortie avant de commencer"
+    )
     return parser.parse_args()
 
 
@@ -392,7 +397,8 @@ def main() -> None:
         logger.log_info("")
 
 
-    vide_repertoire(OUT_DIR, getattr(args, "clean_outdir", True), args.dry_run)
+    if args.clear:
+        vide_repertoire(OUT_DIR, True, args.dry_run)
 
     depot_ssh = creer_url_ssh(args.url)
     # cloner_ou_fetch_depot construit le chemin final lui-même, on passe juste le répertoire de base

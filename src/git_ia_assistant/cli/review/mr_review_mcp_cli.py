@@ -43,8 +43,9 @@ def main():
     parser = argparse.ArgumentParser(description="Revue MR via Agent MCP", add_help=False)
     parser.add_argument("-h", "--help", action="store_true")
     parser.add_argument("-u", "--url")
-    parser.add_argument("-ia", choices=["gemini", "copilot"], default="gemini")
+    parser.add_argument("-ia", choices=["gemini", "copilot", "ollama"], default="gemini")
     parser.add_argument("--publier", action="store_true")
+    parser.add_argument("--clear", action="store_true", help="Vider le répertoire de sortie classique (mrOrpr)")
     args = parser.parse_args()
 
     if args.help:
@@ -54,6 +55,7 @@ def main():
     if not args.url:
         logger.die("L'URL (-u) est obligatoire.")
 
+    ia_type = args.ia + "_mcp"
     git_token = os.environ.get("GIT_TOKEN")
     if not git_token:
         logger.die("GIT_TOKEN manquant dans l'environnement.")
@@ -65,8 +67,10 @@ def main():
 
     logger.log_info(f"🚀 Démarrage de la revue MCP pour {plateforme} !{numero_mr}")
 
-    # 2. Préparation du répertoire de travail (léger)
-    vide_repertoire(OUT_DIR, True, False)
+    # 2. Gestion du nettoyage si demandé
+    if args.clear:
+        DIR_A_VIDER = Path.home() / "ia_assistant/mrOrpr"
+        vide_repertoire(DIR_A_VIDER, True, False)
     
     # On a besoin du chemin local pour le serveur MCP filesystem
     # Note: Dans une version future, on pourrait même éviter le clone local si le serveur MCP Git 
@@ -89,25 +93,36 @@ def main():
         logger.die("Impossible de générer la configuration MCP.")
 
     # 4. Instanciation de l'IA (Version MCP)
-    # On utilise la factory existante mais on va s'assurer que l'instance sait qu'elle est en mode MCP
     ia_instance = IaAssistantMrFactory.create_mr_instance(
-        ia=args.ia,
+        ia=ia_type,
         url_mr=args.url,
         plateforme=plateforme,
         numero_mr=numero_mr,
         out_dir=OUT_DIR,
         langage=langage,
         mcp_config_path=mcp_config_path,
-        # On passe un flag spécifique pour indiquer le mode Agent si nécessaire
     )
 
     # 5. Lancement de la revue Agentique
     # En mode MCP, on ne passe pas de fichiers diff/resume car l'IA les récupérera elle-même
     logger.log_info("🤖 L'Agent IA explore le codebase...")
     
-    # On appelle une méthode spécifique au mode MCP si elle existe, 
-    # sinon on adapte generer_revue_mr pour qu'elle comprenne le mode MCP
-    result = ia_instance.generer_revue_mr(diff_path=None, resume_path=None)
+    result = None
+    try:
+        result = ia_instance.generer_revue_mr(diff_path=None, resume_path=None)
+    except Exception as e:
+        err_msg = str(e).lower()
+        if 'quota' in err_msg or 'exhausted' in err_msg or '429' in err_msg:
+            logger.log_error(f"❌ Quota épuisé pour {args.ia} (Erreur 429 RESOURCE_EXHAUSTED).")
+            logger.log_info("")
+            logger.log_info("💡 Solutions possibles :")
+            logger.log_info("   1. Attendre quelques minutes avant de réessayer.")
+            logger.log_info("   2. Utiliser une autre IA (ex: -ia copilot).")
+            logger.log_info("   3. Passer sur une IA locale (ex: -ia ollama) pour éviter les quotas distants.")
+            sys.exit(1)
+        else:
+            logger.log_error(f"❌ Échec lors de la génération de la revue {args.ia} : {e}")
+            sys.exit(1)
 
     if result:
         output_file = OUT_DIR / f"revue_mcp_{numero_mr}.md"

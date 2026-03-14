@@ -35,11 +35,17 @@ class IaAssistantCommitFactory:
         "copilot": "git_ia_assistant.ia.copilot.ia_assistant_copilot_commit",
         "gemini": "git_ia_assistant.ia.gemini.ia_assistant_gemini_commit",
         "ollama": "git_ia_assistant.ia.ollama.ia_assistant_ollama_commit",
+        "copilot_mcp": "git_ia_assistant.ia.copilot.ia_assistant_copilot_commit_mcp",
+        "gemini_mcp": "git_ia_assistant.ia.gemini.ia_assistant_gemini_commit_mcp",
+        "ollama_mcp": "git_ia_assistant.ia.ollama.ia_assistant_ollama_commit_mcp",
     }
     IA_CLASSES = {
         "copilot": "IaAssistantCopilotCommit",
         "gemini": "IaAssistantGeminiCommit",
         "ollama": "IaAssistantOllamaCommit",
+        "copilot_mcp": "IaAssistantCopilotCommitMcp",
+        "gemini_mcp": "IaAssistantGeminiCommitMcp",
+        "ollama_mcp": "IaAssistantOllamaCommitMcp",
     }
 
     @classmethod
@@ -50,3 +56,16 @@ class IaAssistantCommitFactory:
             return IaAssistantCommit
         module = importlib.import_module(module_name)
         return getattr(module, class_name)
+
+    @classmethod
+    def create_commit_instance(
+        cls,
+        ia: str,
+        fichiers: list,
+        mcp_config_path=None
+    ) -> IaAssistantCommit:
+        commit_class = cls.get_commit_class(ia)
+        return commit_class(
+            fichiers=fichiers,
+            mcp_config_path=mcp_config_path
+        )

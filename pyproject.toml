@@ -39,6 +39,7 @@ dev = [
 [project.scripts]
 git-ia-commit = "git_ia_assistant.cli.commits.commit_cli:main"
 git-ia-commit-v2 = "git_ia_assistant.cli.commits.commit_v2:main"
+git-ia-commit-mcp = "git_ia_assistant.cli.commits.commit_mcp_cli:main"
 git-ia-commit-version = "git_ia_assistant.cli.commits.commit_version_cli:main"
 git-ia-review = "git_ia_assistant.cli.review.review_my_code_cli:main"
 git-ia-mr = "git_ia_assistant.cli.review.mr_review_cli:main"

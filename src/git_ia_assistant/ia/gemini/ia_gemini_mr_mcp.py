@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 from pathlib import Path
 from typing import Optional
+from google import genai
 from git_ia_assistant.core.definition.ia_assistant_mr import IaAssistantMr
 from python_commun.ai.mcp_client_manager import McpClientManager
 from python_commun.ai.prompt import charger_prompt, formatter_prompt
 from python_commun.logging import logger
-import os
-from google import genai
-from google.genai import types
 
 class IaGeminiMrMcp(IaAssistantMr):
     """
@@ -21,62 +20,73 @@ class IaGeminiMrMcp(IaAssistantMr):
         self.mcp_manager = None
 
     def generer_revue_mr(self, diff_path: Optional[Path] = None, resume_path: Optional[Path] = None) -> Optional[str]:
+        """
+        Génère une revue de la MR/PR en utilisant Google Gemini en mode Agent MCP.
+        """
         if not self.mcp_config_path:
-            logger.die("Configuration MCP manquante pour le mode Agent.")
+            logger.die("Configuration MCP manquante pour le mode Agent Gemini.")
 
+        # Démarrage des serveurs MCP
         self.mcp_manager = McpClientManager(self.mcp_config_path)
         self.mcp_manager.demarrer_serveurs()
 
         try:
-            # Préparation du prompt (léger car sans diff)
-            prompt_template = charger_prompt(self._choisir_prompt_mr() + "_mcp", self.dossier_prompts)
+            # 1. Préparation du prompt MCP
+            # On utilise le prompt spécifique au langage si possible
+            nom_base_prompt = self._choisir_prompt_mr()
+            prompt_name = f"{nom_base_prompt}_mcp"
             
-            # Récupération des fichiers modifiés (on pourrait aussi laisser l'IA le faire)
-            liste_fichiers = "Consultable via git.git_diff"
+            prompt_template = charger_prompt(prompt_name, self.dossier_prompts)
             
+            # En mode Agent, on ne passe pas le diff complet pour économiser les tokens
             prompt = formatter_prompt(
                 prompt_template,
                 url=self.url_mr,
-                resume="Analyse en cours via outils...",
-                liste_fichiers=liste_fichiers,
+                resume="Analyse agentique en cours via outils MCP...",
+                liste_fichiers="Utilise l'outil git.git_diff pour identifier les changements.",
                 langage=self.langage,
-                migration_detectee="A vérifier via outils",
-                migration_info="",
+                migration_detectee="À vérifier via outils",
+                migration_info="L'IA doit explorer le code pour détecter les changements de version.",
                 numero_mr=self.numero_mr,
                 version_cible=self._get_version_cible()
             )
 
-            # Configuration du client Gemini avec les outils MCP
+            # 2. Configuration du client Gemini
             api_key = os.getenv("GEMINI_API_KEY")
-            client = genai.Client(api_key=api_key, http_options={"api_version": "v1"})
+            if not api_key:
+                logger.die("La variable d'environnement GEMINI_API_KEY n'est pas configurée.")
+                
+            client = genai.Client(api_key=api_key, http_options={"api_version": "v1alpha"})
             
-            # Conversion des outils MCP en outils Gemini
-            gemini_tools = []
-            for tool in self.mcp_manager.get_all_tools():
-                # On simplifie ici, une vraie conversion nécessiterait de mapper les types JSON Schema
-                # Pour cet exemple, on suppose que l'IA sait appeler les fonctions par leur nom
-                pass
-
-            # Boucle de réflexion (Agent)
-            # Note: Le SDK google-genai gère automatiquement le tool calling si on passe tools=[]
-            # Mais ici nous devons faire le pont manuellement avec nos serveurs MCP.
+            # 3. Exécution de l'Agent
+            logger.log_info("🤖 Gemini (Agent MCP) analyse le dépôt...")
             
-            logger.log_info("🤖 Envoi du prompt à Gemini (Mode Agent)...")
-            # Appel simplifié (pour une implémentation complète, il faudrait gérer l'itération tools)
+            # Note: Pour une boucle de tool-calling complète, il faudrait itérer ici.
+            # Pour l'instant, nous envoyons le prompt d'investigation.
             response = client.models.generate_content(
-                model="gemini-2.0-flash", # Modèle supportant bien les outils
+                model="auto",
                 contents=prompt
             )
             
-            return response.text
+            return response.text.strip() if hasattr(response, "text") else str(response).strip()
 
+        except Exception as e:
+            logger.log_error(f"Erreur lors de la génération de la revue Gemini MCP : {e}")
+            return None
         finally:
             if self.mcp_manager:
-                self.mcp_manager.arreter_serveurs()
+                try:
+                    self.mcp_manager.arreter_serveurs()
+                except Exception:
+                    pass
 
     def _choisir_prompt_mr(self) -> str:
-        # Logique pour choisir le prompt selon le langage
-        if "angular" in self.langage.lower(): return "mr_review_angular"
-        if "python" in self.langage.lower(): return "mr_review_python"
-        if "java" in self.langage.lower(): return "mr_review_java"
+        """Choisit le nom du prompt en fonction du langage détecté."""
+        lang = self.langage.lower()
+        if "angular" in lang:
+            return "mr_review_angular"
+        elif "python" in lang:
+            return "mr_review_python"
+        elif "java" in lang:
+            return "mr_review_java"
         return "mr_review"

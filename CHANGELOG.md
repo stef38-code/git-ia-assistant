@@ -10,6 +10,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Ajouté
 - **🚀 Mode Agent IA (MCP) Intégré** : Passage d'un modèle d'analyse de texte à un modèle d'agent autonome.
 - **Nouvelle commande `git-ia-mr-mcp`** : Revue de MR/PR agentique ultra-précise (alias `ia-mr-mcp`).
+- **Nouvelle commande `git-ia-commit-mcp`** : Génération de message de commit agentique (alias `ia-commit-mcp`).
 - **`McpClientManager`** : Nouveau moteur universel dans `python_commun` pour piloter les serveurs MCP.
 - **Support Agentique Multi-IA** :
   - **Gemini** : Utilisation du tool calling via `IaGeminiMrMcp`.

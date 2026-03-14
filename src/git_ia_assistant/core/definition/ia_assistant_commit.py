@@ -44,9 +44,10 @@ class IaAssistantCommit(IaAssistant):
     Classe mère pour la gestion des commits IA.
     """
 
-    def __init__(self, fichiers: List[str]):
+    def __init__(self, fichiers: List[str], mcp_config_path=None):
         super().__init__()
         self.fichiers = fichiers
+        self.mcp_config_path = mcp_config_path
         # Limite de caractères pour le contexte du diff (à ajuster selon le modèle d'IA)
         self.MAX_DIFF_LENGTH = 15000
 
@@ -345,3 +346,11 @@ class IaAssistantCommit(IaAssistant):
                 logger.log_info("Push non effectué. N'oubliez pas de pousser vos changements manuellement.")
         else:
             logger.log_warn("Commit annulé.")
+
+    def generer_et_valider_commit_mcp(self):
+        """Méthode à implémenter par les sous-classes MCP."""
+        raise NotImplementedError
+
+    def gerer_optimisation_mcp(self):
+        """Méthode à implémenter par les sous-classes MCP."""
+        raise NotImplementedError

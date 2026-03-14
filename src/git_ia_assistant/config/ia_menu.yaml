@@ -2,6 +2,7 @@
 # Format: commande: sous_repertoire/nom_du_script.py
 
 git-ia-commit: commits/commit_cli.py
+git-ia-commit-mcp: commits/commit_mcp_cli.py
 git-ia-commit-v2: commits/commit_cli_v2.py
 git-ia-commit-version: commits/commit_version_cli.py
 git-ia-review: review/review_my_code_cli.py
