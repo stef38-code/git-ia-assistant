@@ -96,7 +96,18 @@ export GEMINI_API_KEY='votre_clé_api_gemini'
 ollama run llama3
 ```
 
-## 🔌 Vérification des serveurs MCP
+## 🔌 Serveurs MCP
+
+### Installation de uv / uvx
+
+`uvx` est nécessaire pour exécuter certains serveurs MCP (comme le serveur `git`). Voici comment l'installer rapidement via `curl` :
+
+```bash
+# Installation de uv (inclut uvx)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Vérification et installation des serveurs MCP
 
 Avant d'utiliser les fonctionnalités MCP, vérifiez que tous les serveurs requis sont installés :
 
@@ -112,14 +123,14 @@ McpConfigManager.verifier_installation(["git", "github"])
 
 Les serveurs MCP supportés sont :
 
-| Serveur | Package | Lanceur |
-|---|---|---|
-| `git` | `mcp-server-git` | `uvx` |
-| `github` | `@modelcontextprotocol/server-github` | `npx` |
-| `gitlab` | `@modelcontextprotocol/server-gitlab` | `npx` |
-| `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | `npx` |
-| `typescript` | `@modelcontextprotocol/server-typescript` | `npx` |
-| `angular` | `@modelcontextprotocol/server-angular` | `npx` |
-| `sonarqube` | `mcp-server-sonarqube` | `npx` |
-| `filesystem` | `@modelcontextprotocol/server-filesystem` | `npx` |
-| `search` | `@modelcontextprotocol/server-ripgrep` | `npx` |
+| Serveur | Package | Lanceur | Commande d'installation |
+|---|---|---|---|
+| `git` | `mcp-server-git` | `uvx` | `uv pip install mcp-server-git` (ou usage direct via `uvx`) |
+| `github` | `@modelcontextprotocol/server-github` | `npx` | `npm install -g @modelcontextprotocol/server-github` |
+| `gitlab` | `@modelcontextprotocol/server-gitlab` | `npx` | `npm install -g @modelcontextprotocol/server-gitlab` |
+| `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | `npx` | `npm install -g @modelcontextprotocol/server-sequential-thinking` |
+| `typescript` | `@modelcontextprotocol/server-typescript` | `npx` | `npm install -g @modelcontextprotocol/server-typescript` |
+| `angular` | `@modelcontextprotocol/server-angular` | `npx` | `npm install -g @modelcontextprotocol/server-angular` |
+| `sonarqube` | `mcp-server-sonarqube` | `npx` | `npm install -g mcp-server-sonarqube` |
+| `filesystem` | `@modelcontextprotocol/server-filesystem` | `npx` | `npm install -g @modelcontextprotocol/server-filesystem` |
+| `search` | `@modelcontextprotocol/server-ripgrep` | `npx` | `npm install -g @modelcontextprotocol/server-ripgrep` |
