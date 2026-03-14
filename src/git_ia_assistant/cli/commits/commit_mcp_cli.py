@@ -2,11 +2,30 @@
 # -*- coding: utf-8 -*-
 """
 NAME
-    commit_mcp_cli - Génère un message de commit en mode AGENT via MCP.
+    commit_mcp_cli - Génère un message de commit en mode AGENT via MCP (Model Context Protocol).
 
 DESCRIPTION
-    Version MCP du script de commit. L'IA explore le codebase pour générer
-    un message plus précis (scope, pourquoi) ou optimiser les groupes de commits.
+    Version MCP du script de commit. L'IA explore le codebase via un agent pour générer
+    un message plus précis (scope, raison du changement) ou optimiser les groupes de commits.
+    
+    L'agent utilise le protocole MCP pour accéder aux outils d'analyse de code et de Git,
+    permettant une compréhension contextuelle approfondie du projet.
+
+OPTIONS
+    --ia gemini|copilot|ollama   Choix de l'IA à utiliser (défaut: gemini)
+    -f, --fichier <fichier(s)>   Liste des fichiers spécifiques à analyser
+    --optimise                   Analyse et propose un regroupement en commits logiques
+    --clear                      Nettoyer le répertoire de travail temporaire avant exécution
+    -h, --help                   Afficher l'aide colorisée
+
+EXEMPLES
+    python commit_mcp_cli.py
+    python commit_mcp_cli.py --ia copilot --optimise
+    python commit_mcp_cli.py -f src/mon_fichier.py
+    python commit_mcp_cli.py --clear
+
+FUNCTIONS
+    main() : Point d'entrée du script, gère la configuration de l'agent et l'orchestration MCP.
 """
 
 import argparse

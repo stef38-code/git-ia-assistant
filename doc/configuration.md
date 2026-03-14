@@ -95,3 +95,31 @@ export GEMINI_API_KEY='votre_clé_api_gemini'
 # Puis lancez un modèle
 ollama run llama3
 ```
+
+## 🔌 Vérification des serveurs MCP
+
+Avant d'utiliser les fonctionnalités MCP, vérifiez que tous les serveurs requis sont installés :
+
+```python
+from git_ia_assistant.cli.mcp.mcp_config_manager import McpConfigManager
+
+# Vérifie tous les serveurs (affiche les instructions d'installation si manquants)
+McpConfigManager.verifier_installation()
+
+# Vérifie uniquement des serveurs spécifiques
+McpConfigManager.verifier_installation(["git", "github"])
+```
+
+Les serveurs MCP supportés sont :
+
+| Serveur | Package | Lanceur |
+|---|---|---|
+| `git` | `mcp-server-git` | `uvx` |
+| `github` | `@modelcontextprotocol/server-github` | `npx` |
+| `gitlab` | `@modelcontextprotocol/server-gitlab` | `npx` |
+| `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | `npx` |
+| `typescript` | `@modelcontextprotocol/server-typescript` | `npx` |
+| `angular` | `@modelcontextprotocol/server-angular` | `npx` |
+| `sonarqube` | `mcp-server-sonarqube` | `npx` |
+| `filesystem` | `@modelcontextprotocol/server-filesystem` | `npx` |
+| `search` | `@modelcontextprotocol/server-ripgrep` | `npx` |
