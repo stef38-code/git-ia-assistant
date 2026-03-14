@@ -5,7 +5,6 @@ import os
 import json
 import urllib.request
 from git_ia_assistant.core.definition.ia_assistant_commit import IaAssistantCommit
-from python_commun.ai.mcp_client_manager import McpClientManager
 from python_commun.ai.prompt import charger_prompt, formatter_prompt
 from python_commun.logging import logger
 from python_commun.system.system import detect_lang_repo
@@ -19,14 +18,11 @@ class IaAssistantOllamaCommitMcp(IaAssistantCommit):
     """
 
     def generer_et_valider_commit_mcp(self):
-        if not self.mcp_config_path:
-            logger.die("Configuration MCP manquante.")
-
-        mcp_manager = McpClientManager(self.mcp_config_path)
-        mcp_manager.demarrer_serveurs()
+        if not self.mcp_manager:
+            logger.die("Les serveurs MCP ne sont pas démarrés.")
 
         try:
-            ollama_tools = self._preparer_outils_ollama(mcp_manager)
+            ollama_tools = self._preparer_outils_ollama()
             prompt_template = charger_prompt("commits/commit_mcp_prompt.md", self.dossier_prompts)
             prompt = formatter_prompt(
                 prompt_template,
@@ -53,15 +49,15 @@ class IaAssistantOllamaCommitMcp(IaAssistantCommit):
                     name_full = tool_info.get("name")
                     srv_name, tool_name = name_full.split("__", 1) if "__" in name_full else ("git", name_full)
                     
-                    result_mcp = mcp_manager.executer_outil(srv_name, tool_name, tool_info.get("arguments", {}))
+                    result_mcp = self.mcp_manager.executer_outil(srv_name, tool_name, tool_info.get("arguments", {}))
                     messages.append({"role": "tool", "content": json.dumps(result_mcp)})
 
-        finally:
-            mcp_manager.arreter_serveurs()
+        except Exception as e:
+            logger.log_error(f"Erreur lors de la revue Ollama MCP : {e}")
 
-    def _preparer_outils_ollama(self, mcp_manager) -> list:
+    def _preparer_outils_ollama(self) -> list:
         tools = []
-        for tool in mcp_manager.get_all_tools():
+        for tool in self.mcp_manager.get_all_tools():
             tools.append({
                 "type": "function",
                 "function": {

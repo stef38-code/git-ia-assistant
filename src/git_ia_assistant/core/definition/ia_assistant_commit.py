@@ -39,6 +39,8 @@ from python_commun.system.system import detect_lang_repo
 import re
 
 
+from python_commun.ai.mcp_client_manager import McpClientManager
+
 class IaAssistantCommit(IaAssistant):
     """
     Classe mère pour la gestion des commits IA.
@@ -48,8 +50,20 @@ class IaAssistantCommit(IaAssistant):
         super().__init__()
         self.fichiers = fichiers
         self.mcp_config_path = mcp_config_path
+        self.mcp_manager = None
         # Limite de caractères pour le contexte du diff (à ajuster selon le modèle d'IA)
         self.MAX_DIFF_LENGTH = 15000
+
+    def demarrer_outils(self):
+        """Démarre les serveurs MCP si une config est présente."""
+        if self.mcp_config_path:
+            self.mcp_manager = McpClientManager(self.mcp_config_path)
+            self.mcp_manager.demarrer_serveurs()
+
+    def arreter_outils(self):
+        """Arrête proprement les serveurs MCP."""
+        if self.mcp_manager:
+            self.mcp_manager.arreter_serveurs()
 
     def detecter_fichiers(self):
         if not self.fichiers:
