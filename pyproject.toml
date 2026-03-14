@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-ia-assistant"
-version = "0.9.9"
+version = "1.0.0"
 authors = [
   { name="stef38-code", email="73640160+stef38-code@users.noreply.github.com" },
 ]
@@ -42,6 +42,7 @@ git-ia-commit-v2 = "git_ia_assistant.cli.commits.commit_v2:main"
 git-ia-commit-version = "git_ia_assistant.cli.commits.commit_version_cli:main"
 git-ia-review = "git_ia_assistant.cli.review.review_my_code_cli:main"
 git-ia-mr = "git_ia_assistant.cli.review.mr_review_cli:main"
+git-ia-mr-mcp = "git_ia_assistant.cli.review.mr_review_mcp_cli:main"
 git-ia-squash = "git_ia_assistant.cli.commits.squash_cli:main"
 git-ia-changelog = "git_ia_assistant.cli.git_history.changelog_cli:main"
 git-ia-explain = "git_ia_assistant.cli.git_history.explain_cli:main"

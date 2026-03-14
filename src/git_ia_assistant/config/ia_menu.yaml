@@ -6,6 +6,7 @@ git-ia-commit-v2: commits/commit_cli_v2.py
 git-ia-commit-version: commits/commit_version_cli.py
 git-ia-review: review/review_my_code_cli.py
 git-ia-mr: review/mr_review_cli.py
+git-ia-mr-mcp: review/mr_review_mcp_cli.py
 git-ia-squash: commits/squash_cli.py
 git-ia-changelog: git_history/changelog_cli.py
 git-ia-explain: git_history/explain_cli.py

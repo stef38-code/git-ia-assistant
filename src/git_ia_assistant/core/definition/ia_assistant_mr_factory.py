@@ -36,11 +36,17 @@ class IaAssistantMrFactory:
         "copilot": "git_ia_assistant.ia.copilot.ia_copilot_mr",
         "gemini": "git_ia_assistant.ia.gemini.ia_gemini_mr",
         "ollama": "git_ia_assistant.ia.ollama.ia_ollama_mr",
+        "copilot_mcp": "git_ia_assistant.ia.copilot.ia_copilot_mr_mcp",
+        "gemini_mcp": "git_ia_assistant.ia.gemini.ia_gemini_mr_mcp",
+        "ollama_mcp": "git_ia_assistant.ia.ollama.ia_ollama_mr_mcp",
     }
     IA_CLASSES = {
         "copilot": "IaCopilotMr",
         "gemini": "IaGeminiMr",
         "ollama": "IaOllamaMr",
+        "copilot_mcp": "IaCopilotMrMcp",
+        "gemini_mcp": "IaGeminiMrMcp",
+        "ollama_mcp": "IaOllamaMrMcp",
     }
 
     @classmethod

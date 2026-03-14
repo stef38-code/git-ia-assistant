@@ -5,6 +5,22 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-03-14
+
+### Ajouté
+- **🚀 Mode Agent IA (MCP) Intégré** : Passage d'un modèle d'analyse de texte à un modèle d'agent autonome.
+- **Nouvelle commande `git-ia-mr-mcp`** : Revue de MR/PR agentique ultra-précise (alias `ia-mr-mcp`).
+- **`McpClientManager`** : Nouveau moteur universel dans `python_commun` pour piloter les serveurs MCP.
+- **Support Agentique Multi-IA** :
+  - **Gemini** : Utilisation du tool calling via `IaGeminiMrMcp`.
+  - **Copilot** : Intégration profonde via `--additional-mcp-config`.
+  - **Ollama** : Boucle de réflexion autonome (loop tool calling) implémentée manuellement pour les modèles locaux.
+- **Prompts MCP optimisés** : Nouveaux templates `_mcp.md` pour Angular, Python et Java, réduisant la consommation de tokens et augmentant la pertinence.
+
+### Amélioré
+- **Performance** : En mode MCP, le script n'envoie plus le diff complet mais laisse l'IA explorer les fichiers nécessaires.
+- **Précision** : L'IA peut désormais lire les fichiers importés, vérifier les dépendances et explorer l'historique Git.
+
 ## [0.9.9] - 2026-03-13
 
 ### Corrigé

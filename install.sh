@@ -38,7 +38,7 @@ ALIAS_FILE="${HOME}/.aliases"
 TMP_DIR=$(mktemp -d)
 
 # Commandes disponibles
-COMMANDS=("git-ia-commit" "git-ia-commit-version" "git-ia-commit-v2" "git-ia-review" "git-ia-mr" "git-ia-squash" "git-ia-changelog" "git-ia-explain" "git-ia-test" "git-ia-doc" "git-ia-refacto" "git-ia-menu")
+COMMANDS=("git-ia-commit" "git-ia-commit-version" "git-ia-commit-v2" "git-ia-review" "git-ia-mr" "git-ia-mr-mcp" "git-ia-squash" "git-ia-changelog" "git-ia-explain" "git-ia-test" "git-ia-doc" "git-ia-refacto" "git-ia-menu")
 
 function cleanup {
     if [ -d "$TMP_DIR" ]; then
@@ -186,6 +186,7 @@ function configure_aliases {
     fi
 
     for cmd in "${COMMANDS[@]}"; do
+        alias_name=${cmd#git-} # Enlever le préfixe git-
         alias_cmd="alias $alias_name='$cmd'" # ex: alias ia-commit='git-ia-commit'
         
         if grep -q "alias $alias_name=" "$ALIAS_FILE"; then

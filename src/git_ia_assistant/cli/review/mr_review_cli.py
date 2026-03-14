@@ -19,12 +19,11 @@ OPTIONS
     -ia copilot|gemini|ollama   Choix de l'IA (défaut: auto-détecté via IA_SELECTED ou copilot)
     --dry-run                   Simulation, affiche le prompt sans appel à l'IA
     --publier                   Publier le rapport de revue comme commentaire dans la MR/PR
-    --mcp                       Activer l'utilisation des serveurs MCP (git, plateforme, langage)
     -h, --help                  Afficher l'aide du script
 
 EXEMPLES
     git-ia-mr -u https://gitlab.com/repo/-/merge_requests/1 --dry-run
-    git-ia-mr -u https://github.com/user/repo/pull/456 -ia gemini --mcp
+    git-ia-mr -u https://github.com/user/repo/pull/456 -ia gemini
     git-ia-mr --url https://gitlab.com/org/project/-/merge_requests/123
     git-ia-mr -u https://gitlab.com/repo/-/merge_requests/1 --publier
 """
@@ -61,7 +60,6 @@ from python_commun.network.url_utils import (
 )
 from python_commun.cli.usage import usage
 from git_ia_assistant.core.definition.ia_assistant_mr_factory import IaAssistantMrFactory
-from git_ia_assistant.cli.mcp.mcp_config_manager import McpConfigManager
 
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/mrOrpr"
@@ -166,11 +164,6 @@ def _parser_options() -> argparse.Namespace:
         "--publier", 
         action="store_true", 
         help="Publier le rapport de revue comme commentaire dans la MR/PR"
-    )
-    parser.add_argument(
-        "--mcp", 
-        action="store_true", 
-        help="Activer l'utilisation des serveurs MCP (git, plateforme, langage)"
     )
     return parser.parse_args()
 
@@ -503,26 +496,6 @@ def main() -> None:
             logger.log_error("❌ Abandon de la génération de la revue en raison de la taille excessive.")
             return
 
-    # Gestion de la configuration MCP si demandée
-    mcp_config_path = None
-    if args.mcp:
-        logger.log_info("🔧 Activation du support MCP...")
-        mcp_config_path = McpConfigManager.generer_config(
-            out_dir=OUT_DIR,
-            plateforme=plateforme,
-            langage=langage_framework,
-            token=git_token,
-            repo_path=repo_local_path)
-        if mcp_config_path and mcp_config_path.exists():
-            import json
-            config = json.loads(mcp_config_path.read_text())
-            serveurs = list(config.get("mcpServers", {}).keys())
-            logger.log_info(f"📋 Config MCP générée : {mcp_config_path}")
-            logger.log_info(f"🔌 Serveurs MCP configurés ({len(serveurs)}) : {', '.join(serveurs)}")
-        else:
-            logger.log_warn("⚠️  Échec de la génération de la config MCP — Copilot fonctionnera sans MCP")
-            mcp_config_path = None
-
     # Utilisation du pattern Factory pour instancier la classe IA appropriée
     ia_instance = IaAssistantMrFactory.create_mr_instance(
         ia=ia_utilisee,
@@ -534,7 +507,7 @@ def main() -> None:
         langage=langage_framework,
         migration_info=migration_info,
         versions_actuelles=versions_actuelles,
-        mcp_config_path=mcp_config_path,
+        mcp_config_path=None,
     )
 
     # Génération de la revue via l'IA

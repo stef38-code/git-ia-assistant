@@ -1,6 +1,6 @@
 # Git IA Assistant
 
-Un ensemble d'outils intelligents pour améliorer votre workflow Git en utilisant des Modèles de Langage (LLM) comme Copilot, Gemini et Ollama.
+Un ensemble d'outils intelligents pour améliorer votre workflow Git en utilisant des Modèles de Langage (LLM) comme Copilot, Gemini et Ollama. Désormais avec le support **Agentique MCP** pour une précision chirurgicale.
 
 ## 📋 Pré-requis
 
@@ -23,6 +23,7 @@ Avant d'installer l'assistant, assurez-vous de disposer des éléments suivants 
 Git IA Assistant automatise les tâches répétitives de Git (commits, revues, documentation) et fournit une assistance intelligente pour la qualité du code.
 
 *   **[Fonctionnalités principales](doc/fonctionnalites.md)** : Commits, revues MR/PR, tests, documentation, refactorisation.
+*   **🚀 Mode Agent (MCP)** : Revue de code autonome où l'IA explore elle-même votre codebase (via `git`, `filesystem`, `ripgrep`).
 *   **[Utilisation du menu `ia`](doc/menu_interactif.md)** : Pilotez tous les outils depuis une interface textuelle riche.
 
 ## 📦 Démarrage rapide
@@ -78,6 +79,20 @@ Les serveurs MCP supportés sont :
 | `sonarqube` | `mcp-server-sonarqube` | `npx` |
 | `filesystem` | `@modelcontextprotocol/server-filesystem` | `npx` |
 | `search` | `@modelcontextprotocol/server-ripgrep` | `npx` |
+
+## 🤖 Mode Agent (MCP)
+
+La version 1.0.0 introduit le mode **Agent**, accessible via `git-ia-mr-mcp`. Contrairement au mode classique qui envoie tout le diff à l'IA, le mode Agent :
+1.  **Configure un environnement sécurisé** avec vos serveurs MCP locaux.
+2.  **Fournit des outils** à l'IA (lire un fichier, chercher un texte, voir le diff git).
+3.  **Laisse l'IA décider** de ce qu'elle doit explorer pour comprendre votre code.
+
+**Avantage :** Analyse beaucoup plus profonde des impacts, détection des régressions hors-diff et économie massive de tokens.
+
+```bash
+# Lancer une revue de MR en mode Agent
+ia-mr-mcp -u https://gitlab.com/repo/-/merge_requests/123
+```
 
 ## 🛠️ Utilisation
 
