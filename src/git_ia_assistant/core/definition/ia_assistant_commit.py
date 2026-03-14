@@ -306,6 +306,8 @@ class IaAssistantCommit(IaAssistant):
             pousser_vers_distant,
         )
 
+        logger.log_console(f"\nMessage généré par l'IA :\n{'-'*30}\n{message}\n{'-'*30}\n")
+
         while True:
             choix = (
                 input("Valider le commit ? [y: oui, n: non, e: éditer, a: affiner] [défaut: y] : ")

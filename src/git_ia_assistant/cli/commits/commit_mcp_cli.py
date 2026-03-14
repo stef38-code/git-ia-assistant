@@ -72,12 +72,31 @@ def main():
         mcp_config_path=mcp_config_path
     )
 
+    # Préparation des fichiers (git add) et affichage stats
+    assistant.detecter_fichiers()
+
     # 4. Génération
     logger.log_info("🤖 L'Agent analyse vos changements...")
-    if args.optimise:
-        assistant.gerer_optimisation_mcp()
-    else:
-        assistant.generer_et_valider_commit_mcp()
+    
+    result = None
+    try:
+        if args.optimise:
+            assistant.gerer_optimisation_mcp()
+        else:
+            assistant.generer_et_valider_commit_mcp()
+    except Exception as e:
+        err_msg = str(e).lower()
+        if 'quota' in err_msg or 'exhausted' in err_msg or '429' in err_msg:
+            logger.log_error(f"❌ Quota épuisé pour {args.ia} (Erreur 429 RESOURCE_EXHAUSTED).")
+            logger.log_info("")
+            logger.log_info("💡 Solutions possibles :")
+            logger.log_info("   1. Attendre quelques minutes avant de réessayer.")
+            logger.log_info("   2. Utiliser une autre IA (ex: --ia copilot).")
+            logger.log_info("   3. Passer sur une IA locale (ex: --ia ollama) pour éviter les quotas distants.")
+            sys.exit(1)
+        else:
+            logger.log_error(f"❌ Échec lors de la génération du commit {args.ia} : {e}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()

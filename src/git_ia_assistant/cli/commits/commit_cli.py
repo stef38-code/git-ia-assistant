@@ -140,7 +140,6 @@ def generer_et_valider_commit(ia_choisie: str, fichiers_a_analyser: List[str]) -
 
     logger.log_info(f"Génération du message de commit avec {ia_choisie}...")
     message_commit = assistant_commit.generer_message_commit()
-    logger.log_console(f"Message généré par l'IA :\n{message_commit}")
 
     try:
         assistant_commit.valider_commit(message_commit)

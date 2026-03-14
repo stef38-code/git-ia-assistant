@@ -56,17 +56,18 @@ class IaGeminiMrMcp(IaAssistantMr):
             if not api_key:
                 logger.die("La variable d'environnement GEMINI_API_KEY n'est pas configurée.")
                 
-            client = genai.Client(api_key=api_key, http_options={"api_version": "v1alpha"})
-            
+            client = genai.Client(api_key=api_key, http_options={"api_version": "v1"})
+
             # 3. Exécution de l'Agent
             logger.log_info("🤖 Gemini (Agent MCP) analyse le dépôt...")
-            
+
             # Note: Pour une boucle de tool-calling complète, il faudrait itérer ici.
             # Pour l'instant, nous envoyons le prompt d'investigation.
             response = client.models.generate_content(
-                model="auto",
+                model="gemini-2.5-flash",
                 contents=prompt
             )
+
             
             return response.text.strip() if hasattr(response, "text") else str(response).strip()
 

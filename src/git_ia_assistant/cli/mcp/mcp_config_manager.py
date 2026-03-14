@@ -12,7 +12,7 @@ from python_commun.ai import sauvegarder_config_mcp
 
 # Constantes pour les paquets MCP réutilisés
 PAQUET_FILESYSTEM = "@modelcontextprotocol/server-filesystem"
-PAQUET_RIPGREP = "@modelcontextprotocol/server-ripgrep"
+PAQUET_RIPGREP = "mcp-ripgrep@latest"
 
 # Instructions d'installation pour chaque serveur MCP
 INSTRUCTIONS_INSTALLATION = {
