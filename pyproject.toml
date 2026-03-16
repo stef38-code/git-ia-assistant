@@ -50,7 +50,7 @@ git-ia-explain = "git_ia_assistant.cli.git_history.explain_cli:main"
 git-ia-test = "git_ia_assistant.cli.code_quality.test_cli:main"
 git-ia-doc = "git_ia_assistant.cli.code_quality.doc_cli:main"
 git-ia-refacto = "git_ia_assistant.cli.code_quality.refacto_cli:main"
-git-ia-menu = "git_ia_assistant.cli.ia_menu:main"
+git-ia-menu = "git_ia_assistant.cli.menu.ia_menu:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
