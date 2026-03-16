@@ -47,6 +47,27 @@ from git_ia_assistant.core.definition.ia_assistant_commit_factory import IaAssis
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/commits_mcp"
 
+def determiner_ia_choisie(parser, args):
+    """Détermine l'IA à utiliser (priorités) :
+    1. variable d'environnement IA_SELECTED (ou IA) si valide (gemini,copilot,ollama)
+    2. présence de GEMINI_API_KEY → 'gemini'
+    3. présence de COPILOT_API_KEY ou GITHUB_TOKEN → 'copilot'
+    4. sinon → 'ollama'
+    """
+    ia_defaut = parser.get_default("ia")
+    ia_choisie = args.ia
+    if ia_choisie == ia_defaut:
+        env_ia = os.getenv("IA_SELECTED") or os.getenv("IA")
+        if env_ia and env_ia.lower() in ("gemini", "copilot", "ollama"):
+            return env_ia.lower()
+        # Priorité aux clés API
+        if os.getenv("GEMINI_API_KEY"):
+            return "gemini"
+        if os.getenv("COPILOT_API_KEY") or os.getenv("GITHUB_TOKEN"):
+            return "copilot"
+        return "ollama"
+    return ia_choisie
+
 def main():
     parser = argparse.ArgumentParser(description="Commit via Agent MCP", add_help=False)
     parser.add_argument("-h", "--help", action="store_true")
@@ -84,7 +105,8 @@ def main():
     )
 
     # 3. Instanciation
-    ia_type = args.ia + "_mcp"
+    ia_choisie = determiner_ia_choisie(parser, args)
+    ia_type = ia_choisie + "_mcp"
     assistant = IaAssistantCommitFactory.create_commit_instance(
         ia=ia_type,
         fichiers=fichiers,
@@ -109,10 +131,10 @@ def main():
     except Exception as e:
         err_msg = str(e).lower()
         if 'quota' in err_msg or 'exhausted' in err_msg or '429' in err_msg:
-            logger.log_error(f"❌ Quota épuisé pour {args.ia} (Erreur 429 RESOURCE_EXHAUSTED).")
+            logger.log_error(f"❌ Quota épuisé pour {ia_choisie} (Erreur 429 RESOURCE_EXHAUSTED).")
             sys.exit(1)
         else:
-            logger.log_error(f"❌ Échec lors de la génération du commit {args.ia} : {e}")
+            logger.log_error(f"❌ Échec lors de la génération du commit {ia_choisie} : {e}")
             sys.exit(1)
     finally:
         # Arrêt systématique

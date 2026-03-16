@@ -52,6 +52,14 @@ Pour plus de détails, consultez le **[Guide d'installation complet](doc/install
 
 L'outil nécessite une configuration minimale (Tokens API et choix du moteur IA). Consultez la **[Documentation de configuration](doc/configuration.md)**.
 
+Sélection de l'IA (précedence) :
+- Si l'option `--ia` est laissée par défaut, l'ordre de sélection est :
+  1. variable d'environnement `IA_SELECTED` (ou `IA`) si elle est valide (`gemini`, `copilot`, `ollama`)
+  2. présence de `GEMINI_API_KEY` → `gemini`
+  3. présence de `COPILOT_API_KEY` ou `GITHUB_TOKEN` → `copilot`
+  4. sinon → `ollama`
+
+
 ## 🤖 Mode Agent (MCP)
 
 Pour en savoir plus sur le fonctionnement et les avantages du mode Agent, consultez la **[Documentation du Mode Agent (MCP)](doc/mcp.md)**.

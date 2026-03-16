@@ -5,6 +5,13 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-03-16
+
+### Changed
+- Extraction de la logique de sélection de l'IA dans `commit_mcp_cli.py` (fonction `determine_chosen_ia`).
+- Priorité de sélection : `IA_SELECTED`/`IA` → `GEMINI_API_KEY` → `COPILOT_API_KEY`/`GITHUB_TOKEN` → `ollama`.
+- Suppression de la recherche de la variable `GH_TOKEN`.
+
 ## [1.0.0] - 2026-03-14
 
 ### Ajouté
