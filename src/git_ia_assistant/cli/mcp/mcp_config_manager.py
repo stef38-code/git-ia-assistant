@@ -57,7 +57,7 @@ INSTRUCTIONS_INSTALLATION = {
 SERVEURS_MCP = {
     "git": {
         "command": "uvx",
-        "args": ["mcp-server-git"]
+        "args": ["mcp-server-git","--native-tls"]
     },
     "github": {
         "command": "npx",
