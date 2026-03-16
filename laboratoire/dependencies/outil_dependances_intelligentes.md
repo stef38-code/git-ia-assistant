@@ -334,9 +334,7 @@ git-ia-deps upgrade --safe --commit
 git-ia-deps upgrade --safe --update-changelog
 ```
 
-### 3. SonarQube
 ```bash
-# Synchronise avec alertes SonarQube
 git-ia-deps sync-sonar --project my-app
 ```
 
@@ -438,7 +436,6 @@ security-audit:
 
 ### Phase 4 - Intégrations (1 semaine)
 - JIRA tickets
-- SonarQube sync
 - SBOM generation
 
 ---

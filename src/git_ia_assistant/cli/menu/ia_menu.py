@@ -59,7 +59,10 @@ from python_commun.system.system import executer_commande, executer_capture
 
 # Chemins relatifs au script dans src/git_ia_assistant/cli/
 CLI_DIR = Path(__file__).parent
-CONFIG_FILE = CLI_DIR.parent / "config" / "ia_menu.yaml"
+# CONFIG_FILE previously pointed to CLI_DIR.parent / "config" which resolves to
+# src/git_ia_assistant/cli/config — the actual config lives in
+# src/git_ia_assistant/config, so move up one directory.
+CONFIG_FILE = CLI_DIR.parent.parent / "config" / "ia_menu.yaml"
 
 COMMAND_MAPPING = charger_config_yaml(str(CONFIG_FILE))
 
@@ -148,12 +151,12 @@ class MasterSelector:
             self.index = (self.index + 1) % len(self.commands)
             self._update_details()
 
-        @self.kb.add("h")
+        @self.kb.add("f1")
         def _(event):
             self.mode = "help"
             self._update_details()
 
-        @self.kb.add("o")
+        @self.kb.add("f2")
         def _(event):
             self.mode = "options"
             self._update_details()
@@ -166,8 +169,7 @@ class MasterSelector:
             self.selected_value = self.commands[self.index]
             event.app.exit()
 
-        @self.kb.add("q")
-        @self.kb.add("Q")
+        @self.kb.add("f10")
         @self.kb.add("c-c")
         def _(event):
             self.selected_value = None
@@ -445,7 +447,7 @@ def gerer_workflow_dynamique(cmd_name: str) -> List[str]:
 def main():
     print("\n" + "═"*75)
     print(" 🤖 GIT IA ASSISTANT - MENU INTERACTIF")
-    print(" [↑/↓]: Navigation  [h]: Aide  [o]: Options  [Enter]: Lancer  [q]: Quitter")
+    print(" [↑/↓]: Navigation  [F1]: Aide  [F2]: Options  [Enter]: Lancer  [F10]: Quitter")
     print("═"*75 + "\n")
 
     selected_cmd = MasterSelector().run()

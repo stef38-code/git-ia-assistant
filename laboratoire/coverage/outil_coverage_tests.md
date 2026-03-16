@@ -211,10 +211,8 @@ git-ia-coverage jira-ticket --threshold 80 --project MYAPP
 # → Description inclut lignes/branches manquantes
 ```
 
-### 3. SonarQube
 
 ```bash
-# Compare avec métriques SonarQube
 git-ia-coverage sync-sonar --project my-app
 ```
 
@@ -333,7 +331,6 @@ jobs:
 
 ### Phase 3 - Intégrations (1 semaine)
 - Intégration JIRA
-- Intégration SonarQube
 - Support TypeScript (Istanbul)
 
 ---

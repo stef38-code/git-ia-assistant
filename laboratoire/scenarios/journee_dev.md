@@ -22,7 +22,6 @@ Ce document détaille le flux de travail structuré d'un développeur utilisant 
    **FIN TANT QUE**
 
 ### 4. QUALITÉ : Vérification avant envoi
-   - **Action** : Analyse de la qualité de code via SonarCloud/SonarQube avec assistance IA.
    - **Commande** : `script_precheck_sonar`
 
 ### 5. LIVRAISON : Demande de relecture

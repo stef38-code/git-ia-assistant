@@ -131,6 +131,5 @@ Les serveurs MCP supportés sont :
 | `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | `npx` | `npm install -g @modelcontextprotocol/server-sequential-thinking` |
 | `typescript` | `@modelcontextprotocol/server-typescript` | `npx` | `npm install -g @modelcontextprotocol/server-typescript` |
 | `angular` | `@modelcontextprotocol/server-angular` | `npx` | `npm install -g @modelcontextprotocol/server-angular` |
-| `sonarqube` | `mcp-server-sonarqube` | `npx` | `npm install -g mcp-server-sonarqube` |
 | `filesystem` | `@modelcontextprotocol/server-filesystem` | `npx` | `npm install -g @modelcontextprotocol/server-filesystem` |
 | `search` | `@modelcontextprotocol/server-ripgrep` | `npx` | `npm install -g @modelcontextprotocol/server-ripgrep` |

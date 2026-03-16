@@ -74,7 +74,6 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Support natif des serveurs MCP (Model Context Protocol)** :
   - Nouvelle option `--mcp` pour `git-ia-mr`.
   - Génération dynamique d'une configuration MCP (`mcp-config.json`) basée sur le contexte.
-  - Support des serveurs : `git`, `github`/`gitlab`, `sequential-thinking`, `typescript`, `angular` et `sonarqube`.
   - Intégration directe avec Copilot CLI via le flag `--additional-mcp-config`.
 - **Répertoire dédié MCP** : Centralisation de la logique dans `cli/mcp/` avec le `McpConfigManager`.
 - **Prompt Angular Gemini optimisé** : Nouveau prompt `mr_review_angular_gemini_prompt.md` incluant des instructions de "Chain of Thought" pour exploiter le contexte étendu.
@@ -273,7 +272,6 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Fichier PROPOSITIONS.md** : Analyse détaillée de 10 nouveaux scénarios avec ROI, synergies et roadmap d'implémentation
 - **Section README.md "Laboratoire"** : +200 lignes documentant tous les scénarios avec tableau récapitulatif (priorités, efforts, ROI)
 - **Documentation existante enrichie** :
-  - Scénario SonarQube : Intégration complète avec suggestions IA de corrections
   - Scénario JIRA : Synchronisation Git↔JIRA, TODO→tickets, rapports de sprint
   - Scénario Commit+Version : Workflow automatisé (déjà implémenté)
 

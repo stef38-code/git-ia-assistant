@@ -1,13 +1,10 @@
-# Scénario d'interrogation SonarQube pour l'analyse de qualité du code
 
 ## 📋 Vue d'ensemble
 
-Ce scénario décrit comment interroger SonarQube/SonarCloud via son API REST pour récupérer les métriques de qualité du code d'un projet : Vulnerabilities (vulnérabilités), Bugs, et Code Smells (mauvaises pratiques).
 
 ## 🎯 Objectif
 
 Créer un outil CLI qui :
-1. Se connecte à SonarQube/SonarCloud via son API
 2. Récupère les métriques de qualité pour un projet donné
 3. Affiche un rapport structuré des problèmes détectés
 4. Permet le filtrage par sévérité et type
@@ -18,24 +15,17 @@ Créer un outil CLI qui :
 ### Variables d'environnement requises
 
 ```bash
-# URL du serveur SonarQube/SonarCloud
 export SONAR_HOST_URL="https://sonarcloud.io"
-# ou pour SonarQube auto-hébergé :
 # export SONAR_HOST_URL="https://sonar.example.com"
 
-# Token d'authentification (généré depuis SonarQube)
 export SONAR_TOKEN="votre_token_ici"
-# Format: squ_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (SonarQube)
 #     ou: sqp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (SonarCloud)
 
 # Clé du projet à analyser
 export SONAR_PROJECT_KEY="mon-organisation_mon-projet"
 ```
 
-### Génération du token SonarQube
 
-**SonarQube (auto-hébergé)** :
-1. Se connecter à SonarQube
 2. Mon compte → Sécurité → Tokens
 3. Générer un nouveau token avec le scope "Execute Analysis"
 
@@ -44,7 +34,6 @@ export SONAR_PROJECT_KEY="mon-organisation_mon-projet"
 2. Mon compte → Security → Generate Tokens
 3. Générer un token avec les droits "Browse"
 
-## 🔍 API SonarQube - Endpoints utilisés
 
 ### 1. Récupération des métriques globales
 
@@ -172,13 +161,10 @@ curl -u "${SONAR_TOKEN}:" \
 ```python
 #!/usr/bin/env python3
 """
-Script d'interrogation SonarQube pour analyse de qualité du code.
 
 Ce script récupère les métriques de qualité (bugs, vulnérabilités, code smells)
-depuis SonarQube/SonarCloud et génère un rapport détaillé.
 
 Variables d'environnement requises :
-- SONAR_HOST_URL : URL du serveur SonarQube
 - SONAR_TOKEN : Token d'authentification
 - SONAR_PROJECT_KEY : Clé du projet à analyser
 """
@@ -192,7 +178,6 @@ import os
 import requests
 from typing import Dict, List, Optional
 
-class SonarQubeClient:
     def __init__(self):
         self.host_url = os.getenv("SONAR_HOST_URL")
         self.token = os.getenv("SONAR_TOKEN")
@@ -205,7 +190,6 @@ class SonarQubeClient:
         self.session.auth = (self.token, "")  # Token comme username, password vide
     
     def _get(self, endpoint: str, params: Dict) -> Dict:
-        """Effectue une requête GET vers l'API SonarQube."""
         url = f"{self.host_url}{endpoint}"
         response = self.session.get(url, params=params, timeout=30)
         response.raise_for_status()
@@ -280,7 +264,6 @@ def generate_report(self) -> str:
     """Génère un rapport Markdown des résultats."""
     metrics = self.get_project_metrics()
     
-    report = f"# 📊 Rapport SonarQube - {self.project_key}\n\n"
     report += f"**Serveur** : {self.host_url}\n\n"
     
     # Métriques globales
@@ -314,7 +297,6 @@ def generate_report(self) -> str:
     return report
 
 def _rating_to_emoji(self, rating: str) -> str:
-    """Convertit une note SonarQube en emoji."""
     ratings = {"A": "🟢", "B": "🟡", "C": "🟠", "D": "🔴", "E": "🔴"}
     return ratings.get(rating, "⚪")
 ```
@@ -374,7 +356,6 @@ import argparse
 
 def _parser_options() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Interroge SonarQube pour récupérer les métriques de qualité",
         add_help=False
     )
     parser.add_argument("-h", "--help", action="store_true", help="Afficher l'aide")
@@ -394,7 +375,6 @@ def _parser_options() -> argparse.Namespace:
 ### Rapport console (par défaut)
 
 ```
-📊 Rapport SonarQube - mon-organisation_mon-projet
 
 Serveur : https://sonarcloud.io
 
@@ -484,9 +464,7 @@ Serveur : https://sonarcloud.io
 
 3. **Génération de revue de code IA** : Enrichir le contexte
    ```bash
-   # Récupérer les hotspots SonarQube pour le fichier modifié
    git-ia-review mon-fichier.java
-   # → L'IA peut voir les problèmes SonarQube et les commenter
    ```
 
 4. **Rapport périodique** : Générer un dashboard
@@ -497,7 +475,6 @@ Serveur : https://sonarcloud.io
 
 ## 🚀 Étapes de développement
 
-### Phase 1 : Client SonarQube basique
 - [ ] Connexion à l'API avec authentification
 - [ ] Récupération des métriques globales
 - [ ] Affichage console simple
@@ -555,7 +532,6 @@ def validate_url(url: str) -> bool:
 
 ### Vue d'ensemble
 
-Pour chaque problème détecté par SonarQube (Vulnerability, Bug, Code Smell), l'outil interroge un fournisseur d'IA (Copilot, Gemini, Ollama) pour obtenir :
 1. Une explication détaillée du problème
 2. Les risques associés
 3. Des suggestions de correction concrètes
@@ -564,7 +540,6 @@ Pour chaque problème détecté par SonarQube (Vulnerability, Bug, Code Smell), 
 ### Workflow proposé
 
 ```
-SonarQube API → Récupération issues → Pour chaque issue :
                                        ↓
                             Chargement du fichier concerné
                                        ↓
@@ -586,17 +561,13 @@ SonarQube API → Récupération issues → Pour chaque issue :
 **Fichier** : `src/git_ia_assistant/prompts/sonar/bug_fix_prompt.md`
 
 ```markdown
-# Analyse et correction d'un bug détecté par SonarQube
 
-Tu es un expert en qualité de code et en résolution de bugs. SonarQube a détecté un bug dans le code suivant.
 
 ## 📋 Informations du bug
 
-**Règle SonarQube** : {rule_key}
 **Sévérité** : {severity}
 **Fichier** : {file_path}
 **Ligne** : {line}
-**Message SonarQube** : {message}
 
 ## 📝 Code concerné
 
@@ -619,7 +590,6 @@ Tu es un expert en qualité de code et en résolution de bugs. SonarQube a déte
    - Identifie les scénarios où le bug se manifeste
 
 2. **Impact** :
-   - Évalue la gravité (correspond-elle à la sévérité SonarQube : {severity} ?)
    - Liste les conséquences possibles en production
    - Indique si le bug peut causer des pertes de données ou des failles de sécurité
 
@@ -665,17 +635,13 @@ Tu es un expert en qualité de code et en résolution de bugs. SonarQube a déte
 **Fichier** : `src/git_ia_assistant/prompts/sonar/vulnerability_fix_prompt.md`
 
 ```markdown
-# Analyse et correction d'une vulnérabilité de sécurité détectée par SonarQube
 
-Tu es un expert en sécurité applicative. SonarQube a détecté une vulnérabilité critique dans le code suivant.
 
 ## 🔒 Informations de la vulnérabilité
 
-**Règle SonarQube** : {rule_key}
 **Sévérité** : {severity}
 **Fichier** : {file_path}
 **Ligne** : {line}
-**Message SonarQube** : {message}
 **Tags** : {tags}
 
 ## 📝 Code vulnérable
@@ -753,17 +719,13 @@ Tu es un expert en sécurité applicative. SonarQube a détecté une vulnérabil
 **Fichier** : `src/git_ia_assistant/prompts/sonar/code_smell_fix_prompt.md`
 
 ```markdown
-# Analyse et refactoring d'un code smell détecté par SonarQube
 
-Tu es un expert en qualité de code et en refactoring. SonarQube a détecté un code smell (mauvaise pratique) dans le code suivant.
 
 ## 📋 Informations du code smell
 
-**Règle SonarQube** : {rule_key}
 **Sévérité** : {severity}
 **Fichier** : {file_path}
 **Ligne** : {line}
-**Message SonarQube** : {message}
 **Dette technique** : {debt}
 
 ## 📝 Code concerné
@@ -850,7 +812,6 @@ from python_commun.ai.prompt import charger_prompt, formatter_prompt
 from python_commun.logging import logger
 
 class SonarIssueAIAnalyzer:
-    """Analyse les issues SonarQube et génère des suggestions via IA."""
     
     def __init__(self, ia_provider: str = "copilot"):
         """
@@ -870,10 +831,8 @@ class SonarIssueAIAnalyzer:
     
     def analyze_issue(self, issue: Dict, file_content: str) -> Dict:
         """
-        Analyse une issue SonarQube et génère des suggestions.
         
         Args:
-            issue: Issue SonarQube (dict avec key, rule, severity, etc.)
             file_content: Contenu complet du fichier
         
         Returns:
@@ -978,10 +937,8 @@ class SonarIssueAIAnalyzer:
             raise ValueError(f"Fournisseur IA inconnu : {self.ia_provider}")
 ```
 
-#### Intégration dans le client SonarQube
 
 ```python
-class SonarQubeClient:
     # ... (code existant)
     
     def analyze_issues_with_ai(self, issue_type: str = None, max_issues: int = 10) -> List[Dict]:
@@ -995,7 +952,6 @@ class SonarQubeClient:
         Returns:
             Liste des analyses avec suggestions IA
         """
-        # Récupérer les issues depuis SonarQube
         issues = self.get_issues(issue_type=issue_type, severity="BLOCKER,CRITICAL")
         
         # Limiter le nombre d'issues (éviter les coûts IA excessifs)
@@ -1028,7 +984,6 @@ class SonarQubeClient:
     
     def _get_local_file_path(self, component: str) -> str:
         """
-        Convertit un component SonarQube en chemin local.
         
         Args:
             component: "project_key:src/main/java/Service.java"
@@ -1067,7 +1022,6 @@ git-ia-sonar --ai-suggestions --interactive
 ### Format de sortie avec suggestions IA
 
 ```
-📊 Rapport SonarQube avec suggestions IA - mon-projet
 
 🐛 Bug #1 - CRITICAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1131,7 +1085,6 @@ void testProcessUser_whenUserNotFound_shouldThrowException() {
 ```python
 def _parser_options() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Interroge SonarQube et génère des suggestions IA",
         add_help=False
     )
     # ... (options existantes)
@@ -1194,9 +1147,7 @@ def apply_fix_interactively(analysis: Dict, file_path: str):
 
 ## 📚 Ressources
 
-- **Documentation API SonarQube** : https://docs.sonarsource.com/sonarqube/latest/extension-guide/web-api/
 - **SonarCloud API** : https://sonarcloud.io/web_api
-- **Métriques disponibles** : https://docs.sonarsource.com/sonarqube/latest/user-guide/metric-definitions/
 
 ## 💡 Exemple de configuration
 
@@ -1214,7 +1165,6 @@ alias sonar-report="git-ia-sonar --export /tmp/sonar-$(date +%Y%m%d).json"
 ## 🎯 Résumé
 
 Ce scénario permet de :
-1. ✅ Interroger SonarQube/SonarCloud de manière sécurisée
 2. ✅ Récupérer les bugs, vulnérabilités et code smells
 3. ✅ **Générer des suggestions de correction via IA pour chaque problème**
 4. ✅ **Proposer du code corrigé avec explications détaillées**

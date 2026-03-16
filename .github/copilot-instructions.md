@@ -794,3 +794,15 @@ grep -r "http://" src/ --include="*.py" | grep -v "localhost" && echo "❌ HTTP 
 
 echo "✅ Tous les tests de sécurité sont passés!"
 ```
+
+## Recommandations de taille des scripts Python
+
+Il n'existe pas de limite formelle, mais bonnes pratiques recommandées :
+
+- Module/fichier : idéalement < 300–500 lignes. Si plus, scinder en sous-modules/packages.
+- Fonction/méthode : préférer < 50 lignes.
+- Classe : préférer < 200–400 lignes.
+- Complexité cyclomatique : viser < 10 par fonction/méthode.
+
+Outils recommandés : flake8, pylint (style), radon (LOC & complexité), prospector (analyse).
+Ces règles favorisent lisibilité, testabilité et responsabilité unique.

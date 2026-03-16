@@ -7,8 +7,6 @@ Le dossier `laboratoire/` contient des scénarios de fonctionnalités sous forme
 ### 1. **Commit avec versioning automatique**
 Automatise complètement le workflow de versioning lors d'un commit. Déjà implémenté via `git-ia-commit-version`.
 
-### 2. **Intégration SonarQube avec suggestions IA**
-Interroger SonarQube/SonarCloud pour récupérer les problèmes de qualité et générer des corrections automatiques via IA.
 
 ### 3. **Intégration JIRA**
 Synchroniser automatiquement Git avec JIRA (Auto-commenting, transitions, TODO → Tickets).
@@ -30,7 +28,6 @@ Un workflow complet intégrant toutes les fonctionnalités IA pour une productiv
 | # | Scénario | Priorité | Effort Estimé | Statut |
 |---|----------|----------|--------|--------|
 | 1 | Commit + Versioning | ✅ Haute | - | ✅ Disponible |
-| 2 | SonarQube + IA | 🟠 Moyenne | - | 📝 Documenté |
 | 3 | JIRA Integration | 🟠 Moyenne | - | 📝 Documenté |
 | 4 | Lint & Format | 🔴 Haute | 40h | 📝 Documenté |
 | 5 | Coverage & Tests | 🔴 Haute | 30h | 📝 Documenté |

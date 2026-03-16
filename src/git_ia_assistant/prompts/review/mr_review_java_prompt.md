@@ -179,7 +179,6 @@ Identifie les opportunités d'amélioration structurelle et de design :
 - `instanceof` en cascade → envisager polymorphisme ou pattern matching (Java 17+)
 
 **Ne commente PAS :**
-- Style/formatage géré par Checkstyle/SonarQube
 - Nommage conventionnel Java acceptable
 - Préférences sur l'ordre des imports
 

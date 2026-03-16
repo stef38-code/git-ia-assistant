@@ -43,11 +43,7 @@ INSTRUCTIONS_INSTALLATION = {
         "npm install -g @modelcontextprotocol/server-angular\n"
         "  ou via npx : npx -y @modelcontextprotocol/server-angular"
     ),
-    "mcp-server-sonarqube": (
-        "npm install -g mcp-server-sonarqube\n"
-        "  ⚠️  Requiert la variable d'environnement : SONAR_TOKEN\n"
-        "  ou via npx : npx -y mcp-server-sonarqube"
-    ),
+
     PAQUET_FILESYSTEM: (
         f"npm install -g {PAQUET_FILESYSTEM}\n"
         f"  ou via npx : npx -y {PAQUET_FILESYSTEM}"
@@ -85,11 +81,7 @@ SERVEURS_MCP = {
         "command": "npx",
         "args": ["-y", "@modelcontextprotocol/server-angular"]
     },
-    "sonarqube": {
-        "command": "npx",
-        "args": ["-y", "mcp-server-sonarqube"],
-        "env_var": "SONAR_TOKEN"
-    },
+
     "filesystem": {
         "command": "npx",
         "args": ["-y", PAQUET_FILESYSTEM]
@@ -349,12 +341,7 @@ class McpConfigManager:
         if "angular" in langage_minuscule:
             config["mcpServers"]["angular"] = SERVEURS_MCP["angular"]
             
-        # SonarQube si token présent
-        sonar_token = os.environ.get("SONAR_TOKEN")
-        if sonar_token:
-            config["mcpServers"]["sonarqube"] = SERVEURS_MCP["sonarqube"].copy()
-            config["mcpServers"]["sonarqube"]["env"] = {"SONAR_TOKEN": sonar_token}
-            
+
         # Serveurs de fichiers (si un chemin de dépôt est fourni)
         if repo_path:
             config["mcpServers"]["filesystem"] = {

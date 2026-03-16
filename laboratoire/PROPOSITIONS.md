@@ -13,7 +13,6 @@
 |----------|----------|---------------------|
 | `git-ia-commit` | Messages de commit IA | Pas de hook pre-commit, pas de validation linters |
 | `git-ia-test` | Génération de tests | Pas de couverture, pas de stub/mock auto |
-| `git-ia-review` | Revue de code locale | Pas d'intégration SonarQube |
 | `git-ia-mr-review` | Revue MR/PR distante | Pas de suggestions inline applicables |
 | `git-ia-refacto` | Refactorisation | Pas de linting auto-appliqué |
 | `git-ia-doc` | Documentation | Pas de génération OpenAPI/Swagger |
@@ -25,7 +24,6 @@
 ### Scénarios du laboratoire (3)
 
 - ✅ **git/** - Commit avec versioning automatique (implémenté)
-- 📝 **sonar/** - Intégration SonarQube + suggestions IA
 - 📝 **jira/** - Synchronisation Git ↔ JIRA
 
 ---
@@ -202,7 +200,6 @@ git-ia-coverage check --fail-under 80        # Exit code 1 si < 80%
 
 **Intégrations** :
 - **JIRA** : crée ticket si couverture < seuil (`git-ia-coverage jira-ticket`)
-- **SonarQube** : compare avec métriques SonarQube
 - `git-ia-test` : génère tests complémentaires
 
 **Exemple de sortie** :
@@ -312,7 +309,6 @@ Appliquer les corrections ? [y: oui, n: non, c: créer MR] : c
 - `git-ia-commit` : commit automatique des upgrades
 - `git-ia-changelog` : enregistre les changements de dépendances
 - **JIRA** : crée tickets pour vulnérabilités critiques
-- **SonarQube** : synchronise avec alertes SonarQube
 
 **Valeur ajoutée** :
 - 🔒 Sécurité : détection proactive des vulnérabilités
@@ -450,7 +446,6 @@ git-ia-api-doc enrich --framework fastapi --add-ai-descriptions
 | **Lint** | `git-ia-commit` (pre-hook), `git-ia-review` (analyse linting) |
 | **Scaffold** | `git-ia-test` (tests), `git-ia-doc` (docs), `git-ia-commit` (commit auto) |
 | **Coverage** | `git-ia-test` (génération tests), **JIRA** (tickets si < seuil) |
-| **Deps** | `git-ia-changelog` (upgrades), **SonarQube** (vulns), `git-ia-commit` (MR auto) |
 | **API-Doc** | `git-ia-doc` (enrichit), **JIRA** (stories), `git-ia-commit-version` (versioning API) |
 
 ---
