@@ -33,26 +33,45 @@ class IaCopilotMrMcp(IaAssistantMr):
         """
         try:
             # Charger le prompt MCP (léger)
-            prompt_template = charger_prompt(
-                self._choisir_prompt_mr() + "_mcp", self.dossier_prompts
-            )
+            # Construire le nom de fichier du prompt MCP : review/mr_review_<langage>_mcp_prompt.md
+            base = self._choisir_prompt_mr()
+            if base.endswith("_prompt.md") or base.startswith("review/"):
+                prompt_name = base.replace("_prompt.md", "_mcp_prompt.md") if base.endswith("_prompt.md") else base + "_mcp_prompt.md"
+            else:
+                prompt_name = f"review/{base}_mcp_prompt.md"
+            prompt_template = charger_prompt(prompt_name, self.dossier_prompts)
             
             # Formater le prompt
+            # Tenter de charger un résumé et la liste des fichiers si disponibles
+            resume_text, files_text = self.charger_resume_et_liste()
+
             prompt = formatter_prompt(
                 prompt_template,
                 url=self.url_mr,
-                resume="Analyse agentique en cours...",
-                liste_fichiers="Consultable via outils git",
+                resume=resume_text or "Analyse agentique en cours...",
+                liste_fichiers=files_text or "Consultable via outils git",
                 langage=self.langage,
-                migration_detectee="A vérifier",
-                migration_info="",
+                migration_detectee=("oui" if self.migration_info.get("detected", False) else "non"),
+                migration_info="\n".join([f"* {m}" for m in self.migration_info.get("migrations", [])]) if self.migration_info.get("migrations") else "Aucune migration détectée",
                 numero_mr=self.numero_mr,
                 version_cible=self._get_version_cible(),
             )
 
+            # Sauvegarde du prompt MCP pour debug
+            prompt_file_mcp = self.out_dir / f"prompt_mcp_mr{self.numero_mr}.md"
+            try:
+                prompt_file_mcp.write_text(prompt, encoding="utf-8")
+                prompt_saved = True
+            except Exception as e:
+                logger.log_warning(f"Impossible de sauvegarder le prompt MCP : {e}")
+                prompt_saved = False
+
             if self.dry_run:
                 logger.log_console(f"[DRY-RUN] Prompt Agent MCP pour Copilot :\n{prompt}")
                 return None
+
+            if prompt_saved:
+                logger.log_info(f"Prompt MCP sauvegardé : {prompt_file_mcp}")
 
             logger.log_info(f"🤖 Revue Agentique en cours avec Copilot (MCP)...")
             

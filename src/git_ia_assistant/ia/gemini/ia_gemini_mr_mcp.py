@@ -26,30 +26,47 @@ class IaGeminiMrMcp(IaAssistantMr):
         if not self.mcp_config_path:
             logger.die("Configuration MCP manquante pour le mode Agent Gemini.")
 
-        # Démarrage des serveurs MCP
-        self.mcp_manager = McpClientManager(self.mcp_config_path)
-        self.mcp_manager.demarrer_serveurs()
+        # Démarrage des serveurs MCP (si non déjà démarrés dans le CLI)
+        if not getattr(self, "mcp_manager", None):
+            self.mcp_manager = McpClientManager(self.mcp_config_path)
+            self.mcp_manager.demarrer_serveurs()
+        else:
+            logger.log_info("Réutilisation du McpClientManager déjà démarré.")
 
         try:
             # 1. Préparation du prompt MCP
             # On utilise le prompt spécifique au langage si possible
             nom_base_prompt = self._choisir_prompt_mr()
-            prompt_name = f"{nom_base_prompt}_mcp"
-            
+            # Construire le nom du fichier prompt MCP attendu
+            if nom_base_prompt.endswith("_prompt.md") or nom_base_prompt.startswith("review/"):
+                prompt_name = nom_base_prompt.replace("_prompt.md", "_mcp_prompt.md") if nom_base_prompt.endswith("_prompt.md") else nom_base_prompt + "_mcp_prompt.md"
+            else:
+                prompt_name = f"review/{nom_base_prompt}_mcp_prompt.md"
             prompt_template = charger_prompt(prompt_name, self.dossier_prompts)
             
             # En mode Agent, on ne passe pas le diff complet pour économiser les tokens
+            resume_text, files_text = self.charger_resume_et_liste()
+
             prompt = formatter_prompt(
                 prompt_template,
                 url=self.url_mr,
-                resume="Analyse agentique en cours via outils MCP...",
-                liste_fichiers="Utilise l'outil git.git_diff pour identifier les changements.",
+                resume=resume_text or "Analyse agentique en cours via outils MCP...",
+                liste_fichiers=files_text or "Utilise l'outil git.git_diff pour identifier les changements.",
                 langage=self.langage,
-                migration_detectee="À vérifier via outils",
+                migration_detectee=("oui" if self.migration_info.get("detected", False) else "non"),
                 migration_info="L'IA doit explorer le code pour détecter les changements de version.",
                 numero_mr=self.numero_mr,
                 version_cible=self._get_version_cible()
             )
+
+            # Sauvegarde du prompt MCP pour debug
+            prompt_file_mcp = self.out_dir / f"prompt_mcp_mr{self.numero_mr}.md"
+            try:
+                prompt_file_mcp.write_text(prompt, encoding="utf-8")
+                prompt_saved = True
+            except Exception as e:
+                logger.log_warning(f"Impossible de sauvegarder le prompt MCP : {e}")
+                prompt_saved = False
 
             # 2. Configuration du client Gemini
             api_key = os.getenv("GEMINI_API_KEY")
@@ -60,6 +77,9 @@ class IaGeminiMrMcp(IaAssistantMr):
 
             # 3. Exécution de l'Agent
             logger.log_info("🤖 Gemini (Agent MCP) analyse le dépôt...")
+
+            if prompt_saved:
+                logger.log_info(f"Prompt MCP sauvegardé : {prompt_file_mcp}")
 
             # Note: Pour une boucle de tool-calling complète, il faudrait itérer ici.
             # Pour l'instant, nous envoyons le prompt d'investigation.

@@ -158,6 +158,46 @@ class IaAssistantMr(IaAssistant):
 
         return ""
 
+    def charger_resume_et_liste(self) -> tuple:
+        """
+        Tente de charger un fichier de résumé et une liste de fichiers pour la MR,
+        en cherchant dans plusieurs emplacements (modes mr_mcp et mrOrpr).
+        Retourne (resume_text, liste_fichiers_text).
+        """
+        from pathlib import Path
+        home = Path.home()
+        candidates = [
+            Path(self.out_dir) / f"resume_{self.numero_mr}.md",
+            Path(self.out_dir) / f"files_{self.numero_mr}.txt",
+            home / "ia_assistant" / "mrOrpr" / f"resume_{self.numero_mr}.md",
+            home / "ia_assistant" / "mrOrpr" / f"files_{self.numero_mr}.txt",
+        ]
+
+        resume_text = ""
+        files_text = ""
+
+        # Lecture du resume
+        resume_paths = [candidates[0], candidates[2]]
+        for p in resume_paths:
+            try:
+                if p.exists():
+                    resume_text = p.read_text(encoding='utf-8')
+                    break
+            except Exception:
+                continue
+
+        # Lecture de la liste des fichiers
+        files_paths = [candidates[1], candidates[3]]
+        for p in files_paths:
+            try:
+                if p.exists():
+                    files_text = p.read_text(encoding='utf-8')
+                    break
+            except Exception:
+                continue
+
+        return resume_text, files_text
+
     @abstractmethod
     def generer_revue_mr(
         self, diff_path: Path, resume_path: Path

@@ -35,10 +35,6 @@ INSTRUCTIONS_INSTALLATION = {
         "npm install -g @modelcontextprotocol/server-sequential-thinking\n"
         "  ou via npx : npx -y @modelcontextprotocol/server-sequential-thinking"
     ),
-    "@modelcontextprotocol/server-typescript": (
-        "npm install -g @modelcontextprotocol/server-typescript\n"
-        "  ou via npx : npx -y @modelcontextprotocol/server-typescript"
-    ),
     "@modelcontextprotocol/server-angular": (
         "npm install -g @modelcontextprotocol/server-angular\n"
         "  ou via npx : npx -y @modelcontextprotocol/server-angular"
@@ -74,15 +70,10 @@ SERVEURS_MCP = {
         "command": "npx",
         "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
-    "typescript": {
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-typescript"]
-    },
     "angular": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-angular"]
+        "args": ["angular-mcp-server"]
     },
-
     "filesystem": {
         "command": "npx",
         "args": ["-y", PAQUET_FILESYSTEM]
@@ -374,15 +365,15 @@ class McpConfigManager:
                 config["mcpServers"]["github"]["env"] = {"GITHUB_PERSONAL_ACCESS_TOKEN": token}
         elif plateforme.lower() == "gitlab":
             config["mcpServers"]["gitlab"] = SERVEURS_MCP["gitlab"].copy()
-            if token: 
+            if token:
                 config["mcpServers"]["gitlab"]["env"] = {"GITLAB_PRIVATE_TOKEN": token}
         
         # Outils transverses
         config["mcpServers"]["sequential-thinking"] = SERVEURS_MCP["sequential-thinking"]
         
         # Outils spécifiques au langage
-        if "typescript" in langage_minuscule or "angular" in langage_minuscule:
-            config["mcpServers"]["typescript"] = SERVEURS_MCP["typescript"]
+        # if "typescript" in langage_minuscule or "angular" in langage_minuscule:
+        #     config["mcpServers"]["typescript"] = SERVEURS_MCP["typescript"]
         if "angular" in langage_minuscule:
             config["mcpServers"]["angular"] = SERVEURS_MCP["angular"]
             

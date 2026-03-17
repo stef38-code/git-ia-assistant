@@ -41,28 +41,49 @@ class IaOllamaMrMcp(IaAssistantMr):
         if not self.mcp_config_path:
             logger.die("Configuration MCP manquante pour le mode Agent Ollama.")
 
-        self.mcp_manager = McpClientManager(self.mcp_config_path)
-        self.mcp_manager.demarrer_serveurs()
+        if not getattr(self, "mcp_manager", None):
+            self.mcp_manager = McpClientManager(self.mcp_config_path)
+            self.mcp_manager.demarrer_serveurs()
+        else:
+            logger.log_info("Réutilisation du McpClientManager déjà démarré.")
 
         try:
             # 1. Préparation des outils au format Ollama
             ollama_tools = self._preparer_outils_ollama()
             
             # 2. Préparation du prompt MCP
-            prompt_template = charger_prompt(
-                self._choisir_prompt_mr() + "_mcp", self.dossier_prompts
-            )
+            # Construire le nom du fichier prompt MCP attendu
+            base = self._choisir_prompt_mr()
+            if base.endswith("_prompt.md") or base.startswith("review/"):
+                prompt_name = base.replace("_prompt.md", "_mcp_prompt.md") if base.endswith("_prompt.md") else base + "_mcp_prompt.md"
+            else:
+                prompt_name = f"review/{base}_mcp_prompt.md"
+            prompt_template = charger_prompt(prompt_name, self.dossier_prompts)
+            resume_text, files_text = self.charger_resume_et_liste()
+
             prompt = formatter_prompt(
                 prompt_template,
                 url=self.url_mr,
-                resume="Analyse agentique en cours via Ollama...",
-                liste_fichiers="Utilise l'outil git_diff pour commencer",
+                resume=resume_text or "Analyse agentique en cours via Ollama...",
+                liste_fichiers=files_text or "Utilise l'outil git_diff pour commencer",
                 langage=self.langage,
-                migration_detectee="A analyser",
+                migration_detectee=("oui" if self.migration_info.get("detected", False) else "non"),
                 migration_info="",
                 numero_mr=self.numero_mr,
                 version_cible=self._get_version_cible(),
             )
+
+            # Sauvegarde du prompt MCP pour debug
+            prompt_file_mcp = self.out_dir / f"prompt_mcp_mr{self.numero_mr}.md"
+            try:
+                prompt_file_mcp.write_text(prompt, encoding="utf-8")
+                prompt_saved = True
+            except Exception as e:
+                logger.log_warning(f"Impossible de sauvegarder le prompt MCP : {e}")
+                prompt_saved = False
+
+            if prompt_saved:
+                logger.log_info(f"Prompt MCP sauvegardé : {prompt_file_mcp}")
 
             messages = [{"role": "user", "content": prompt}]
             

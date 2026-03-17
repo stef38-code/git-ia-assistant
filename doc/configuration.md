@@ -130,6 +130,6 @@ Les serveurs MCP supportés sont :
 | `gitlab` | `@modelcontextprotocol/server-gitlab` | `npx` | `npm install -g @modelcontextprotocol/server-gitlab` |
 | `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | `npx` | `npm install -g @modelcontextprotocol/server-sequential-thinking` |
 | `typescript` | `@modelcontextprotocol/server-typescript` | `npx` | `npm install -g @modelcontextprotocol/server-typescript` |
-| `angular` | `@modelcontextprotocol/server-angular` | `npx` | `npm install -g @modelcontextprotocol/server-angular` |
+| `angular` | `angular-mcp-server` | `npx` | `npm install angular-mcp-server@latest` |
 | `filesystem` | `@modelcontextprotocol/server-filesystem` | `npx` | `npm install -g @modelcontextprotocol/server-filesystem` |
 | `search` | `@modelcontextprotocol/server-ripgrep` | `npx` | `npm install -g @modelcontextprotocol/server-ripgrep` |
