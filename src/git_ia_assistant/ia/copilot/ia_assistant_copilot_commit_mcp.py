@@ -24,6 +24,18 @@ class IaAssistantCopilotCommitMcp(IaAssistantCommit):
         logger.log_info("🤖 Copilot analyse le codebase (MCP) pour le message de commit...")
         message = envoyer_prompt_copilot(prompt, mcp_config_path=self.mcp_config_path)
         
+        # Nettoyage : extraire le bloc Conventional Commit si présent
+        import re
+        commit_pattern = re.compile(r"^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.*\))?!?:", re.IGNORECASE)
+        lines = message.splitlines()
+        start_index = -1
+        for i, line in enumerate(lines):
+            if commit_pattern.match(line.strip()):
+                start_index = i
+                break
+        if start_index != -1:
+            message = "\n".join(lines[start_index:]).strip()
+
         self.valider_commit(message)
 
     def gerer_optimisation_mcp(self):

@@ -57,7 +57,8 @@ INSTRUCTIONS_INSTALLATION = {
 SERVEURS_MCP = {
     "git": {
         "command": "uvx",
-        "args": ["mcp-server-git","--native-tls"]
+        "args": ["--native-tls",
+                 "mcp-server-git"]
     },
     "github": {
         "command": "npx",
@@ -249,6 +250,26 @@ class McpConfigManager:
         return ok
 
     @staticmethod
+    def _tester_connect_ssl(host: str) -> bool or str:
+        """
+        Teste rapidement la vérification TLS vers un hôte en utilisant openssl en shell
+        (echo en entrée pour éviter que s_client attende indéfiniment). Retourne True si
+        la vérification est OK, sinon renvoie la sortie d'erreur pour diagnostic.
+        """
+        try:
+            # Utiliser bash -lc pour faire 'echo | openssl s_client ...' afin d'envoyer EOF
+            cmd = (
+                "echo | openssl s_client -connect {h}:443 -servername {h} 2>&1"
+            ).format(h=host)
+            resultat = executer_capture(["bash", "-lc", cmd], check=False)
+            sortie = (resultat.stdout.decode("utf-8") if resultat.stdout else "") + (resultat.stderr.decode("utf-8") if resultat.stderr else "")
+            if "Verify return code: 0 (ok)" in sortie or "Verify return code: 0" in sortie:
+                return True
+            return sortie
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
     def verifier_installation(servers: Optional[list] = None) -> bool:
         """
         Vérifie que les serveurs MCP requis sont accessibles.
@@ -298,9 +319,33 @@ class McpConfigManager:
         # ── Vérification de l'environnement ───────────────────────────────────
         env_ok = McpConfigManager._verifier_variables_environnement(serveurs_selectionnes)
 
-        est_valide = (not manquants) and env_ok
+        # ── Test TLS rapide (diagnostic) ──────────────────────────────────────
+        # Détecte des problèmes de certificats (ex: UnknownIssuer) et fournit
+        # des conseils d'action clairs pour l'utilisateur.
+        ssl_test = McpConfigManager._tester_connect_ssl('pypi.org')
+        if ssl_test is not True:
+            # Affiche un message d'aide succinct et non intrusif
+            logger.log_error(
+                "Erreur TLS lors de la vérification des serveurs MCP : certificat invalide ou CA inconnue."
+            )
+            print("\nConseils :", file=sys.stderr)
+            print("  - Assurez-vous que les certificats racines système sont installés (package 'ca-certificates').", file=sys.stderr)
+            print("    Exemple (Debian/Ubuntu) : sudo apt-get update && sudo apt-get install -y ca-certificates", file=sys.stderr)
+            print("  - Si vous êtes derrière un proxy d'entreprise avec CA interne, fournissez le bundle PEM via SSL_CERT_FILE ou REQUESTS_CA_BUNDLE :", file=sys.stderr)
+            print("      export SSL_CERT_FILE=/chemin/vers/ca-bundle.pem", file=sys.stderr)
+            print("  - Pour mcp-server-git, tenter une installation manuelle évite le téléchargement à l'exécution :", file=sys.stderr)
+            print("      python -m pip install --user mcp-server-git", file=sys.stderr)
+            print("  - En dépannage uniquement (non recommandé en production) : pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org mcp-server-git", file=sys.stderr)
+            print("  - Le serveur MCP peut aussi nécessiter l'option '--native-tls' lors du lancement pour utiliser les certificats systèmes.", file=sys.stderr)
+            print("\nSortie OpenSSL (extrait) :", file=sys.stderr)
+            # Imprimer un court extrait pour aider au diagnostic
+            extrait = (ssl_test[:1000] + '...') if isinstance(ssl_test, str) else str(ssl_test)
+            for ligne in extrait.splitlines()[:20]:
+                print("    ", ligne, file=sys.stderr)
+
+        est_valide = (not manquants) and env_ok and (ssl_test is True)
         if est_valide:
-            logger.log_info("Tous les serveurs MCP sont correctement installés.")
+            logger.log_info("Tous les serveurs MCP sont correctement installés et TLS est valide.")
 
         return est_valide
 

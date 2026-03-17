@@ -73,6 +73,7 @@ def main():
     parser.add_argument("-h", "--help", action="store_true")
     parser.add_argument("--ia", choices=["gemini", "copilot", "ollama"], default="gemini")
     parser.add_argument("-f", "--fichier", nargs="*", help="Fichiers spécifiques")
+    parser.add_argument("--dry-run", "--dryrun", action="store_true", dest="dry_run", help="Simulation : affiche l'IA choisie, vérifie rapidement les serveurs MCP et liste les fichiers")
     parser.add_argument("--optimise", action="store_true", help="Proposer des commits logiques")
     parser.add_argument("--clear", action="store_true", help="Nettoyer le répertoire de travail")
     args = parser.parse_args()
@@ -85,6 +86,21 @@ def main():
     fichiers = args.fichier or liste_fichier_non_suivis_et_modifies()
     if not fichiers:
         logger.log_warn("Aucun changement détecté.")
+        return
+
+    # Si mode simulation (dry-run) : afficher IA sélectionnée, tester les serveurs MCP et lister les fichiers
+    if args.dry_run:
+        ia_choisie = determiner_ia_choisie(parser, args)
+        logger.log_info(f"[DRY-RUN] IA sélectionnée : {ia_choisie}")
+        # Vérification rapide (non exhaustive) pour éviter de bloquer l'utilisateur
+        # Passe une liste vide pour éviter les vérifications longues (npm list -g, pip show, etc.)
+        servers_ok = McpConfigManager.verifier_installation(servers=[])
+        if servers_ok:
+            logger.log_info("[DRY-RUN] Vérification rapide terminée (pas d'inspection complète).")
+        else:
+            logger.log_warn("[DRY-RUN] Problèmes détectés lors de la vérification rapide (voir erreurs).")
+        logger.log_info(f"[DRY-RUN] Fichiers pris en compte : {fichiers}")
+        logger.log_info("[DRY-RUN] Pour une vérification complète, exécutez sans --dry-run.")
         return
 
     # 2. Configuration MCP
