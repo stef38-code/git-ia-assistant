@@ -112,7 +112,13 @@ def main():
         vide_repertoire(OUT_DIR, True, False)
 
     logger.log_info(f"🚀 Initialisation de l'Agent Commit (MCP) pour : {langage}")
-    
+    # Afficher le nombre de fichiers spécifiés à préparer
+    try:
+        n_fich = len(fichiers)
+    except Exception:
+        n_fich = 0
+    logger.log_info(f"1 fichier(s) spécifié(s) à préparer" if n_fich == 1 else f"{n_fich} fichier(s) spécifié(s) à préparer")
+
     mcp_config_path = McpConfigManager.generer_config(
         out_dir=OUT_DIR,
         plateforme="local",
