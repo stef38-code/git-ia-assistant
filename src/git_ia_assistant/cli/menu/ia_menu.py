@@ -43,7 +43,7 @@ from python_commun.cli.menu_utils import (
 )
 from python_commun.cli.usage import colorier_aide
 from python_commun.logging import logger
-from python_commun.system.system import executer_commande
+from python_commun.system.system import executer_commande, detect_lang_and_framework
 from python_commun.git_ia_shared.menu_utils import trv, srcp, get_help_text
 
 # ==============================================================================
@@ -317,7 +317,15 @@ def gerer_workflow_dynamique(cmd: str) -> List[str]:
 # ==============================================================================
 
 def main():
-    print("\n" + "═"*75)
+    # Détection du langage du dépôt (affiché en début)
+    try:
+        repo_root = CLI.parent.parent.parent.parent
+        lang = detect_lang_and_framework(repo_root)
+    except Exception:
+        lang = "inconnu"
+
+    print(f"Langage & framework détectés : {lang}\n")
+    print("" + "═"*75)
     print(" 🤖 GIT IA ASSISTANT - MENU INTERACTIF")
     print(" [↑/↓]: Navigation  [F1]: Aide  [F2]: Options  [Enter]: Lancer  [F10]: Quitter")
     print("═"*75 + "\n")
