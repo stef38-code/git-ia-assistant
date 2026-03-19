@@ -80,7 +80,8 @@ class IaAssistantCommit(IaAssistant):
                 f"{len(fichiers_apres_add)} fichier(s) détecté(s) (après 'git add -A')"
             )
         else:
-            logger.log_info(f"{len(self.fichiers)} fichier(s) spécifié(s) à préparer")
+            if getattr(self, "_afficher_compte_fichiers", True):
+                logger.log_info(f"{len(self.fichiers)} fichier(s) spécifié(s) à préparer")
             
             repo_root = self.repo.working_dir
             fichiers_a_ajouter = []

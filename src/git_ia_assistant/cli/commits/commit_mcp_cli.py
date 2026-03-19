@@ -139,6 +139,12 @@ def main():
     try:
         assistant.demarrer_outils()
 
+        # éviter double affichage du nombre de fichiers (déjà affiché plus haut)
+        try:
+            assistant._afficher_compte_fichiers = False
+        except Exception:
+            pass
+
         # Préparation des fichiers (git add) - Arrivera après le démarrage MCP
         assistant.detecter_fichiers()
 
