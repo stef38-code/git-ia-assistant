@@ -40,23 +40,19 @@ from python_commun.cli.usage import usage
 from git_ia_assistant.core.definition.ia_assistant_mr_factory import IaAssistantMrFactory
 from git_ia_assistant.cli.mcp.mcp_config_manager import McpConfigManager
 from python_commun.ai.mcp_client_manager import McpClientManager
+from git_ia_assistant.core.cli_helpers.commit_cli_helpers import (
+    determiner_ia_choisie,
+    generer_mcp_config,
+    handle_clear,
+    dry_run_check,
+    log_ia_info,
+    start_mcp_manager,
+    stop_mcp_manager,
+)
 
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/mr_mcp"
 
-def determiner_ia_choisie(parser, args):
-    ia_defaut = parser.get_default("ia")
-    ia_choisie = args.ia
-    if ia_choisie == ia_defaut:
-        env_ia = os.getenv("IA_SELECTED") or os.getenv("IA")
-        if env_ia and env_ia.lower() in ("gemini", "copilot", "ollama"):
-            return env_ia.lower()
-        if os.getenv("GEMINI_API_KEY"):
-            return "gemini"
-        if os.getenv("COPILOT_API_KEY") or os.getenv("GITHUB_TOKEN"):
-            return "copilot"
-        return "ollama"
-    return ia_choisie
 
 
 def main():
@@ -92,14 +88,7 @@ def main():
 
     # 2. Vérification rapide si dry-run
     if args.dry_run:
-        logger.log_info(f"[DRY-RUN] IA sélectionnée : {ia_choisie}")
-        servers_ok = McpConfigManager.verifier_installation(servers=[])
-        if servers_ok:
-            logger.log_info("[DRY-RUN] Vérification rapide terminée (pas d'inspection complète).")
-        else:
-            logger.log_warn("[DRY-RUN] Problèmes détectés lors de la vérification rapide (voir erreurs).")
-        logger.log_info(f"[DRY-RUN] MR à analyser : {args.url}")
-        logger.log_info("[DRY-RUN] Pour une vérification complète, exécutez sans --dry-run.")
+        dry_run_check(args, parser, f"MR à analyser : {args.url}")
         return
 
     if not git_token:
@@ -166,12 +155,12 @@ def main():
     langage = detect_lang_and_framework(repo_path)
     logger.log_info(f"🛠️  Configuration des outils pour : {langage}")
     
-    mcp_config_path = McpConfigManager.generer_config(
+    mcp_config_path = generer_mcp_config(
         out_dir=OUT_DIR,
         plateforme=plateforme,
         langage=langage,
+        repo_path=repo_path,
         token=git_token,
-        repo_path=repo_path
     )
 
     if not mcp_config_path:
@@ -179,16 +168,8 @@ def main():
 
     # Afficher l'initialisation de l'agent (aligné sur commit_mcp_cli)
     logger.log_info(f"🚀 Initialisation de l'Agent Revue (MCP) pour : {langage}")
-
-    # Afficher IA choisie et modèle si disponible
-    model_info = ""
-    if ia_choisie == "gemini":
-        model_info = os.getenv("GEMINI_MODEL") or "gemini-2.5-flash"
-    elif ia_choisie == "ollama":
-        model_info = os.getenv("OLLAMA_MODEL") or "(local ollama)"
-    elif ia_choisie == "copilot":
-        model_info = os.getenv("COPILOT_MODEL") or "(copilot)"
-    logger.log_info(f"ℹ INFO:  IA sélectionnée : {ia_choisie} {('- model: ' + model_info) if model_info else ''}")
+    # Afficher IA sélectionnée et modèle si disponible (helper mutualisé)
+    log_ia_info(ia_choisie)
 
     # Instanciation de l'IA (Version MCP)
     ia_instance = IaAssistantMrFactory.create_mr_instance(
@@ -201,14 +182,8 @@ def main():
         mcp_config_path=mcp_config_path,
     )
 
-    # Démarrage des serveurs MCP via McpClientManager pour afficher immédiatement
-    # les logs de démarrage (nombre d'outils chargés, erreurs de TLS, etc.).
-    mcp_manager = None
-    try:
-        mcp_manager = McpClientManager(mcp_config_path)
-        mcp_manager.demarrer_serveurs()
-    except Exception as e:
-        logger.log_warn(f"Erreur lors du démarrage des serveurs MCP : {e}")
+    # Démarrage des serveurs MCP via helper
+    mcp_manager = start_mcp_manager(mcp_config_path)
 
     # Fournir le manager à l'instance IA pour réutilisation
     if mcp_manager:
@@ -265,13 +240,8 @@ def main():
             sys.exit(1)
 
     finally:
-        # Arrêt systématique des serveurs MCP
-        if mcp_manager:
-            try:
-                mcp_manager.arreter_serveurs()
-            except Exception:
-                pass
-        logger.log_info("🔌 Arrêt des serveurs MCP terminé.")
+        # Arrêt systématique des serveurs MCP via helper
+        stop_mcp_manager(mcp_manager)
 
 
 

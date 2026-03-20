@@ -47,26 +47,7 @@ from git_ia_assistant.core.definition.ia_assistant_commit_factory import IaAssis
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/commits_mcp"
 
-def determiner_ia_choisie(parser, args):
-    """Détermine l'IA à utiliser (priorités) :
-    1. variable d'environnement IA_SELECTED (ou IA) si valide (gemini,copilot,ollama)
-    2. présence de GEMINI_API_KEY → 'gemini'
-    3. présence de COPILOT_API_KEY ou GITHUB_TOKEN → 'copilot'
-    4. sinon → 'ollama'
-    """
-    ia_defaut = parser.get_default("ia")
-    ia_choisie = args.ia
-    if ia_choisie == ia_defaut:
-        env_ia = os.getenv("IA_SELECTED") or os.getenv("IA")
-        if env_ia and env_ia.lower() in ("gemini", "copilot", "ollama"):
-            return env_ia.lower()
-        # Priorité aux clés API
-        if os.getenv("GEMINI_API_KEY"):
-            return "gemini"
-        if os.getenv("COPILOT_API_KEY") or os.getenv("GITHUB_TOKEN"):
-            return "copilot"
-        return "ollama"
-    return ia_choisie
+from git_ia_assistant.core.cli_helpers.commit_cli_helpers import determiner_ia_choisie, detecter_fichiers, handle_dry_run, generer_mcp_config, handle_clear
 
 def main():
     parser = argparse.ArgumentParser(description="Commit via Agent MCP", add_help=False)
@@ -83,24 +64,14 @@ def main():
         return
 
     # 1. Détection des fichiers
-    fichiers = args.fichier or liste_fichier_non_suivis_et_modifies()
+    fichiers = detecter_fichiers(args)
     if not fichiers:
         logger.log_warn("Aucun changement détecté.")
         return
 
     # Si mode simulation (dry-run) : afficher IA sélectionnée, tester les serveurs MCP et lister les fichiers
     if args.dry_run:
-        ia_choisie = determiner_ia_choisie(parser, args)
-        logger.log_info(f"[DRY-RUN] IA sélectionnée : {ia_choisie}")
-        # Vérification rapide (non exhaustive) pour éviter de bloquer l'utilisateur
-        # Passe une liste vide pour éviter les vérifications longues (npm list -g, pip show, etc.)
-        servers_ok = McpConfigManager.verifier_installation(servers=[])
-        if servers_ok:
-            logger.log_info("[DRY-RUN] Vérification rapide terminée (pas d'inspection complète).")
-        else:
-            logger.log_warn("[DRY-RUN] Problèmes détectés lors de la vérification rapide (voir erreurs).")
-        logger.log_info(f"[DRY-RUN] Fichiers pris en compte : {fichiers}")
-        logger.log_info("[DRY-RUN] Pour une vérification complète, exécutez sans --dry-run.")
+        handle_dry_run(args, parser, fichiers)
         return
 
     # 2. Configuration MCP
@@ -108,8 +79,7 @@ def main():
     langage = detect_lang_and_framework(repo_path)
     
     if args.clear:
-        from python_commun.system.system import vide_repertoire
-        vide_repertoire(OUT_DIR, True, False)
+        handle_clear(OUT_DIR)
 
     logger.log_info(f"🚀 Initialisation de l'Agent Commit (MCP) pour : {langage}")
     # Afficher le nombre de fichiers spécifiés à préparer
@@ -119,12 +89,7 @@ def main():
         n_fich = 0
     logger.log_info(f"1 fichier(s) spécifié(s) à préparer" if n_fich == 1 else f"{n_fich} fichier(s) spécifié(s) à préparer")
 
-    mcp_config_path = McpConfigManager.generer_config(
-        out_dir=OUT_DIR,
-        plateforme="local",
-        langage=langage,
-        repo_path=repo_path
-    )
+    mcp_config_path = generer_mcp_config(out_dir=OUT_DIR, langage=langage, repo_path=repo_path)
 
     # 3. Instanciation
     ia_choisie = determiner_ia_choisie(parser, args)
