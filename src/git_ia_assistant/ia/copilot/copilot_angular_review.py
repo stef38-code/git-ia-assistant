@@ -33,7 +33,7 @@ from git_ia_assistant.ia.copilot.copilot_utils import charger_prompt, formatter_
 
 
 def obtenir_revue_ia(
-    chemin_fichier: str, version: str = "15", ia: str = "copilot"
+    chemin_fichier: str, version: str = "20", ia: str = "copilot"
 ) -> None:
     """
     Envoie le code à l'IA pour une analyse technique.

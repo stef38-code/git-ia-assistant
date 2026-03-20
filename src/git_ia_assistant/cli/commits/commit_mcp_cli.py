@@ -3,29 +3,6 @@
 """
 NAME
     commit_mcp_cli - Génère un message de commit en mode AGENT via MCP (Model Context Protocol).
-
-DESCRIPTION
-    Version MCP du script de commit. L'IA explore le codebase via un agent pour générer
-    un message plus précis (scope, raison du changement) ou optimiser les groupes de commits.
-    
-    L'agent utilise le protocole MCP pour accéder aux outils d'analyse de code et de Git,
-    permettant une compréhension contextuelle approfondie du projet.
-
-OPTIONS
-    --ia gemini|copilot|ollama   Choix de l'IA à utiliser (défaut: gemini)
-    -f, --fichier <fichier(s)>   Liste des fichiers spécifiques à analyser
-    --optimise                   Analyse et propose un regroupement en commits logiques
-    --clear                      Nettoyer le répertoire de travail temporaire avant exécution
-    -h, --help                   Afficher l'aide colorisée
-
-EXEMPLES
-    python commit_mcp_cli.py
-    python commit_mcp_cli.py --ia copilot --optimise
-    python commit_mcp_cli.py -f src/mon_fichier.py
-    python commit_mcp_cli.py --clear
-
-FUNCTIONS
-    main() : Point d'entrée du script, gère la configuration de l'agent et l'orchestration MCP.
 """
 
 import argparse
@@ -39,15 +16,20 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 from python_commun.logging import logger
 from python_commun.system.system import detect_lang_and_framework
-from python_commun.git.git_core import liste_fichier_non_suivis_et_modifies
 from python_commun.cli.usage import usage
-from git_ia_assistant.cli.mcp.mcp_config_manager import McpConfigManager
 from git_ia_assistant.core.definition.ia_assistant_commit_factory import IaAssistantCommitFactory
 
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/commits_mcp"
 
-from git_ia_assistant.core.cli_helpers.commit_cli_helpers import determiner_ia_choisie, detecter_fichiers, handle_dry_run, generer_mcp_config, handle_clear
+from git_ia_assistant.core.cli_helpers.commit_cli_helpers import (
+    determiner_ia_choisie,
+    detecter_fichiers,
+    handle_dry_run,
+    generer_mcp_config,
+    handle_clear,
+)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Commit via Agent MCP", add_help=False)
@@ -77,7 +59,7 @@ def main():
     # 2. Configuration MCP
     repo_path = Path(os.getcwd())
     langage = detect_lang_and_framework(repo_path)
-    
+
     if args.clear:
         handle_clear(OUT_DIR)
 
@@ -87,7 +69,10 @@ def main():
         n_fich = len(fichiers)
     except Exception:
         n_fich = 0
-    logger.log_info(f"1 fichier(s) spécifié(s) à préparer" if n_fich == 1 else f"{n_fich} fichier(s) spécifié(s) à préparer")
+    if n_fich == 1:
+        logger.log_info("1 fichier(s) spécifié(s) à préparer")
+    else:
+        logger.log_info(f"{n_fich} fichier(s) spécifié(s) à préparer")
 
     mcp_config_path = generer_mcp_config(out_dir=OUT_DIR, langage=langage, repo_path=repo_path)
 
@@ -97,7 +82,7 @@ def main():
     assistant = IaAssistantCommitFactory.create_commit_instance(
         ia=ia_type,
         fichiers=fichiers,
-        mcp_config_path=mcp_config_path
+        mcp_config_path=mcp_config_path,
     )
 
     # 4. Orchestration MCP (Démarrage avant la détection)
@@ -115,7 +100,7 @@ def main():
 
         # 5. Génération
         logger.log_info("🤖 L'Agent analyse vos changements...")
-        
+
         if args.optimise:
             assistant.gerer_optimisation_mcp()
         else:
@@ -132,6 +117,7 @@ def main():
     finally:
         # Arrêt systématique
         assistant.arreter_outils()
+
 
 if __name__ == "__main__":
     main()

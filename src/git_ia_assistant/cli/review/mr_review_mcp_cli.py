@@ -3,21 +3,6 @@
 """
 NAME
     mr_review_mcp_cli - Revue de MR/PR en mode AGENT via serveurs MCP.
-
-DESCRIPTION
-    Cette version "MCP" du script de revue délègue l'exploration du code à l'IA.
-    L'IA utilise des outils (git, filesystem, ripgrep) pour analyser les changements.
-    
-    Avantages :
-    - Moins de tokens consommés (pas d'envoi du diff complet)
-    - Meilleure analyse (l'IA peut lire les fichiers complets)
-    - Plus rapide (pas de génération de patch locale)
-
-OPTIONS
-    -u, --url URL               URL de la MR/PR (OBLIGATOIRE)
-    -ia gemini|copilot          Choix de l'IA (défaut: gemini car mieux adapté au MCP)
-    --publier                   Publier le rapport en commentaire
-    -h, --help                  Afficher l'aide
 """
 
 import argparse
@@ -38,8 +23,6 @@ from python_commun.system.system import vide_repertoire, detect_lang_and_framewo
 from python_commun.network.url_utils import rechercher_information_depuis_url
 from python_commun.cli.usage import usage
 from git_ia_assistant.core.definition.ia_assistant_mr_factory import IaAssistantMrFactory
-from git_ia_assistant.cli.mcp.mcp_config_manager import McpConfigManager
-from python_commun.ai.mcp_client_manager import McpClientManager
 from git_ia_assistant.core.cli_helpers.commit_cli_helpers import (
     determiner_ia_choisie,
     generer_mcp_config,
@@ -52,7 +35,6 @@ from git_ia_assistant.core.cli_helpers.commit_cli_helpers import (
 
 HOME = Path.home()
 OUT_DIR = HOME / "ia_assistant/mr_mcp"
-
 
 
 def main():
@@ -104,9 +86,8 @@ def main():
     if args.clear:
         DIR_A_VIDER = Path.home() / "ia_assistant/mrOrpr"
         vide_repertoire(DIR_A_VIDER, True, False)
-    
+
     # Vider le répertoire MCP pour éviter les artefacts d'exécutions précédentes
-    from python_commun.system.system import vide_repertoire
     try:
         vide_repertoire(OUT_DIR, True, args.dry_run)
     except Exception:
@@ -154,7 +135,7 @@ def main():
     # 3. Configuration des serveurs MCP
     langage = detect_lang_and_framework(repo_path)
     logger.log_info(f"🛠️  Configuration des outils pour : {langage}")
-    
+
     mcp_config_path = generer_mcp_config(
         out_dir=OUT_DIR,
         plateforme=plateforme,
@@ -242,7 +223,6 @@ def main():
     finally:
         # Arrêt systématique des serveurs MCP via helper
         stop_mcp_manager(mcp_manager)
-
 
 
 if __name__ == "__main__":
